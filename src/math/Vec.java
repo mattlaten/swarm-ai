@@ -20,5 +20,5 @@ public class Vec implements Serializable	{
 	public Vec mult(double scalar)	{	return new Vec(x * scalar, y * scalar);		}
 	public Vec neg()				{	return mult(-1);							}
 	public double size()			{	return Math.sqrt(dot(this));				}
-	public double unit()			{	return mult(1.0/size());					}
+	public Vec unit()				{	return mult(1.0/size());					}
 }
