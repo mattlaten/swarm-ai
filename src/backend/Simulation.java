@@ -1,6 +1,6 @@
 package backend;
 
-import environment.*;
+import backend.environment.*;
 
 public class Simulation {
 

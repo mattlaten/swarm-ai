@@ -1,4 +1,4 @@
-package environment;
+package backend.environment;
 
 import java.io.Serializable;
 
