@@ -19,21 +19,21 @@ public class Logger {
 	
 	public void info(String message)
 	{
-		info.printf("%s : [INFO: %s] %s", (new Date()).toString(), className, message);
+		info.printf("%s : [INFO: %s] %s\n", (new Date()).toString(), className, message);
 	}
 	
 	public void err(String message)
 	{
-		err.printf("%s : [ERR: %s] %s", (new Date()).toString(), className, message);
+		err.printf("%s : [ERR: %s] %s\n", (new Date()).toString(), className, message);
 	}
 	
 	public void warn(String message)
 	{
-		info.printf("%s : [WARN: %s] %s", (new Date()).toString(), className, message);
+		info.printf("%s : [WARN: %s] %s\n", (new Date()).toString(), className, message);
 	}
 	
 	public void debug(String message)
 	{
-		info.printf("%s : [DEBUG: %s] %s", (new Date()).toString(), className, message);
+		info.printf("%s : [DEBUG: %s] %s\n", (new Date()).toString(), className, message);
 	}
 }
