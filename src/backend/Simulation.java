@@ -8,7 +8,7 @@ import backend.environment.Prey;
 
 public class Simulation {
 	public ArrayList<Element> elements;
-	HeightMap hm = null;
+	public HeightMap hm = null;
 	
 	public Simulation()	{
 		elements = new ArrayList<Element>();

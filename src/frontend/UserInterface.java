@@ -202,7 +202,7 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener	{
 		
 		for(int y = dotYStart; y <= dotYEnd; y ++)
 			for(int x = dotXStart; x <= dotXEnd; x ++)	{
-				g2.setColor(new Color(ui.sim.hm.getInterpolatedHeight(getPositionInSpace(new Vec(x,y))),0f,0f));
+				g2.setColor(new Color((float)(ui.sim.hm.getInterpolatedHeightAt(getPositionInSpace(new Vec(x,y)))),0f,0f));
 				g2.fillRect(x,y,1,1);
 			}
 				
