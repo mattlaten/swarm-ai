@@ -9,8 +9,8 @@ import math.Vec;
  */
 public abstract class Element implements Serializable	{
 	
-	abstract float getSize();
-	abstract Vec getPosition();
-	abstract RenderObject getROb();
-	abstract Vec getVelocity();
+	abstract public float getSize();
+	abstract public Vec getPosition();
+	abstract public Vec getVelocity();
+	abstract public RenderObject getROb();
 }

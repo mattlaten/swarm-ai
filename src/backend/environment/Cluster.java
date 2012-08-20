@@ -19,27 +19,19 @@ public class Cluster extends Element implements Serializable	{
 		return null;
 	}
 
-	@Override
-	float getSize() {
-		// TODO Auto-generated method stub
+	public float getSize() {
 		return 0;
 	}
 
-	@Override
-	Vec getPosition() {
-		// TODO Auto-generated method stub
+	public Vec getPosition() {
 		return null;
 	}
 
-	@Override
-	RenderObject getROb() {
-		// TODO Auto-generated method stub
+	public RenderObject getROb() {
 		return null;
 	}
 
-	@Override
-	Vec getVelocity() {
-		// TODO Auto-generated method stub
+	public Vec getVelocity() {
 		return null;
 	}
 }

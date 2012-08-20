@@ -6,19 +6,26 @@ import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.border.BevelBorder;
-import javax.swing.border.SoftBevelBorder;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.table.DefaultTableModel;
 
 import math.Vec;
 import backend.Simulation;
+import backend.environment.*;
 
 public class UserInterface extends JFrame {
 	JPanel toolbar;
@@ -29,7 +36,7 @@ public class UserInterface extends JFrame {
 	
 	StatusBar status;
 	
-	public UserInterface(Simulation sim)	{
+	public UserInterface(Simulation sim) throws Exception	{
 		super("Swarm AI");
 		this.sim = sim;
 		
@@ -40,15 +47,35 @@ public class UserInterface extends JFrame {
 		
 		canv = new Canvas(this);
 		
+		status = new StatusBar();
+		
 		modePrey = new JButton("Prey");
+		modePrey.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent ae)	{
+				status.setMode("Placing prey");
+			}
+		});
 		modePredator = new JButton("Predator");
+		modePredator.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent ae)	{
+				status.setMode("Placing predator");
+			}
+		});
 		modeModifier = new JButton("Modifier");
+		modeModifier.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent ae)	{
+				status.setMode("Placing modifier");
+			}
+		});
 		modeObstacle = new JButton("Obstacle");
+		modeObstacle.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent ae)	{
+				status.setMode("Placing obstacle");
+			}
+		});
 		
 		toolbar = new JPanel();
 		toolbar.setLayout(new FlowLayout());
-		
-		status = new StatusBar();
 		
 		getContentPane().setLayout(new BorderLayout());
 		
@@ -62,12 +89,16 @@ public class UserInterface extends JFrame {
 		getContentPane().add(status, BorderLayout.PAGE_END);
 		getContentPane().add(canv, BorderLayout.CENTER);
 		
+		/*PropertyDialog pd = new PropertyDialog(this);
+		pd.targetEntity(sim.elements.get(0));*/
+		
 		setVisible(true);
 	}
 }
 
 class StatusBar extends JPanel	{
-	JLabel mousePointLab = new JLabel();
+	JLabel mousePoint = new JLabel(),
+		   mode = new JLabel();
 	
 	public StatusBar()	{
 		super();
@@ -75,13 +106,58 @@ class StatusBar extends JPanel	{
 		
 		JPanel pane = new JPanel();
 		//pane.setBorder(new SoftBevelBorder(BevelBorder.LOWERED));
-		pane.add(mousePointLab);
+		pane.add(mousePoint);
 		
 		add(pane, BorderLayout.LINE_END);
+		add(mode, BorderLayout.LINE_START);
 	}
 	
 	public void setMousePoint(Vec m)	{
-		mousePointLab.setText("x: " + m.x + ", y: " + m.y);
+		mousePoint.setText("x: " + m.x + ", y: " + m.y);
+	}
+	
+	public void setMode(String mode)	{
+		this.mode.setText(mode);
+	}
+}
+
+
+class PropertyDialog extends JDialog {
+	JTable jt;
+	JTextField propKey, propVal;
+	
+	public PropertyDialog(JFrame owner)	{
+		super(owner, "Properties");
+		
+		setSize(400,400);
+		setLocationRelativeTo(owner);
+		
+		getContentPane().setLayout(new BorderLayout());
+		
+		jt = new JTable(new DefaultTableModel());
+		
+		getContentPane().add(jt, BorderLayout.CENTER);
+		
+		setVisible(true);
+	}
+	
+	public void targetEntity(Element e) throws Exception	{
+		String [] cols = {"Property", "Value"};
+		ArrayList<Field> props = new ArrayList<Field>();
+		Field[] fields = e.getClass().getFields();
+		for(Field f : fields)	{
+			System.out.println(f.getName() + ": " + f.isAnnotationPresent(Property.class) + " " + f.getAnnotations().length);
+			if(f.getAnnotation(Property.class) != null)
+				props.add(f);
+		}
+		String [][] rows = new String[props.size()][2];
+		for(int i = 0; i < props.size(); i++)	{
+			rows[i][0] = props.get(0).getName();
+			rows[i][1] = props.get(0).get(e).toString();
+			System.out.println(rows[i][0] + " " + rows[i][1]);
+		}
+		((DefaultTableModel)jt.getModel()).setDataVector(rows, cols);
+		jt.repaint();
 	}
 }
 
@@ -123,6 +199,14 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener	{
 			dotYStart = o.y - dotDiff*(o.y/dotDiff),
 			dotXEnd   = o.x + dotDiff*((getSize().width-o.x)/dotDiff),
 			dotYEnd   = o.y + dotDiff*((getSize().height-o.y)/dotDiff);
+		
+		for(int y = dotYStart; y <= dotYEnd; y ++)
+			for(int x = dotXStart; x <= dotXEnd; x ++)	{
+				g2.setColor(new Color(ui.sim.hm.getInterpolatedHeight(getPositionInSpace(new Vec(x,y))),0f,0f));
+				g2.fillRect(x,y,1,1);
+			}
+				
+		
 		for(int y = dotYStart; y <= dotYEnd; y += dotDiff)
 			for(int x = dotXStart; x <= dotXEnd; x += dotDiff)
 				g2.fillRect(x, y, 1, 1);
