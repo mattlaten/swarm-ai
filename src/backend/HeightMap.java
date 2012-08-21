@@ -28,7 +28,7 @@ public class HeightMap {
 	{
 		log = new Logger(HeightMap.class, System.out, System.err);
 		readInFile(filename);
-		normalizeTerrain();
+		normalizeTerrain(1);
 		//printGrid();
 	}
 	
@@ -37,7 +37,7 @@ public class HeightMap {
 		log = new Logger(HeightMap.class, System.out, System.err);
 		terrain = new double [y][x];
 		generateRandomHeights();
-		normalizeTerrain();
+		normalizeTerrain(1);
 		//printGrid();
 	}
 	
@@ -89,17 +89,19 @@ public class HeightMap {
 		}
 	}
 	
-	public void normalizeTerrain()
+	public void normalizeTerrain(double factor)
 	{
 		log.info("Normalizing Terrain");
 		range = max - min;
 		System.out.println("Max: " + max + " Min: " + min);
 		
 		for (int j = 0; j < y; j++)
-			for (int i = 0; i < x; i++)
+			for (int i = 0; i < x; i++)	{
 				terrain[i][j] = (terrain[i][j]-min)/range;
-		topLeft = new Vec(-x*3, y*3);
-		botRight= new Vec(x*3, -y*3);
+				System.out.println(terrain[i][j]);
+			}
+		topLeft = new Vec(-x*factor, y*factor);
+		botRight= new Vec(x*factor, -y*factor);
 	}
 	
 	public void printGrid()
@@ -116,24 +118,41 @@ public class HeightMap {
 	
 	public void generateRandomHeights()
 	{
+		//fillGrid(terrain,0,0);
 		for (int i = 0; i < x; i++) 
 			for (int j = 0; j < y; j++)
 			{
+				//terrain[i][j] = Math.random();
+				//algorithm for generating terain at i,j
+				
+				
 				if (i == 0)
 					if (j == 0)
 						terrain[i][j] = Math.random()*30;
 					else
-						terrain[i][j] = Math.max(0, terrain[i][j-1] + (Math.random()*5)-2.5);
+						terrain[i][j] = Math.max(0, terrain[i][j-1] + (Math.random()*10)-5);
 				else 
 					if (j == 0)
-						terrain[i][j] = Math.max(0, terrain[i-1][j] + (Math.random()*5)-2.5);
+						terrain[i][j] = Math.max(0, terrain[i-1][j] + (Math.random()*10)-5);
 					else
-						terrain[i][j] = Math.max(0, (terrain[i-1][j-1] + (Math.random()*5)-2.5
-									  + terrain[i-1][j] + (Math.random()*5)-2.5
-									  + terrain[i][j-1] + (Math.random()*5)-2.5)/3);
+						if (i%10 == 0 && j%10 == 0)
+							terrain[i][j] = Math.random()*10 + terrain[i-1][j-1];
+						else
+							terrain[i][j] = Math.max(0, (terrain[i-1][j-1] + (Math.random()*10)-5
+									  + terrain[i-1][j] + (Math.random()*10)-5
+									  + terrain[i][j-1] + (Math.random()*10)-5)/3);
 				max = Math.max(max, terrain[i][j]);
 				min = Math.min(min, terrain[i][j]);
 			}
+	}
+	
+	public void fillGrid(double grid[][], int x, int y)
+	{
+		terrain[y][x] += Math.random();
+		if (x > 0 && y > 0) fillGrid(grid,x-1,y-1);			
+		if (x > 0 && y < grid.length) fillGrid(grid,x-1,y+1);
+		if (x < grid[0].length && y > 0)fillGrid(grid,x+1,y-1);
+		if (x < grid[0].length && y < grid.length) fillGrid(grid,x+1,y+1);
 	}
 	
 	public double getHeightAt(int x, int y)	{

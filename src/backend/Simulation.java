@@ -16,8 +16,7 @@ public class Simulation {
 		p.position = new Vec(10, 10);
 		elements.add(p);
 		
-		//hm = new HeightMap("/media/Data/UCT/2 - CSC3003S/Capstone/src/Terrain+Generation+Data/Terrain Generation Project Data/GC2.map");
-		hm = new HeightMap("./maps/GC2.map");
-		//hm = new HeightMap();
+		//hm = new HeightMap("./maps/GC2.map");
+		hm = new HeightMap();
 	}
 }
