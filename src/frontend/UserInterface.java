@@ -15,11 +15,13 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -31,6 +33,8 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 
+import util.Logger;
+
 import math.Vec;
 import backend.HeightMap;
 import backend.Simulation;
@@ -38,15 +42,20 @@ import backend.environment.Element;
 import backend.environment.Property;
 
 public class UserInterface extends JFrame {
+	
+	Logger log = new Logger(UserInterface.class, System.out, System.err);
 	JPanel toolbar;
-	JButton modePrey, modePredator, modeModifier, modeObstacle;
+	JButton modePrey, modePredator, modeModifier, modeObstacle, modeLoad;
+	JFileChooser fc;
+	
+	File file;
 	
 	Simulation sim;
 	Canvas canv;
 	
 	StatusBar status;
 	
-	public UserInterface(Simulation sim) throws Exception	{
+	public UserInterface(final Simulation sim) throws Exception	{
 		super("Swarm AI");
 		this.sim = sim;
 		
@@ -58,6 +67,8 @@ public class UserInterface extends JFrame {
 		canv = new Canvas(this);
 		
 		status = new StatusBar();
+		
+		fc = new JFileChooser("./maps/");
 		
 		modePrey = new JButton("Prey");
 		modePrey.addActionListener(new ActionListener(){
@@ -84,6 +95,21 @@ public class UserInterface extends JFrame {
 			}
 		});
 		
+		modeLoad = new JButton("Load Terrain");
+		modeLoad.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent ae)	{
+				status.setMode("Select Terrain");
+				int returnVal = fc.showOpenDialog(UserInterface.this);
+				if (returnVal == JFileChooser.APPROVE_OPTION) {
+		            file = fc.getSelectedFile();
+		            sim.setHeightMap(file);
+		            canv.hmc.setHeightMap(sim.hm);
+		            canv.hmc.render();
+		            log.info("Opening: " + file.getName());
+		        }
+			}
+		});
+		
 		toolbar = new JPanel();
 		toolbar.setLayout(new FlowLayout());
 		
@@ -94,6 +120,7 @@ public class UserInterface extends JFrame {
 		toolbar.add(modePredator);
 		toolbar.add(modeModifier);
 		toolbar.add(modeObstacle);
+		toolbar.add(modeLoad);
 		
 		getContentPane().add(toolbar, BorderLayout.PAGE_START);
 		getContentPane().add(status, BorderLayout.PAGE_END);
@@ -230,7 +257,12 @@ class HeightMapCache implements Runnable	{
 		System.out.println("done");
 	}
 	
-	private void render()	{
+	void setHeightMap(HeightMap hm)
+	{
+		this.hm = hm;
+	}
+	
+	void render()	{
 		if(renderThread.isAlive())
 			renderThread.interrupt();
 		renderThread = new Thread(this);

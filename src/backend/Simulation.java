@@ -1,5 +1,6 @@
 package backend;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import math.Vec;
@@ -30,5 +31,10 @@ public class Simulation implements Runnable {
 			}
 		}
 		catch(InterruptedException ie)	{}
+	}
+	
+	public void setHeightMap(File map)
+	{
+		hm = new HeightMap(map);
 	}
 }

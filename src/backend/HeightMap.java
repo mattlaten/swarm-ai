@@ -2,6 +2,7 @@ package backend;
 
 import java.awt.geom.Rectangle2D;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
@@ -25,10 +26,10 @@ public class HeightMap {
 	
 	public Vec topLeft, botRight;
 	
-	public HeightMap(String filename)
+	public HeightMap(File file)
 	{
 		log = new Logger(HeightMap.class, System.out, System.err);
-		readInFile(filename);
+		readInFile(file);
 		normalizeTerrain(1);
 		//printGrid();
 	}
@@ -42,11 +43,11 @@ public class HeightMap {
 		//printGrid();
 	}
 	
-	public void readInFile(String filename)
+	public void readInFile(File file)
 	{
 		try
 		{	
-			reader = new BufferedReader(new FileReader(filename));
+			reader = new BufferedReader(new FileReader(file));
 			String line = reader.readLine();
 			String tokens [] = line.split(" ");			
 			x = Integer.parseInt(tokens[0]);
