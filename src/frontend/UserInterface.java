@@ -41,7 +41,7 @@ public class UserInterface extends JFrame {
 		this.sim = sim;
 		
 		//set up things
-		setSize(600, 400);
+		setSize(800, 600);
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		

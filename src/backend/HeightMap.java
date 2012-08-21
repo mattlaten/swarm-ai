@@ -20,26 +20,28 @@ public class HeightMap {
 	
 	BufferedReader reader = null;
 	
-	Logger log = new Logger(HeightMap.class, System.out, System.err);
+	Logger log = null;
 	
 	Vec topLeft, botRight;
 	
 	public HeightMap(String filename)
 	{
-		init(filename);
+		log = new Logger(HeightMap.class, System.out, System.err);
+		readInFile(filename);
+		normalizeTerrain();
 		//printGrid();
 	}
 	
 	public HeightMap()
 	{
+		log = new Logger(HeightMap.class, System.out, System.err);
 		terrain = new double [y][x];
 		generateRandomHeights();
+		normalizeTerrain();
 		//printGrid();
-		
-		
 	}
 	
-	public void init(String filename)
+	public void readInFile(String filename)
 	{
 		try
 		{	
@@ -69,14 +71,6 @@ public class HeightMap {
 				if (j == y)
 					break;
 			}
-			range = max - min;
-			System.out.println("Max: " + max + " Min: " + min);
-			
-			for (j = 0; j < y; j++)
-				for (i = 0; i < x; i++)
-					terrain[i][j] = (terrain[i][j]-min)/range;
-			topLeft = new Vec(-x*3, y*3);
-			botRight= new Vec(x*3, -y*3);
 		}
 		catch(Exception ex)
 		{
@@ -93,6 +87,19 @@ public class HeightMap {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public void normalizeTerrain()
+	{
+		log.info("Normalizing Terrain");
+		range = max - min;
+		System.out.println("Max: " + max + " Min: " + min);
+		
+		for (int j = 0; j < y; j++)
+			for (int i = 0; i < x; i++)
+				terrain[i][j] = (terrain[i][j]-min)/range;
+		topLeft = new Vec(-x*3, y*3);
+		botRight= new Vec(x*3, -y*3);
 	}
 	
 	public void printGrid()
@@ -127,16 +134,6 @@ public class HeightMap {
 				max = Math.max(max, terrain[i][j]);
 				min = Math.min(min, terrain[i][j]);
 			}
-		
-		range = max - min;
-		System.out.println("Max: " + max + " Min: " + min);
-		
-		for (int i = 0; i < y; i++)
-			for (int j = 0; j < x; j++)
-				terrain[i][j] = (terrain[i][j]-min)/range;
-		
-		topLeft = new Vec(-x, y);
-		botRight= new Vec(x, -y);
 	}
 	
 	public double getHeightAt(int x, int y)	{
@@ -146,11 +143,13 @@ public class HeightMap {
 	}
 	
 	//http://en.wikipedia.org/wiki/Bilinear_interpolation
-	public double getInterpolatedHeightAt(Vec p)	{
+	public double getInterpolatedHeightAt(Vec pp)	{
 		double width = botRight.x - topLeft.x,
 			   height = topLeft.y - botRight.y,
 			   xStep = width/(this.x),
 			   yStep = height/(this.y);
+		
+		Vec p = pp.minus(new Vec(xStep/2, yStep/2));
 		
 		Vec tp = p.minus(topLeft).invertY();
 		
