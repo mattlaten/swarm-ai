@@ -6,7 +6,7 @@ import math.Vec;
 import backend.environment.Element;
 import backend.environment.Prey;
 
-public class Simulation {
+public class Simulation implements Runnable {
 	public ArrayList<Element> elements;
 	public HeightMap hm = null;
 	
@@ -16,7 +16,19 @@ public class Simulation {
 		p.position = new Vec(10, 10);
 		elements.add(p);
 		
-		//hm = new HeightMap("./maps/GC2.map");
-		hm = new HeightMap();
+		hm = new HeightMap("./maps/GC2.map");
+		//hm = new HeightMap();
+	}
+	
+	public void run()	{
+		try {
+			while(true)	{
+				Thread.sleep(200);
+				for(Element e : elements)	{
+					
+				}
+			}
+		}
+		catch(InterruptedException ie)	{}
 	}
 }

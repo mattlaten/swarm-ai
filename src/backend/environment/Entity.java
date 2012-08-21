@@ -12,6 +12,7 @@ public abstract class Entity extends Element implements Serializable	{
 	public Vec position;
 	@Property
 	public float size;
+	public float sightRadius;
 	
 	public Entity()	{
 		position = new Vec();
@@ -19,6 +20,10 @@ public abstract class Entity extends Element implements Serializable	{
 	
 	public Vec getPosition()	{
 		return position;
+	}
+	
+	public float getSightRadius()	{
+		return sightRadius;
 	}
 	
 	public float getSize()	{

@@ -94,12 +94,12 @@ public class HeightMap {
 	{
 		log.info("Normalizing Terrain");
 		range = max - min;
-		System.out.println("Max: " + max + " Min: " + min);
+		//System.out.println("Max: " + max + " Min: " + min);
 		
 		for (int j = 0; j < y; j++)
 			for (int i = 0; i < x; i++)	{
 				terrain[i][j] = (terrain[i][j]-min)/range;
-				System.out.println(terrain[i][j]);
+				//System.out.println(terrain[i][j]);
 			}
 		topLeft = new Vec(-x*factor, y*factor);
 		botRight= new Vec(x*factor, -y*factor);
