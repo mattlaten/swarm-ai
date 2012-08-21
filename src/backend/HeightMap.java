@@ -22,7 +22,7 @@ public class HeightMap {
 	
 	Logger log = null;
 	
-	Vec topLeft, botRight;
+	public Vec topLeft, botRight;
 	
 	public HeightMap(String filename)
 	{

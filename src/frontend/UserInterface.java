@@ -11,6 +11,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.image.BufferedImage;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
@@ -24,8 +25,10 @@ import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
 import math.Vec;
+import backend.HeightMap;
 import backend.Simulation;
-import backend.environment.*;
+import backend.environment.Element;
+import backend.environment.Property;
 
 public class UserInterface extends JFrame {
 	JPanel toolbar;
@@ -161,37 +164,68 @@ class PropertyDialog extends JDialog {
 	}
 }
 
+class HeightMapCache	{
+	HeightMap hm;
+	public double width, height;
+	BufferedImage img;
+	
+	public HeightMapCache(HeightMap hm)	{
+		this.hm = hm;
+		Vec v = hm.botRight.minus(hm.topLeft);
+		width = v.x;
+		height = Math.abs(v.y);
+		render();
+	}
+	
+	private void render()	{
+		//render this guy
+		img = new BufferedImage((int)width, (int)height, BufferedImage.TYPE_INT_RGB);
+		for(int y = 0; y < img.getHeight(); y++)
+			for(int x = 0; x < img.getWidth(); x++)	{
+				double height = hm.getInterpolatedHeightAt(hm.topLeft.plus(new Vec(x,-y)));
+				int h = (int)(height*255);
+				img.setRGB(x, y, new Color(h,h,h).getRGB());//(((((255 << 8) | h) << 8) | h) << 8) | h);
+			}
+	}
+	
+	public BufferedImage getImage()	{
+		Vec v = hm.botRight.minus(hm.topLeft);
+		if(v.x != width || Math.abs(v.y) != height)
+			render();
+		return img;
+	}
+}
+
 class Canvas extends JLabel implements MouseListener, MouseMotionListener	{
 	UserInterface ui;
-	Vec origin = new Vec();
-	Vec mPoint = new Vec();
-	boolean mouseDragging = false;
+	Vec origin = new Vec();	//the origin relative to the center of the Canvas
+	Vec mPoint = new Vec();	//the position of the mouse in labelSpace
+	
 	int dotDiff = 10;
+	
+	HeightMapCache hmc = null;
 	
 	public Canvas(UserInterface ui)	{
 		this.ui = ui;
 		origin = new Vec();
+		hmc = new HeightMapCache(ui.sim.hm);
 		
 		addMouseListener(this);
 		addMouseMotionListener(this);
 	}
 	
-	public Vec getOriginPosition()	{
-		return new Vec(getSize().width/2, getSize().height/2).plus(origin);
-	}
-	
-	public Vec getMousePositionInSpace()	{
-		return getPositionInSpace(mPoint);
-	}
-	
-	public Vec getPositionInSpace(Vec v)	{
-		return v.minus(getOriginPosition()).invertY();
-	}
+	public Vec toLabelSpace(Vec v)	{	return v.invertY().plus(origin).plus(new Vec(getSize().width/2, getSize().height/2));	}
+	public Vec toWorldSpace(Vec v)	{	return v.minus(originInLabelSpace()).invertY();	}
+	public Vec originInLabelSpace()	{	return toLabelSpace(Vec.ZERO);	}
+	public Vec mouseInWorldSpace()	{	return toWorldSpace(mPoint);	}
 	
 	public void paint(Graphics g)	{
 		Graphics2D g2 = (Graphics2D)g;
 		
-		Point o = getOriginPosition().getPoint();
+		Point o = originInLabelSpace().getPoint();
+		
+		g2.setColor(Color.black);
+		g2.fillRect(0, 0, getSize().width, getSize().height);
 		
 		//draw the dots
 		//g2.setColor(Color.black);
@@ -200,17 +234,20 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener	{
 			dotXEnd   = o.x + dotDiff*((getSize().width-o.x)/dotDiff) + 2*dotDiff,
 			dotYEnd   = o.y + dotDiff*((getSize().height-o.y)/dotDiff) + 2*dotDiff;
 		
-		for(int y = dotYStart; y <= dotYEnd; y ++)
+		//render the heightMap
+		/*for(int y = dotYStart; y <= dotYEnd; y ++)
 			for(int x = dotXStart; x <= dotXEnd; x ++)	{
-				double h = ui.sim.hm.getInterpolatedHeightAt(getPositionInSpace(new Vec(x,y)));
+				double h = ui.sim.hm.getInterpolatedHeightAt(toWorldSpace(new Vec(x,y)));
 				g2.setColor(new Color((float)h,(float)h,(float)h));
 				g2.fillRect(x,y,1,1);
-			}
-				
-		/*g2.setColor(Color.white);
+			}*/
+		Point tl = toLabelSpace(hmc.hm.topLeft).getPoint(), br = toLabelSpace(hmc.hm.botRight).getPoint();
+		g2.drawImage(hmc.getImage(), tl.x, tl.y, br.x, br.y, 0, 0, (int)(hmc.width), (int)(hmc.height), null);
+			
+		g2.setColor(Color.white);
 		for(int y = dotYStart; y <= dotYEnd; y += dotDiff)
 			for(int x = dotXStart; x <= dotXEnd; x += dotDiff)
-				g2.fillRect(x, y, 1, 1);*/
+				g2.fillRect(x, y, 1, 1);
 		
 		//draw the axes
 		g2.setColor(Color.white);
@@ -223,19 +260,14 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener	{
 	
 	public void mousePressed(MouseEvent me)	{
 		mPoint = new Vec(me.getPoint());
-		mouseDragging = true;
 	}
 
-	public void mouseReleased(MouseEvent me) {
-		mouseDragging = false;
-	}
+	public void mouseReleased(MouseEvent me) {}
 	
 	public void mouseDragged(MouseEvent me)	{
-		if(mouseDragging)	{
-			Vec mp = new Vec(me.getPoint());
-			origin = origin.minus(mPoint.minus(mp));
-			mPoint = mp;
-		}
+		Vec mp = new Vec(me.getPoint());
+		origin = origin.minus(mPoint.minus(mp));
+		mPoint = mp;
 		repaint();
 	}
 	
@@ -243,6 +275,6 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener	{
 	public void mouseEntered(MouseEvent me) {}
 	public void mouseExited(MouseEvent me) {}
 	public void mouseMoved(MouseEvent me)	{
-		ui.status.setMousePoint(getPositionInSpace(new Vec(me.getPoint())));
+		ui.status.setMousePoint(toWorldSpace(new Vec(me.getPoint())));
 	}
 }
