@@ -32,4 +32,8 @@ public class Vec implements Serializable	{
 	public Point getPoint()	{
 		return new Point((int)x, (int)y);
 	}
+	
+	public String toString()	{
+		return "<" + x + ", " + y + ">";
+	}
 }

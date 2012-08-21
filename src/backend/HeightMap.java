@@ -26,7 +26,6 @@ public class HeightMap {
 	
 	public HeightMap(String filename)
 	{
-		terrain = new double [y][x];
 		init(filename);
 		//printGrid();
 	}
@@ -47,8 +46,9 @@ public class HeightMap {
 			reader = new BufferedReader(new FileReader(filename));
 			String line = reader.readLine();
 			String tokens [] = line.split(" ");			
-			y = Integer.parseInt(tokens[0]);
 			x = Integer.parseInt(tokens[0]);
+			y = Integer.parseInt(tokens[0]);
+			terrain = new double[x][y];
 			
 			int i = 0;
 			int j = 0;
@@ -59,24 +59,24 @@ public class HeightMap {
 				//System.out.println(terrain[i][j]);
 				max = Math.max(max, terrain[i][j]);
 				min = Math.min(min, terrain[i][j]);
-				j++;
+				i++;
 				k++;
-				if (j == x)
+				if (i == x)
 				{
-					i++;
-					j = 0;
+					j++;
+					i = 0;
 				}
-				if (i == y)
+				if (j == y)
 					break;
 			}
 			range = max - min;
 			System.out.println("Max: " + max + " Min: " + min);
 			
-			for (i = 0; i < y; i++)
-				for (j = 0; j < x; j++)
+			for (j = 0; j < y; j++)
+				for (i = 0; i < x; i++)
 					terrain[i][j] = (terrain[i][j]-min)/range;
-			topLeft = new Vec(-x*10/2, y*10);
-			botRight= new Vec(x*10/2, -y*10);
+			topLeft = new Vec(-x*3, y*3);
+			botRight= new Vec(x*3, -y*3);
 		}
 		catch(Exception ex)
 		{
@@ -135,47 +135,74 @@ public class HeightMap {
 			for (int j = 0; j < x; j++)
 				terrain[i][j] = (terrain[i][j]-min)/range;
 		
-		topLeft = new Vec(-x*10/2, y*10);
-		botRight= new Vec(x*10/2, -y*10);
+		topLeft = new Vec(-x, y);
+		botRight= new Vec(x, -y);
 	}
 	
 	public double getHeightAt(int x, int y)	{
-		if(x < terrain.length && x >= 0 && y < terrain[0].length && y >= 0)
-			return terrain[y][x];
+		if(x < this.x && x >= 0 && y < this.y && y >= 0)
+			return terrain[this.y-y-1][this.x-x-1];
 		return 0;
 	}
 	
 	//http://en.wikipedia.org/wiki/Bilinear_interpolation
 	public double getInterpolatedHeightAt(Vec p)	{
 		double width = botRight.x - topLeft.x,
-			   height = botRight.y - topLeft.y,
-			   xStep = (double)(terrain.length)/width,
-			   yStep = (double)(terrain[0].length)/height;
+			   height = topLeft.y - botRight.y,
+			   xStep = width/(this.x),
+			   yStep = height/(this.y);
 		
-		int tx1 = (int)(Math.floor((p.x - topLeft.x)/xStep)),
-			tx2 = (int)(Math.ceil((p.x - topLeft.x)/xStep)),
-			ty1 = (int)(Math.floor((topLeft.y - p.y)/yStep)),
-			ty2 = (int)(Math.ceil((topLeft.y - p.y)/yStep));
+		Vec tp = p.minus(topLeft).invertY();
+		
+		int tx1 = (int)(Math.floor(tp.x/xStep)),
+			tx2 = (int)(Math.ceil(tp.x/xStep)),
+			ty1 = (int)(Math.floor(tp.y/yStep)),
+			ty2 = (int)(Math.ceil(tp.y/yStep));
 		
 		double x1 = tx1*xStep,
 			   x2 = tx2*xStep,
 			   y1 = ty1*yStep,
 			   y2 = ty2*yStep;
 		
-		System.out.println(x1 + " " + x2 + " " + y1 + " " + y2);
-		
 		double a = 0;
 		if((x2-x1)*(y2-y1) != 0)
-			 a = (getHeightAt(tx1, ty1)*(x2-p.x)*(y2-p.y)
-				  + getHeightAt(tx2, ty1)*(p.x-x1)*(y2-p.y)
-				  + getHeightAt(tx1, ty2)*(x2-p.x)*(p.y-y1)
-				  + getHeightAt(tx2, ty2)*(p.x-x1)*(p.y-y1))
+			 a = (getHeightAt(tx1, ty1)*(x2-tp.x)*(y2-tp.y)
+				  + getHeightAt(tx2, ty1)*(tp.x-x1)*(y2-tp.y)
+				  + getHeightAt(tx1, ty2)*(x2-tp.x)*(tp.y-y1)
+				  + getHeightAt(tx2, ty2)*(tp.x-x1)*(tp.y-y1))
 				 /((x2-x1)*(y2-y1));
 		else if(x2 != x1)
-			a= (getHeightAt(tx1, ty1)*(x2-p.x) + getHeightAt(tx2, ty1)*(p.x-x1))/(x2-x1);
+			a = (getHeightAt(tx1, ty1)*(x2-tp.x) + getHeightAt(tx2, ty1)*(tp.x-x1))/(x2-x1);
+		else if(y2 != y1)
+			a = (getHeightAt(tx1, ty1)*(y2-tp.y) + getHeightAt(tx1, ty2)*(tp.y-y1))/(y2-y1);
 		else
-			a= (getHeightAt(tx1, ty1)*(y2-p.y) + getHeightAt(tx1, ty2)*(p.y-y1))/(y2-y1);
-		System.out.println(a);
+			a = getHeightAt(tx1, ty1);
+		//System.out.println(a);
 		return a;
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

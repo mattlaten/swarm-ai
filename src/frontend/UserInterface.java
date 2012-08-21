@@ -194,25 +194,26 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener	{
 		Point o = getOriginPosition().getPoint();
 		
 		//draw the dots
-		g2.setColor(Color.black);
-		int dotXStart = o.x - dotDiff*(o.x/dotDiff),
-			dotYStart = o.y - dotDiff*(o.y/dotDiff),
-			dotXEnd   = o.x + dotDiff*((getSize().width-o.x)/dotDiff),
-			dotYEnd   = o.y + dotDiff*((getSize().height-o.y)/dotDiff);
+		//g2.setColor(Color.black);
+		int dotXStart = o.x - dotDiff*(o.x/dotDiff) - dotDiff,
+			dotYStart = o.y - dotDiff*(o.y/dotDiff) - dotDiff,
+			dotXEnd   = o.x + dotDiff*((getSize().width-o.x)/dotDiff) + 2*dotDiff,
+			dotYEnd   = o.y + dotDiff*((getSize().height-o.y)/dotDiff) + 2*dotDiff;
 		
 		for(int y = dotYStart; y <= dotYEnd; y ++)
 			for(int x = dotXStart; x <= dotXEnd; x ++)	{
-				g2.setColor(new Color((float)(ui.sim.hm.getInterpolatedHeightAt(getPositionInSpace(new Vec(x,y)))),0f,0f));
+				double h = ui.sim.hm.getInterpolatedHeightAt(getPositionInSpace(new Vec(x,y)));
+				g2.setColor(new Color((float)h,(float)h,(float)h));
 				g2.fillRect(x,y,1,1);
 			}
 				
-		
+		/*g2.setColor(Color.white);
 		for(int y = dotYStart; y <= dotYEnd; y += dotDiff)
 			for(int x = dotXStart; x <= dotXEnd; x += dotDiff)
-				g2.fillRect(x, y, 1, 1);
+				g2.fillRect(x, y, 1, 1);*/
 		
 		//draw the axes
-		g2.setColor(Color.black);
+		g2.setColor(Color.white);
 		g2.fillRect(dotXStart, o.y, dotXEnd, 1);
 		g2.fillRect(o.x, dotYStart, 1, dotYEnd);
 		
