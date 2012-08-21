@@ -4,15 +4,12 @@ import java.awt.Point;
 import java.io.Serializable;
 
 public class Vec implements Serializable	{
+	public static final Vec ZERO = new Vec(0,0);
 	public double x,y;
 	
-	public Vec()	{
-		this(0,0);
-	}
-	
-	public Vec(Point p)	{
-		this(p.x, p.y);
-	}
+	public Vec()		{	this(0,0);		}
+	public Vec(Point p)	{	this(p.x, p.y);	}
+	public Vec(Vec v)	{	this(v.x, v.y);	}
 	
 	public Vec(double x, double y)	{
 		this.x = x;
@@ -31,6 +28,10 @@ public class Vec implements Serializable	{
 	
 	public Point getPoint()	{
 		return new Point((int)x, (int)y);
+	}
+	
+	public boolean equals(Vec other)	{
+		return x == other.x && y == other.y;
 	}
 	
 	public String toString()	{

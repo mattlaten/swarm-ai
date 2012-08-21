@@ -11,6 +11,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
@@ -21,11 +25,17 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.table.DefaultTableModel;
+import javax.swing.event.CellEditorListener;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.AbstractTableModel;
 
 import math.Vec;
+import backend.HeightMap;
 import backend.Simulation;
-import backend.environment.*;
+import backend.environment.Element;
+import backend.environment.Property;
 
 public class UserInterface extends JFrame {
 	JPanel toolbar;
@@ -89,10 +99,10 @@ public class UserInterface extends JFrame {
 		getContentPane().add(status, BorderLayout.PAGE_END);
 		getContentPane().add(canv, BorderLayout.CENTER);
 		
-		/*PropertyDialog pd = new PropertyDialog(this);
-		pd.targetEntity(sim.elements.get(0));*/
+		PropertyDialog pd = new PropertyDialog(this);
+		pd.targetEntity(sim.elements.get(0));
 		
-		setVisible(true);
+		//setVisible(true);
 	}
 }
 
@@ -121,10 +131,50 @@ class StatusBar extends JPanel	{
 	}
 }
 
+@SuppressWarnings("serial")
+class PropertyTableModel extends AbstractTableModel implements TableModelListener	{
+	Element target;
+	ArrayList<Field> props = new ArrayList<Field>();
+	
+	public PropertyTableModel()	{
+		addTableModelListener(this);
+	}
+	
+	public void setTarget(Element t, ArrayList<Field> f)	{
+		target = t;
+		props = f;
+	}
+	public int getColumnCount() { return 2; }
+    public int getRowCount() { return props.size();}
+    public Object getValueAt(int row, int col) {
+    	try {
+        	if(col == 0)
+        		return props.get(row).getName();
+        	else
+        		return props.get(row).get(target).toString();
+    	}
+    	catch(Exception e)	{
+    		e.printStackTrace();
+    	}
+    	return null;
+    }
+    public boolean isCellEditable(int row, int col)	{
+    	return col == 1;
+    }
+    
+	public void tableChanged(TableModelEvent e) {
+		fireTableRowsUpdated(e.getFirstRow(), e.getFirstRow());
+		Field f = props.get(e.getFirstRow());
+		System.out.println(f.getType());
+	}
+}
 
-class PropertyDialog extends JDialog {
+
+class PropertyDialog extends JDialog implements CellEditorListener {
 	JTable jt;
 	JTextField propKey, propVal;
+	
+	PropertyTableModel model;
 	
 	public PropertyDialog(JFrame owner)	{
 		super(owner, "Properties");
@@ -134,7 +184,8 @@ class PropertyDialog extends JDialog {
 		
 		getContentPane().setLayout(new BorderLayout());
 		
-		jt = new JTable(new DefaultTableModel());
+		model = new PropertyTableModel();
+		jt = new JTable(model);
 		
 		getContentPane().add(jt, BorderLayout.CENTER);
 		
@@ -145,104 +196,191 @@ class PropertyDialog extends JDialog {
 		String [] cols = {"Property", "Value"};
 		ArrayList<Field> props = new ArrayList<Field>();
 		Field[] fields = e.getClass().getFields();
-		for(Field f : fields)	{
-			System.out.println(f.getName() + ": " + f.isAnnotationPresent(Property.class) + " " + f.getAnnotations().length);
+		for(Field f : fields)
+			//System.out.println(f.getName() + ": " + f.isAnnotationPresent(Property.class) + " " + f.getAnnotations().length);
 			if(f.getAnnotation(Property.class) != null)
 				props.add(f);
-		}
-		String [][] rows = new String[props.size()][2];
-		for(int i = 0; i < props.size(); i++)	{
-			rows[i][0] = props.get(0).getName();
-			rows[i][1] = props.get(0).get(e).toString();
-			System.out.println(rows[i][0] + " " + rows[i][1]);
-		}
-		((DefaultTableModel)jt.getModel()).setDataVector(rows, cols);
+		model.setTarget(e, props);
 		jt.repaint();
+	}
+
+	public void editingStopped(ChangeEvent e) {
+		System.out.println("here");
+	}
+	public void editingCanceled(ChangeEvent e) {}
+}
+
+class HeightMapCache implements Runnable	{
+	HeightMap hm;
+	public double width, height;
+	BufferedImage img;
+	volatile double completion = 0;
+	Canvas master;
+	
+	Thread renderThread = new Thread(this);
+	
+	public HeightMapCache(Canvas master, HeightMap hm)	{
+		this.hm = hm;
+		this.master = master;
+		Rectangle2D.Double bounds = hm.getRenderBounds();
+		System.out.println(bounds + " " + hm.topLeft + " " + hm.botRight);
+		width = bounds.width;
+		height = bounds.height;
+		render();
+		System.out.println("done");
+	}
+	
+	private void render()	{
+		if(renderThread.isAlive())
+			renderThread.interrupt();
+		renderThread = new Thread(this);
+		renderThread.start();
+	}
+	
+	public BufferedImage getImage()	{
+		Rectangle2D.Double bounds = hm.getRenderBounds();
+		if(bounds.width != width || bounds.height != height)
+			render();
+		return img;
+	}
+	
+	public void run()	{
+		try	{
+			//render this guy
+			img = new BufferedImage((int)width, (int)height, BufferedImage.TYPE_INT_RGB);
+			double offX = (width - (hm.botRight.x - hm.topLeft.x))/2,
+				   offY = (height -(hm.topLeft.y - hm.botRight.y))/2;
+			int yStep = Math.max(img.getHeight()/25, 1);
+			for(int y = 0; y < img.getHeight(); y++)	{
+				for(int x = 0; x < img.getWidth(); x++)	{
+					double height = hm.getInterpolatedHeightAt(hm.topLeft.plus(new Vec(x-offX,-y+offY)));
+					int h = (int)(height*255);
+					img.setRGB(x, y, new Color(h,h,h).getRGB());//(((((255 << 8) | h) << 8) | h) << 8) | h);
+				}
+				if(y%yStep == 0)	{
+					completion = (double)y/img.getHeight();
+					master.repaint();
+					//Thread.sleep(10);
+				}
+			}
+			Thread.sleep(10);
+		}
+		catch(InterruptedException ie)	{
+			
+		}
+		finally	{
+			completion = 1;
+			master.repaint();
+		}
 	}
 }
 
-class Canvas extends JLabel implements MouseListener, MouseMotionListener	{
+class Canvas extends JLabel implements MouseListener, MouseMotionListener, MouseWheelListener	{
 	UserInterface ui;
-	Vec origin = new Vec();
-	Vec mPoint = new Vec();
-	boolean mouseDragging = false;
+	Vec origin = new Vec();	//the origin relative to the center of the Canvas
+	Vec mPoint = new Vec();	//the position of the mouse in labelSpace
+	
 	int dotDiff = 10;
+	HeightMapCache hmc = null;
+	double zoom = 2;
 	
 	public Canvas(UserInterface ui)	{
 		this.ui = ui;
 		origin = new Vec();
+		hmc = new HeightMapCache(this, ui.sim.hm);
 		
 		addMouseListener(this);
 		addMouseMotionListener(this);
+		addMouseWheelListener(this);
 	}
 	
-	public Vec getOriginPosition()	{
-		return new Vec(getSize().width/2, getSize().height/2).plus(origin);
-	}
-	
-	public Vec getMousePositionInSpace()	{
-		return getPositionInSpace(mPoint);
-	}
-	
-	public Vec getPositionInSpace(Vec v)	{
-		return v.minus(getOriginPosition()).invertY();
-	}
+	//public Vec toLabelSpace(Vec v)	{	return v.invertY().plus(origin).plus(new Vec(getSize().width/2, getSize().height/2));	}
+	public Vec toLabelSpace(Vec v)	{	return v.mult(zoom).invertY().plus(origin.mult(zoom)).plus(new Vec(getSize().width/2, getSize().height/2));	}
+	//public Vec toWorldSpace(Vec v)	{	return v.minus(originInLabelSpace()).invertY();	}
+	public Vec toWorldSpace(Vec v)	{	return v.minus(originInLabelSpace()).mult(1/zoom).invertY();	}
+	public Vec originInLabelSpace()	{	return toLabelSpace(Vec.ZERO);	}
+	public Vec mouseInWorldSpace()	{	return toWorldSpace(mPoint);	}
 	
 	public void paint(Graphics g)	{
 		Graphics2D g2 = (Graphics2D)g;
-		
-		Point o = getOriginPosition().getPoint();
-		
-		//draw the dots
-		//g2.setColor(Color.black);
-		int dotXStart = o.x - dotDiff*(o.x/dotDiff) - dotDiff,
-			dotYStart = o.y - dotDiff*(o.y/dotDiff) - dotDiff,
-			dotXEnd   = o.x + dotDiff*((getSize().width-o.x)/dotDiff) + 2*dotDiff,
-			dotYEnd   = o.y + dotDiff*((getSize().height-o.y)/dotDiff) + 2*dotDiff;
-		
-		for(int y = dotYStart; y <= dotYEnd; y ++)
-			for(int x = dotXStart; x <= dotXEnd; x ++)	{
-				double h = ui.sim.hm.getInterpolatedHeightAt(getPositionInSpace(new Vec(x,y)));
-				g2.setColor(new Color((float)h,(float)h,(float)h));
-				g2.fillRect(x,y,1,1);
-			}
-				
-		/*g2.setColor(Color.white);
-		for(int y = dotYStart; y <= dotYEnd; y += dotDiff)
-			for(int x = dotXStart; x <= dotXEnd; x += dotDiff)
-				g2.fillRect(x, y, 1, 1);*/
-		
-		//draw the axes
-		g2.setColor(Color.white);
-		g2.fillRect(dotXStart, o.y, dotXEnd, 1);
-		g2.fillRect(o.x, dotYStart, 1, dotYEnd);
-		
-		/*Vec mPointSpace = mPoint.minus(origin);
-		g2.drawString((int)(mPointSpace.x) + ", " + (int)(mPointSpace.y), (int)(mPoint.x), (int)(mPoint.y));*/
+		//System.out.println(hmc.completion);
+		if(hmc.completion >= 1)	{
+			Point o = originInLabelSpace().getPoint();
+			
+			g2.setColor(Color.black);
+			g2.fillRect(0, 0, getSize().width, getSize().height);
+			
+			//calculate the drawing range
+			double dotDiffZoomed = Math.max(dotDiff*zoom, 2);
+			double dotXStart = (o.x - dotDiffZoomed*Math.floor(o.x/dotDiffZoomed) - dotDiffZoomed),
+				dotYStart = (o.y - dotDiffZoomed*Math.floor(o.y/dotDiffZoomed) - dotDiffZoomed),
+				dotXEnd   = (o.x + dotDiffZoomed*Math.floor((getSize().width-o.x)/dotDiffZoomed) + 2*dotDiffZoomed),
+				dotYEnd   = (o.y + dotDiffZoomed*Math.floor((getSize().height-o.y)/dotDiffZoomed) + 2*dotDiffZoomed);
+			
+			//render the heightMap
+			BufferedImage img = hmc.getImage();
+			Rectangle2D.Double bounds = hmc.hm.getRenderBounds();
+			Point tl = toLabelSpace(new Vec(bounds.x, bounds.y)).getPoint(),
+				  br = toLabelSpace(new Vec(bounds.x+bounds.width, bounds.y-bounds.height)).getPoint();
+			g2.drawImage(hmc.getImage(), (int)tl.x, (int)tl.y, (int)br.x, (int)br.y, 0, 0, (int)(hmc.width), (int)(hmc.height), null);
+			/*Point clampedTl = new Point(Math.max(tl.x, 0), Math.max(tl.y, 0)),
+				  clampedBr = new Point(Math.min(br.x, getSize().width), Math.min(br.y, getSize().height));
+			g2.drawImage(img, clampedTl.x, clampedTl.y, clampedBr.x, clampedBr.y,
+							  clampedTl.x-tl.x, clampedTl.y-tl.y, (int)hmc.width-(br.x-clampedBr.x), (int)hmc.height-(br.y-clampedBr.y), null);*/
+			
+			//draw the grid
+			if(dotDiffZoomed < 5)	dotDiffZoomed *= 2;
+			g2.setColor(Color.white);
+			for(double y = dotYStart; y <= dotYEnd; y += dotDiffZoomed)
+				for(double x = dotXStart; x <= dotXEnd; x += dotDiffZoomed)
+					g2.fillRect((int)x, (int)y, 1, 1);
+			
+			//draw the axes
+			g2.setColor(Color.white);
+			g2.fillRect(0, o.y, getSize().width, 1);
+			g2.fillRect(o.x, 0, 1, getSize().height);
+		}
+		else	{
+			int width = getSize().width/3,
+				height = 50;
+			int x = (getSize().width-width)/2,
+				y = (getSize().height-height)/2;
+			
+			g2.setColor(Color.green);
+			g2.fillRect(x,y,(int)(width*hmc.completion),height);
+			
+			g2.setColor(Color.black);
+			g2.drawRect(x,y,width,height);
+		}
 	}
 	
 	public void mousePressed(MouseEvent me)	{
-		mPoint = new Vec(me.getPoint());
-		mouseDragging = true;
-	}
-
-	public void mouseReleased(MouseEvent me) {
-		mouseDragging = false;
+		if(hmc.completion >= 1)
+			mPoint = new Vec(me.getPoint());
 	}
 	
 	public void mouseDragged(MouseEvent me)	{
-		if(mouseDragging)	{
+		if(hmc.completion >= 1)	{
 			Vec mp = new Vec(me.getPoint());
-			origin = origin.minus(mPoint.minus(mp));
+			origin = origin.minus(mPoint.minus(mp).mult(1/zoom));
 			mPoint = mp;
+			repaint();
 		}
-		repaint();
 	}
 	
+	public void mouseReleased(MouseEvent me) {}
 	public void mouseClicked(MouseEvent me) {}
 	public void mouseEntered(MouseEvent me) {}
 	public void mouseExited(MouseEvent me) {}
 	public void mouseMoved(MouseEvent me)	{
-		ui.status.setMousePoint(getPositionInSpace(new Vec(me.getPoint())));
+		if(hmc.completion >= 1)
+			ui.status.setMousePoint(toWorldSpace(new Vec(me.getPoint())));
+	}
+	public void mouseWheelMoved(MouseWheelEvent mwe)	{
+		if(hmc.completion >= 1) {
+			zoom -= mwe.getWheelRotation()*(0.01+ (zoom-0.1)/9.99);
+			zoom = Math.min(Math.max(0.01, zoom), 10);
+			repaint();
+		}
 	}
 }

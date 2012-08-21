@@ -1,5 +1,6 @@
 package backend;
 
+import java.awt.geom.Rectangle2D;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -22,7 +23,7 @@ public class HeightMap {
 	
 	Logger log = null;
 	
-	Vec topLeft, botRight;
+	public Vec topLeft, botRight;
 	
 	public HeightMap(String filename)
 	{
@@ -168,7 +169,7 @@ public class HeightMap {
 			   xStep = width/(this.x),
 			   yStep = height/(this.y);
 		
-		Vec p = pp.minus(new Vec(xStep/2, yStep/2));
+		Vec p = pp.plus(new Vec(-xStep/2, yStep/2));
 		
 		Vec tp = p.minus(topLeft).invertY();
 		
@@ -197,6 +198,14 @@ public class HeightMap {
 			a = getHeightAt(tx1, ty1);
 		//System.out.println(a);
 		return a;
+	}
+	
+	public Rectangle2D.Double getRenderBounds()	{
+		double width = botRight.x - topLeft.x,
+			   height = topLeft.y - botRight.y,
+			   xStep = width/(this.x),
+			   yStep = height/(this.y);
+		return new Rectangle2D.Double(topLeft.x - xStep, topLeft.y + yStep, width + xStep*2, height + yStep);
 	}
 }
 
