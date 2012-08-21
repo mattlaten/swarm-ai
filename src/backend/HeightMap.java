@@ -99,8 +99,8 @@ public class HeightMap {
 		for (int j = 0; j < y; j++)
 			for (int i = 0; i < x; i++)
 				terrain[i][j] = (terrain[i][j]-min)/range;
-		topLeft = new Vec(-x*3, y*3);
-		botRight= new Vec(x*3, -y*3);
+		topLeft = new Vec(-x*2, y*2);
+		botRight= new Vec(x*2, -y*2);
 	}
 	
 	public void printGrid()
