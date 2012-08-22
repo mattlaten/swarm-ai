@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import math.Vec;
 
 public class Prey extends Element {
+	
 
 	public double getSize() {
 		return 0;

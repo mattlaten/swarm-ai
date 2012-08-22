@@ -17,22 +17,20 @@ class HeightMapCache implements Runnable	{
 	Thread renderThread = new Thread(this);
 	
 	public HeightMapCache(Canvas master, HeightMap hm)	{
-		this.hm = hm;
 		this.master = master;
-		Rectangle2D.Double bounds = hm.getRenderBounds();
-		System.out.println(bounds + " " + hm.topLeft + " " + hm.botRight);
-		width = bounds.width;
-		height = bounds.height;
-		render();
-		System.out.println("done");
+		setHeightMap(hm);
 	}
 	
 	void setHeightMap(HeightMap hm)
 	{
 		this.hm = hm;
+		Rectangle2D.Double bounds = hm.getRenderBounds();
+		width = bounds.width;
+		height = bounds.height;
+		render();
 	}
 	
-	void render()	{
+	private void render()	{
 		if(renderThread.isAlive())
 			renderThread.interrupt();
 		renderThread = new Thread(this);

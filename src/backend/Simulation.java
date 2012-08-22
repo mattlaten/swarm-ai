@@ -10,6 +10,10 @@ import backend.environment.Prey;
 public class Simulation extends Thread {
 	public ArrayList<Element> elements;
 	public HeightMap hm = null;
+	public ArrayList<Object> snapshots;
+	
+	public int timeStep = 20, stepsPerSave = 10;
+	private volatile int time = 0, totalTime = 0;
 	
 	public boolean isRunning = false;
 	
@@ -19,22 +23,42 @@ public class Simulation extends Thread {
 		p.position = new Vec(10, 10);
 		elements.add(p);*/
 		
+		elements = new ArrayList<Element>();
+		snapshots = new ArrayList<Object>();
+		
 		hm = new HeightMap(new File("./maps/GC2.map"));
 		//hm = new HeightMap();
 	}
 	
 	public void run()	{
 		try {
-			while(isRunning)	{
-				Thread.sleep(200);
-				System.out.print("running");
-				for(Element e : elements)	{
-					
+			while(true)	{
+				Thread.sleep(timeStep);
+				if(!isRunning)	continue;
+				boolean upTT = totalTime <= time;
+				time += timeStep;
+				if(upTT)
+					totalTime = time;
+				if(time == totalTime && time % (timeStep*stepsPerSave) == 0)	{
+					snapshots.add(elements.clone());
 				}
-				
+				for(Element e : elements)	{
+					//do something
+				}
 			}
 		}
 		catch(InterruptedException ie)	{}
+	}
+	
+	public void setTime(int t)	{
+		time = Math.max(t - t%timeStep, 0);
+	}
+	public int getTime()	{
+		return time;
+	}
+	
+	public int getTotalTime()	{
+		return totalTime;
 	}
 	
 	public void loadHeightMap(File map)

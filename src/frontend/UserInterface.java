@@ -92,7 +92,6 @@ public class UserInterface extends JFrame {
 			            terrainFile = fc.getSelectedFile();
 			            sim.loadHeightMap(terrainFile);
 			            canv.hmc.setHeightMap(sim.hm);
-			            canv.hmc.render();
 			            log.info("Opening: " + terrainFile.getName());
 			            
 			        }
@@ -113,7 +112,6 @@ public class UserInterface extends JFrame {
 					status.setMode("Generating Random Terrain");
 					sim.setHeightMap(new HeightMap());
 					canv.hmc.setHeightMap(sim.hm);
-					canv.hmc.render();
 					status.setMode("");
 				}
 				else
@@ -128,30 +126,6 @@ public class UserInterface extends JFrame {
 				System.exit(0);
 			}
 		});
-		
-		/*
-		startStop = new JButton("Start");
-		startStop.setBackground(Color.GREEN);
-		startStop.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent ae)	{
-				if (sim.isRunning)
-				{
-					status.setMode("Simulation Stopped");
-					startStop.setText("Start");
-					startStop.setBackground(Color.GREEN);
-					sim.isRunning = false;
-					
-				}
-				else
-				{
-					status.setMode("Running Simulation");
-					startStop.setText("Stop");
-					startStop.setBackground(Color.RED);
-					sim.isRunning = true;
-					sim.start();
-				}
-			}
-		});*/
 		
 		menubar = new JMenuBar();
 		file = new JMenu("File");
@@ -182,13 +156,14 @@ public class UserInterface extends JFrame {
 		JPanel centerThings = new JPanel();
 		centerThings.setLayout(new BorderLayout());
 		centerThings.add(canv, BorderLayout.CENTER);
-		centerThings.add(new ControlBar(), BorderLayout.PAGE_END);
+		centerThings.add(new ControlBar(sim), BorderLayout.PAGE_END);
 		
 		getContentPane().add(centerThings, BorderLayout.CENTER);
 		/*PropertyDialog pd = new PropertyDialog(this);
 		pd.targetEntity(sim.elements.get(0));*/
 		
 		setVisible(true);
+		sim.start();
 	}
 }
 

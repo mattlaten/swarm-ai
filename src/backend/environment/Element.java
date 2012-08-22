@@ -8,7 +8,7 @@ import math.Vec;
 /*
  * Abstract class that models a single element in our environment
  */
-public abstract class Element implements Serializable	{
+public abstract class Element implements Serializable, Cloneable	{
 	abstract public double getSize();
 	abstract public Vec getPosition();
 	abstract public Vec getVelocity();
