@@ -45,7 +45,7 @@ public class UserInterface extends JFrame {
 	
 	Logger log = new Logger(UserInterface.class, System.out, System.err);
 	JPanel toolbar;
-	JButton modePrey, modePredator, modeModifier, modeObstacle, modeLoad;
+	JButton modePrey, modePredator, modeModifier, modeObstacle, modeLoad, modeRandom;
 	JFileChooser fc;
 	
 	File file;
@@ -102,11 +102,24 @@ public class UserInterface extends JFrame {
 				int returnVal = fc.showOpenDialog(UserInterface.this);
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
 		            file = fc.getSelectedFile();
-		            sim.setHeightMap(file);
+		            sim.loadHeightMap(file);
 		            canv.hmc.setHeightMap(sim.hm);
 		            canv.hmc.render();
 		            log.info("Opening: " + file.getName());
+		            
 		        }
+				status.setMode("");
+			}
+		});
+		
+		modeRandom = new JButton("Random Terrain");
+		modeRandom.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent ae)	{
+				status.setMode("Generating Random Terrain");
+				sim.setHeightMap(new HeightMap());
+		        canv.hmc.setHeightMap(sim.hm);
+		        canv.hmc.render();
+				status.setMode("");
 			}
 		});
 		
@@ -121,6 +134,7 @@ public class UserInterface extends JFrame {
 		toolbar.add(modeModifier);
 		toolbar.add(modeObstacle);
 		toolbar.add(modeLoad);
+		toolbar.add(modeRandom);
 		
 		getContentPane().add(toolbar, BorderLayout.PAGE_START);
 		getContentPane().add(status, BorderLayout.PAGE_END);

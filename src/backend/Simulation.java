@@ -19,8 +19,13 @@ public class Simulation {
 		hm = new HeightMap();
 	}
 	
-	public void setHeightMap(File map)
+	public void loadHeightMap(File map)
 	{
 		hm = new HeightMap(map);
+	}
+	
+	public void setHeightMap(HeightMap hm)
+	{
+		this.hm = hm;
 	}
 }
