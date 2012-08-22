@@ -45,7 +45,7 @@ public class UserInterface extends JFrame {
 	
 	Logger log = new Logger(UserInterface.class, System.out, System.err);
 	JPanel toolbar;
-	JButton modePrey, modePredator, modeModifier, modeObstacle, modeLoad, modeRandom;
+	JButton modePrey, modePredator, modeModifier, modeObstacle, modeLoad, modeRandom, startStop;
 	JFileChooser fc;
 	
 	File file;
@@ -123,6 +123,26 @@ public class UserInterface extends JFrame {
 			}
 		});
 		
+		startStop = new JButton("Start");
+		startStop.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent ae)	{
+				if (sim.isRunning)
+				{
+					status.setMode("Simulation Stopped");
+					startStop.setText("Start");
+					sim.isRunning = false;
+					
+				}
+				else
+				{
+					status.setMode("Running Simulation");
+					startStop.setText("Stop");
+					sim.isRunning = true;
+					sim.start();
+				}
+			}
+		});
+		
 		toolbar = new JPanel();
 		toolbar.setLayout(new FlowLayout());
 		
@@ -135,6 +155,7 @@ public class UserInterface extends JFrame {
 		toolbar.add(modeObstacle);
 		toolbar.add(modeLoad);
 		toolbar.add(modeRandom);
+		toolbar.add(startStop);
 		
 		getContentPane().add(toolbar, BorderLayout.PAGE_START);
 		getContentPane().add(status, BorderLayout.PAGE_END);
