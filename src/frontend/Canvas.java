@@ -14,6 +14,8 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.JLabel;
 
+import backend.environment.Element;
+
 import math.Vec;
 
 class Canvas extends JLabel implements MouseListener, MouseMotionListener, MouseWheelListener	{
@@ -24,6 +26,8 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 	int dotDiff = 10;
 	HeightMapCache hmc = null;
 	double zoom = 2;
+	
+	public boolean renderGrid = true, renderAxes = true;
 	
 	public Canvas(UserInterface ui)	{
 		this.ui = ui;
@@ -70,27 +74,31 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 							  clampedTl.x-tl.x, clampedTl.y-tl.y, (int)hmc.width-(br.x-clampedBr.x), (int)hmc.height-(br.y-clampedBr.y), null);*/
 			
 			//draw elements
-			/*g2.setColor(Color.blue);
+			g2.setColor(Color.blue);
 			for(Element e: ui.sim.elements)	{
 				int size = (int)(e.getSize()*zoom);
 				Point pos = toLabelSpace(e.getPosition()).getPoint();
 				g2.drawArc(pos.x-size/2, pos.y-size/2, size, size, 0, 360);
-				size = (int)(e.getSightRadius()*zoom);
+				/*size = (int)(e.getSightRadius()*zoom);
 				g2.setColor(Color.red);
-				g2.drawArc(pos.x-size/2, pos.y-size/2, size, size, 0, 360);
-			}*/
+				g2.drawArc(pos.x-size/2, pos.y-size/2, size, size, 0, 360);*/
+			}
 			
 			//draw the grid
-			if(dotDiffZoomed < 5)	dotDiffZoomed *= 2;
-			g2.setColor(Color.white);
-			for(double y = dotYStart; y <= dotYEnd; y += dotDiffZoomed)
-				for(double x = dotXStart; x <= dotXEnd; x += dotDiffZoomed)
-					g2.fillRect((int)x, (int)y, 1, 1);
+			if(renderGrid)	{
+				if(dotDiffZoomed < 5)	dotDiffZoomed *= 2;
+				g2.setColor(Color.white);
+				for(double y = dotYStart; y <= dotYEnd; y += dotDiffZoomed)
+					for(double x = dotXStart; x <= dotXEnd; x += dotDiffZoomed)
+						g2.fillRect((int)x, (int)y, 1, 1);
+			}
 			
 			//draw the axes
-			g2.setColor(Color.white);
-			g2.fillRect(0, o.y, getSize().width, 1);
-			g2.fillRect(o.x, 0, 1, getSize().height);
+			if(renderAxes)	{
+				g2.setColor(Color.white);
+				g2.fillRect(0, o.y, getSize().width, 1);
+				g2.fillRect(o.x, 0, 1, getSize().height);
+			}
 		}
 		else	{
 			int width = getSize().width/3,
@@ -130,8 +138,11 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 	}
 	public void mouseWheelMoved(MouseWheelEvent mwe)	{
 		if(hmc.completion >= 1) {
+			Vec m1 = toWorldSpace(new Vec(mwe.getPoint()));
 			zoom -= mwe.getWheelRotation()*(0.01+ (zoom-0.1)/9.99);
 			zoom = Math.min(Math.max(0.01, zoom), 10);
+			Vec m2 = toWorldSpace(new Vec(mwe.getPoint()));
+			origin = origin.plus(m2.minus(m1).invertY());
 			repaint();
 		}
 	}

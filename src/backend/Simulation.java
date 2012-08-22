@@ -18,12 +18,11 @@ public class Simulation extends Thread {
 	public boolean isRunning = false;
 	
 	public Simulation()	{
-		/*elements = new ArrayList<Element>();
+		elements = new ArrayList<Element>();
 		Prey p = new Prey();
 		p.position = new Vec(10, 10);
-		elements.add(p);*/
+		elements.add(p);
 		
-		elements = new ArrayList<Element>();
 		snapshots = new ArrayList<Object>();
 		
 		hm = new HeightMap(new File("./maps/GC2.map"));

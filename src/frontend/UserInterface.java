@@ -6,14 +6,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JSplitPane;
 
 import util.Logger;
 import backend.HeightMap;
@@ -29,8 +30,9 @@ public class UserInterface extends JFrame {
 	PropertiesPanel properties;
 	
 	JMenuBar menubar;
-	JMenu file;
+	JMenu file, view;
 	JMenuItem fileLoadTerrain, fileGenerateRandomTerrain, fileExit;
+	JCheckBoxMenuItem viewGrid, viewAxes;
 	
 	File terrainFile;
 	
@@ -127,14 +129,33 @@ public class UserInterface extends JFrame {
 			}
 		});
 		
-		menubar = new JMenuBar();
-		file = new JMenu("File");
-		file.add(fileLoadTerrain);
-		file.add(fileGenerateRandomTerrain);
-		file.addSeparator();
-		file.add(fileExit);
+		viewGrid = new JCheckBoxMenuItem("Show Grid", canv.renderGrid);
+		viewGrid.addActionListener(new ActionListener()	{
+			public void actionPerformed(ActionEvent ae)	{
+				canv.renderGrid = viewGrid.isSelected();
+				canv.repaint();
+			}
+		});
 		
+		viewAxes = new JCheckBoxMenuItem("Show Axes", canv.renderAxes);
+		viewAxes.addActionListener(new ActionListener()	{
+			public void actionPerformed(ActionEvent ae)	{
+				canv.renderAxes = viewGrid.isSelected();
+				canv.repaint();
+			}
+		});
+		
+		menubar = new JMenuBar();
+			file = new JMenu("File");
+				file.add(fileLoadTerrain);
+				file.add(fileGenerateRandomTerrain);
+				file.addSeparator();
+				file.add(fileExit);
+			view = new JMenu("View");
+				view.add(viewGrid);
+				view.add(viewAxes);
 		menubar.add(file);
+		menubar.add(view);
 		
 		setJMenuBar(menubar);
 		
@@ -149,8 +170,12 @@ public class UserInterface extends JFrame {
 		toolbar.add(modeModifier);
 		toolbar.add(modeObstacle);
 		
+		properties.targetEntity(sim.elements.get(0));
+		
+		JSplitPane sPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+		sPane.add(properties);
+		
 		getContentPane().add(toolbar, BorderLayout.PAGE_START);
-		getContentPane().add(properties, BorderLayout.LINE_START);
 		getContentPane().add(status, BorderLayout.PAGE_END);
 		
 		JPanel centerThings = new JPanel();
@@ -158,7 +183,9 @@ public class UserInterface extends JFrame {
 		centerThings.add(canv, BorderLayout.CENTER);
 		centerThings.add(new ControlBar(sim), BorderLayout.PAGE_END);
 		
-		getContentPane().add(centerThings, BorderLayout.CENTER);
+		sPane.add(centerThings);
+		
+		getContentPane().add(sPane, BorderLayout.CENTER);
 		/*PropertyDialog pd = new PropertyDialog(this);
 		pd.targetEntity(sim.elements.get(0));*/
 		
