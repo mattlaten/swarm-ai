@@ -159,13 +159,11 @@ public class HeightMap {
 		int base = 0;
 		int size = x;
 		
-		
 		grid[0][0] = Math.random();
 		grid[x][0] = Math.random();
 		grid[0][x] = Math.random();
 		grid[x][x] = Math.random();
-		
-
+	
 		/*
 		grid[0][0] = 0.3;
 		grid[x][0] = 0.5;
