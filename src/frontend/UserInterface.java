@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GridLayout;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -19,6 +20,7 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -27,6 +29,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.SpringLayout;
 import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.TableModelEvent;
@@ -44,7 +47,7 @@ import backend.environment.Property;
 public class UserInterface extends JFrame {
 	
 	Logger log = new Logger(UserInterface.class, System.out, System.err);
-	JPanel toolbar;
+	JPanel toolbar, control, properties, menu, viewPort, viewPortControl;
 	JButton modePrey, modePredator, modeModifier, modeObstacle, modeLoad, modeRandom, startStop;
 	JFileChooser fc;
 	
@@ -67,8 +70,15 @@ public class UserInterface extends JFrame {
 		canv = new Canvas(this);
 		
 		status = new StatusBar();
+		viewPortControl = new JPanel();
+
+		viewPort = new JPanel();
 		
 		fc = new JFileChooser("./maps/");
+
+		properties = new JPanel();
+		JLabel label = new JLabel("Properties");
+		properties.add(label);
 		
 		modePrey = new JButton("Prey");
 		modePrey.addActionListener(new ActionListener(){
@@ -98,38 +108,53 @@ public class UserInterface extends JFrame {
 		modeLoad = new JButton("Load Terrain");
 		modeLoad.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent ae)	{
-				status.setMode("Select Terrain");
-				int returnVal = fc.showOpenDialog(UserInterface.this);
-				if (returnVal == JFileChooser.APPROVE_OPTION) {
-		            file = fc.getSelectedFile();
-		            sim.loadHeightMap(file);
-		            canv.hmc.setHeightMap(sim.hm);
-		            canv.hmc.render();
-		            log.info("Opening: " + file.getName());
-		            
-		        }
-				status.setMode("");
+				if (!sim.isRunning)
+				{
+					status.setMode("Select Terrain");
+					int returnVal = fc.showOpenDialog(UserInterface.this);
+					if (returnVal == JFileChooser.APPROVE_OPTION) {
+			            file = fc.getSelectedFile();
+			            sim.loadHeightMap(file);
+			            canv.hmc.setHeightMap(sim.hm);
+			            canv.hmc.render();
+			            log.info("Opening: " + file.getName());
+			            
+			        }
+					status.setMode("");
+				}
+				else
+				{
+					status.setMode("Can't change terrain while simulation is running!");					
+				}
 			}
 		});
 		
 		modeRandom = new JButton("Random Terrain");
 		modeRandom.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent ae)	{
-				status.setMode("Generating Random Terrain");
-				sim.setHeightMap(new HeightMap());
-		        canv.hmc.setHeightMap(sim.hm);
-		        canv.hmc.render();
-				status.setMode("");
-			}
-		});
+				if (!sim.isRunning)
+				{
+					status.setMode("Generating Random Terrain");
+					sim.setHeightMap(new HeightMap());
+					canv.hmc.setHeightMap(sim.hm);
+					canv.hmc.render();
+					status.setMode("");
+				}
+				else
+				{
+					status.setMode("Can't change terrain while simulation is running!");
+				}
+		}});
 		
 		startStop = new JButton("Start");
+		startStop.setBackground(Color.GREEN);
 		startStop.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent ae)	{
 				if (sim.isRunning)
 				{
 					status.setMode("Simulation Stopped");
 					startStop.setText("Start");
+					startStop.setBackground(Color.GREEN);
 					sim.isRunning = false;
 					
 				}
@@ -137,6 +162,7 @@ public class UserInterface extends JFrame {
 				{
 					status.setMode("Running Simulation");
 					startStop.setText("Stop");
+					startStop.setBackground(Color.RED);
 					sim.isRunning = true;
 					sim.start();
 				}
@@ -153,14 +179,28 @@ public class UserInterface extends JFrame {
 		toolbar.add(modePredator);
 		toolbar.add(modeModifier);
 		toolbar.add(modeObstacle);
-		toolbar.add(modeLoad);
-		toolbar.add(modeRandom);
-		toolbar.add(startStop);
 		
+		control = new JPanel();
+		control.setLayout(new BoxLayout(control,BoxLayout.PAGE_AXIS));
+		control.add(properties);
+		control.add(modeLoad);
+		control.add(modeRandom);
+		
+		viewPortControl.add(startStop);
+			
+		viewPort.add(toolbar);
+		viewPort.add(canv);
+		
+		getContentPane().add(control, BorderLayout.LINE_START);
+		getContentPane().add(viewPort, BorderLayout.CENTER);
+		getContentPane().add(status, BorderLayout.PAGE_END);
+		
+		/*
 		getContentPane().add(toolbar, BorderLayout.PAGE_START);
+		getContentPane().add(control, BorderLayout.LINE_START);
 		getContentPane().add(status, BorderLayout.PAGE_END);
 		getContentPane().add(canv, BorderLayout.CENTER);
-		
+		*/	
 		/*PropertyDialog pd = new PropertyDialog(this);
 		pd.targetEntity(sim.elements.get(0));*/
 		
