@@ -9,8 +9,7 @@ import math.Vec;
  * Abstract class that models a single element in our environment
  */
 public abstract class Element implements Serializable	{
-	abstract public float getSize();
-	abstract public float getSightRadius();
+	abstract public double getSize();
 	abstract public Vec getPosition();
 	abstract public Vec getVelocity();
 	abstract public void update(ArrayList<Element> influences);
