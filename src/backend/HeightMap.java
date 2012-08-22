@@ -95,7 +95,7 @@ public class HeightMap {
 	{
 		log.info("Normalizing Terrain");
 		range = max - min;
-		System.out.println("Max: " + max + " Min: " + min);
+		//System.out.println("Max: " + max + " Min: " + min);
 		
 		for (int j = 0; j < y; j++)
 			for (int i = 0; i < x; i++)	{

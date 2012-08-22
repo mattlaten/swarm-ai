@@ -140,8 +140,8 @@ public class UserInterface extends JFrame {
 		getContentPane().add(status, BorderLayout.PAGE_END);
 		getContentPane().add(canv, BorderLayout.CENTER);
 		
-		//PropertyDialog pd = new PropertyDialog(this);
-		//pd.targetEntity(sim.elements.get(0));
+		/*PropertyDialog pd = new PropertyDialog(this);
+		pd.targetEntity(sim.elements.get(0));*/
 		
 		setVisible(true);
 	}
@@ -164,7 +164,7 @@ class StatusBar extends JPanel	{
 	}
 	
 	public void setMousePoint(Vec m)	{
-		mousePoint.setText("x: " + m.x + ", y: " + m.y);
+		mousePoint.setText("x: " + (int)(m.x) + ", y: " + (int)(m.y));
 	}
 	
 	public void setMode(String mode)	{
@@ -373,6 +373,17 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 				  clampedBr = new Point(Math.min(br.x, getSize().width), Math.min(br.y, getSize().height));
 			g2.drawImage(img, clampedTl.x, clampedTl.y, clampedBr.x, clampedBr.y,
 							  clampedTl.x-tl.x, clampedTl.y-tl.y, (int)hmc.width-(br.x-clampedBr.x), (int)hmc.height-(br.y-clampedBr.y), null);*/
+			
+			//draw elements
+			g2.setColor(Color.blue);
+			for(Element e: ui.sim.elements)	{
+				int size = (int)(e.getSize()*zoom);
+				Point pos = toLabelSpace(e.getPosition()).getPoint();
+				g2.drawArc(pos.x-size/2, pos.y-size/2, size, size, 0, 360);
+				size = (int)(e.getSightRadius()*zoom);
+				g2.setColor(Color.red);
+				g2.drawArc(pos.x-size/2, pos.y-size/2, size, size, 0, 360);
+			}
 			
 			//draw the grid
 			if(dotDiffZoomed < 5)	dotDiffZoomed *= 2;
