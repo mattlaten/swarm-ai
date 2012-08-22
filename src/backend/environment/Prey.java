@@ -21,17 +21,27 @@ public class Prey extends Entity {
 		return new Vec(velocity);
 	}
 	
-	public void update(ArrayList<Element> influences)	{
+	public void update(ArrayList<Element> influentials, ArrayList<Vec> influences)	{
 		Vec vel = getVelocity();
-		for(Element e : influences)	{
+		for(Element e : influentials)	{
 			Vec dir = e.getPosition().minus(getPosition());
 			if(dir.size() <= getSightRadius())	{
 				Vec unit = dir.unit();
 				if(e instanceof Predator)
 					unit = unit.neg();
+				if(e instanceof Prey)	{
+					unit = unit.neg();
+					unit.mult(0.5);
+				}
 				vel = vel.plus(unit);
 			}
 		}
+		if(influences != null)
+			for(Vec v : influences)	{
+				Vec dir = v.minus(getPosition());
+				if(dir.size() <= getSightRadius())
+					vel = vel.plus(dir.unit());
+			}
 		velocity = vel;
 	}
 }

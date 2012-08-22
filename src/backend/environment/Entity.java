@@ -28,7 +28,7 @@ public abstract class Entity extends Element implements Serializable	{
 		return sightRadius;
 	}
 	
-	public float getSize()	{
+	public double getSize()	{
 		return size;
 	}
 	

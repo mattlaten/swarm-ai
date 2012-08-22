@@ -4,6 +4,7 @@ import java.awt.geom.Rectangle2D;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import math.Rect;
 import math.Vec;
 
 /*
@@ -24,8 +25,9 @@ public class Cluster extends Element implements Serializable	{
 		return null;
 	}
 
-	public float getSize() {
-		return 0;
+	public double getSize() {
+		Rect r = getBounds();
+		return Math.max(r.getHeight(), r.getWidth());
 	}
 	
 	public float getSightRadius()	{
@@ -44,21 +46,21 @@ public class Cluster extends Element implements Serializable	{
 		return null;
 	}
 	
-	private Rectangle2D.Double getBounds()	{
+	private Rect getBounds()	{
 		Vec topLeft = new Vec(Double.MAX_VALUE, Double.MIN_VALUE),
 			botRight = new Vec(Double.MIN_VALUE, Double.MAX_VALUE);
 		for(Element e: elements)	{
 			Vec pos = e.getPosition();
-			float size = e.getSize();
+			double size = e.getSize();
 			topLeft.x = Math.min(topLeft.x, pos.x-size/2);
 			topLeft.y = Math.max(topLeft.y, pos.y+size/2);
 			botRight.x = Math.max(botRight.x, pos.x+size/2);
 			botRight.y = Math.min(botRight.y, pos.y-size/2);
 		}
-		return new Rectangle2D.Double(topLeft.x, topLeft.y, botRight.x-topLeft.x, topLeft.y-botRight.y);
+		return new Rect(topLeft, botRight);
 	}
 	
-	public void update(ArrayList<Element> influences)	{
+	public void update(ArrayList<Element> influentials, ArrayList<Vec> influences)	{
 		
 	}
 }
