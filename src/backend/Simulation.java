@@ -14,10 +14,10 @@ public class Simulation extends Thread {
 	public boolean isRunning = false;
 	
 	public Simulation()	{
-		/*elements = new ArrayList<Element>();
+		elements = new ArrayList<Element>();
 		Prey p = new Prey();
 		p.position = new Vec(10, 10);
-		elements.add(p);*/
+		elements.add(p);
 		
 		hm = new HeightMap(new File("./maps/GC2.map"));
 		//hm = new HeightMap();

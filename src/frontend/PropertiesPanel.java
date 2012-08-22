@@ -9,6 +9,7 @@ public class PropertiesPanel extends JPanel {
 	{
 		JLabel label = new JLabel("Properties");
 		this.add(label);
+		
 		setVisible(true);
 	}
 }
