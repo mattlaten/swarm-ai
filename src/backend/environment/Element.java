@@ -10,9 +10,8 @@ import math.Vec;
  */
 public abstract class Element implements Serializable	{
 	abstract public double getSize();
-	abstract public float getSightRadius();
 	abstract public Vec getPosition();
 	abstract public Vec getVelocity();
-	abstract public void update(ArrayList<Element> influentials, ArrayList<Vec> influences);
+	abstract public void update(ArrayList<Element> influences);
 	abstract public RenderObject getROb();
 }
