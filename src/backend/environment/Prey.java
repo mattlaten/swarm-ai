@@ -4,10 +4,16 @@ import java.util.ArrayList;
 
 import math.Vec;
 
-public class Prey extends Element {
+public class Prey extends Element implements Cloneable {
 	public @Property Vec position;
 	public @Property Vec velocity;
 	public @Property double size;
+	
+	public Prey(Vec position, Vec velocity, double size)	{
+		this.position = new Vec(position);
+		this.velocity = new Vec(velocity);
+		this.size = size;
+	}
 	
 	public Prey()
 	{
@@ -35,10 +41,18 @@ public class Prey extends Element {
 	}
 
 	public void update(ArrayList<Element> influences) {
+		for(Element e : influences)	{
+			Vec dir = e.getPosition().minus(getPosition());
+			
+		}
 	}
 
 	public RenderObject getROb() {
 		return null;
 	}
 
+	public Object clone()	{
+		return new Prey(position, velocity, size);
+	}
+	
 }
