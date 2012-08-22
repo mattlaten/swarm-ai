@@ -101,13 +101,8 @@ public class UserInterface extends JFrame {
 			}
 		});
 		
-		menubar = new JMenuBar();
-		file = new JMenu();
 		fileLoadTerrain = new JMenuItem("Load Terrain");
-		fileGenerateRandomTerrain = new JMenuItem("Generate Random Terrain");
-		
-		modeLoad = new JButton("Load Terrain");
-		modeLoad.addActionListener(new ActionListener(){
+		fileLoadTerrain.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent ae)	{
 				status.setMode("Select Terrain");
 				int returnVal = fc.showOpenDialog(UserInterface.this);
@@ -123,14 +118,21 @@ public class UserInterface extends JFrame {
 			}
 		});
 		
-		modeRandom = new JButton("Random Terrain");
-		modeRandom.addActionListener(new ActionListener(){
+		fileGenerateRandomTerrain = new JMenuItem("Generate Random Terrain");
+		fileGenerateRandomTerrain.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent ae)	{
 				status.setMode("Generating Random Terrain");
 				sim.setHeightMap(new HeightMap());
 		        canv.hmc.setHeightMap(sim.hm);
 		        canv.hmc.render();
 				status.setMode("");
+			}
+		});
+		
+		fileExit = new JMenuItem("Exit");
+		fileExit.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ae)	{
+				System.exit(0);
 			}
 		});
 		
@@ -154,6 +156,17 @@ public class UserInterface extends JFrame {
 			}
 		});*/
 		
+		menubar = new JMenuBar();
+		file = new JMenu("File");
+		file.add(fileLoadTerrain);
+		file.add(fileGenerateRandomTerrain);
+		file.addSeparator();
+		file.add(fileExit);
+		
+		menubar.add(file);
+		
+		setJMenuBar(menubar);
+		
 		toolbar = new JPanel();
 		toolbar.setLayout(new FlowLayout());
 		
@@ -164,13 +177,19 @@ public class UserInterface extends JFrame {
 		toolbar.add(modePredator);
 		toolbar.add(modeModifier);
 		toolbar.add(modeObstacle);
-		toolbar.add(modeLoad);
-		toolbar.add(modeRandom);
+		//toolbar.add(modeLoad);
+		//toolbar.add(modeRandom);
 		//toolbar.add(startStop);
 		
 		getContentPane().add(toolbar, BorderLayout.PAGE_START);
 		getContentPane().add(status, BorderLayout.PAGE_END);
-		getContentPane().add(canv, BorderLayout.CENTER);
+		
+		JPanel centerThings = new JPanel();
+		centerThings.setLayout(new BorderLayout());
+		centerThings.add(canv, BorderLayout.CENTER);
+		centerThings.add(new ControlBar(), BorderLayout.PAGE_END);
+		
+		getContentPane().add(centerThings, BorderLayout.CENTER);
 		
 		/*PropertyDialog pd = new PropertyDialog(this);
 		pd.targetEntity(sim.elements.get(0));*/
