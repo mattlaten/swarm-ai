@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import math.Vec;
 
 public class Prey extends Element {
-	public Vec position;
-	Vec velocity;
-	double size;
+	public @Property Vec position;
+	public @Property Vec velocity;
+	public @Property double size;
 	
 	public Prey()
 	{

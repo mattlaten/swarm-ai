@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.io.File;
 
 import javax.swing.BoxLayout;
@@ -175,6 +176,8 @@ public class UserInterface extends JFrame {
 		toolbar.add(modeModifier);
 		toolbar.add(modeObstacle);
 		
+		properties.targetEntity(sim.elements.get(0));
+		
 		getContentPane().add(toolbar, BorderLayout.PAGE_START);
 		getContentPane().add(properties, BorderLayout.LINE_START);
 		getContentPane().add(status, BorderLayout.PAGE_END);
@@ -185,8 +188,8 @@ public class UserInterface extends JFrame {
 		centerThings.add(new ControlBar(), BorderLayout.PAGE_END);
 		
 		getContentPane().add(centerThings, BorderLayout.CENTER);
-		/*PropertyDialog pd = new PropertyDialog(this);
-		pd.targetEntity(sim.elements.get(0));*/
+		PropertyDialog pd = new PropertyDialog(this);
+		pd.targetEntity(sim.elements.get(0));
 		
 		setVisible(true);
 	}

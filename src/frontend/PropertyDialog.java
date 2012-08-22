@@ -49,6 +49,7 @@ class PropertyTableModel extends AbstractTableModel implements TableModelListene
     }
     
 	public void tableChanged(TableModelEvent e) {
+		System.out.print("merp");
 		fireTableRowsUpdated(e.getFirstRow(), e.getFirstRow());
 		Field f = props.get(e.getFirstRow());
 		System.out.println(f.getType());
