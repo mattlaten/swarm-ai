@@ -78,7 +78,7 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 			for(Element e: ui.sim.elements)	{
 				int size = (int)(e.getSize()*zoom);
 				Point pos = toLabelSpace(e.getPosition()).getPoint();
-				g2.drawArc(pos.x-size/2, pos.y-size/2, size, size, 0, 360);
+				g2.fillArc(pos.x-size/2, pos.y-size/2, size, size, 0, 360);
 				/*size = (int)(e.getSightRadius()*zoom);
 				g2.setColor(Color.red);
 				g2.drawArc(pos.x-size/2, pos.y-size/2, size, size, 0, 360);*/

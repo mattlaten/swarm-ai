@@ -24,7 +24,7 @@ public class UserInterface extends JFrame {
 	
 	Logger log = new Logger(UserInterface.class, System.out, System.err);
 	JPanel toolbar;// control, menu, viewPort, viewPortControl;
-	JButton modePrey, modePredator, modeModifier, modeObstacle, modeLoad, modeRandom, startStop;
+	JButton modeSelect, modePrey, modePredator, modeModifier, modeObstacle, modeLoad, modeRandom, startStop;
 	JFileChooser fc;
 	
 	PropertiesPanel properties;
@@ -58,6 +58,13 @@ public class UserInterface extends JFrame {
 
 		properties = new PropertiesPanel();
 		
+		
+		modeSelect = new JButton("Select");
+		modeSelect.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent ae)	{
+				status.setMode("Selecting");
+			}
+		});
 		modePrey = new JButton("Prey");
 		modePrey.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent ae)	{
@@ -165,6 +172,7 @@ public class UserInterface extends JFrame {
 		getContentPane().setLayout(new BorderLayout());
 		
 		//add things
+		toolbar.add(modeSelect);
 		toolbar.add(modePrey);
 		toolbar.add(modePredator);
 		toolbar.add(modeModifier);
