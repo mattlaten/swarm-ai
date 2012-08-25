@@ -48,6 +48,8 @@ public class UserInterface extends JFrame {
 	
 	StatusBar status;
 	
+	HashSet<Element> selected = new HashSet<Element>();
+	
 	public UserInterface(final Simulation sim) throws Exception	{
 		super("Swarm AI");
 		this.sim = sim;
@@ -196,7 +198,7 @@ public class UserInterface extends JFrame {
 		toolbar.add(modeModifier);
 		toolbar.add(modeObstacle);
 		
-		properties.targetEntity(sim.elements.get(0));
+		//properties.targetEntity(sim.elements.get(0));
 		
 		JSplitPane sPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		sPane.add(properties);
@@ -298,7 +300,7 @@ public class UserInterface extends JFrame {
 				validLocation = false;
 		
 		if (validLocation)
-			sim.elements.add(new Prey(xloc,yloc,0,0,5));
+			sim.elements.add(new Prey(xloc,yloc,1,1,5));
 		canv.repaint();
 	}
 

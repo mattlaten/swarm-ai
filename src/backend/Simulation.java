@@ -2,15 +2,15 @@ package backend;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.concurrent.CopyOnWriteArrayList;
 
-import math.Vec;
 import backend.environment.Element;
-import backend.environment.Prey;
 
 public class Simulation extends Thread {
-	public ArrayList<Element> elements;
+	public CopyOnWriteArrayList<Element> elements;
 	public HeightMap hm = null;
-	public ArrayList<Object> snapshots;
+	private  ArrayList<Object> snapshots;
 	
 	public int timeStep = 20, stepsPerSave = 10;
 	private volatile int time = 0, totalTime = 0;
@@ -18,10 +18,15 @@ public class Simulation extends Thread {
 	public boolean isRunning = false;
 	
 	public Simulation()	{
-		elements = new ArrayList<Element>();
-		Prey p = new Prey();
+		elements = new CopyOnWriteArrayList<Element>();
+		/*Prey p = new Prey();
 		p.position = new Vec(10, 10);
+		p.velocity = new Vec(1,1).truncate(p.getMaxSpeed());
 		elements.add(p);
+		p = new Prey();
+		p.position = new Vec(20, 10);
+		p.velocity = new Vec(1,1).truncate(p.getMaxSpeed());
+		elements.add(p);*/
 		
 		snapshots = new ArrayList<Object>();
 		
@@ -41,10 +46,10 @@ public class Simulation extends Thread {
 				if(time == totalTime && time % (timeStep*stepsPerSave) == 0)	{
 					snapshots.add(elements.clone());
 				}
-				for(Element e : elements)	{
-					//do something
-				}
-				//redraw?
+				for(Element e : elements)
+					e.calculateUpdate(elements);
+				for(Element e : elements)
+					e.update();
 			}
 		}
 		catch(InterruptedException ie)	{}

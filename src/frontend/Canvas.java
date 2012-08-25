@@ -20,7 +20,7 @@ import backend.environment.Element;
 
 import math.Vec;
 
-class Canvas extends JLabel implements MouseListener, MouseMotionListener, MouseWheelListener	{
+class Canvas extends JLabel implements MouseListener, MouseMotionListener, MouseWheelListener, Runnable	{
 	UserInterface ui;
 	Vec origin = new Vec();	//the origin relative to the center of the Canvas
 	Vec mPoint = new Vec();	//the position of the mouse in labelSpace
@@ -32,7 +32,9 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 	HeightMapCache hmc = null;
 	double zoom = 1;
 	
-	public boolean renderGrid = true, renderAxes = true, renderHeightMap = true;
+	public boolean renderGrid = false,
+			renderAxes = false,
+			renderHeightMap = false;
 	
 	public Canvas(UserInterface ui)	{
 		this.ui = ui;
@@ -42,6 +44,8 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 		addMouseListener(this);
 		addMouseMotionListener(this);
 		addMouseWheelListener(this);
+		
+		new Thread(this).start();
 	}
 	
 	//public Vec toLabelSpace(Vec v)	{	return v.invertY().plus(origin).plus(new Vec(getSize().width/2, getSize().height/2));	}
@@ -50,6 +54,16 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 	public Vec toWorldSpace(Vec v)	{	return v.minus(originInLabelSpace()).mult(1/zoom).invertY();	}
 	public Vec originInLabelSpace()	{	return toLabelSpace(Vec.ZERO);	}
 	public Vec mouseInWorldSpace()	{	return toWorldSpace(mPoint);	}
+	
+	public void run()	{
+		try {
+			while(true)	{
+				Thread.sleep(40);
+				repaint();
+			}
+		}
+		catch(InterruptedException ie)	{}
+	}
 	
 	public void paint(Graphics g)	{
 		Graphics2D g2 = (Graphics2D)g;
@@ -81,18 +95,19 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 								  clampedTl.x-tl.x, clampedTl.y-tl.y, (int)hmc.width-(br.x-clampedBr.x), (int)hmc.height-(br.y-clampedBr.y), null);*/
 			}	
 			//draw elements
-			g2.setColor(Color.blue);
 			for(Element e: ui.sim.elements)	{
+				g2.setColor(Color.blue);
 				if (ui.selection.contains(e))
 					g2.setColor(Color.green);	
 				int size = (int)(e.getSize()*zoom);
 				Point pos = toLabelSpace(e.getPosition()).getPoint();
 				g2.fillArc(pos.x-size, pos.y-size, size*2, size*2, 0, 360);
-				if (ui.selection.contains(e))
-					g2.setColor(Color.blue);	
-				/*size = (int)(e.getSightRadius()*zoom);
+				
+				size = (int)(e.getRadius()*zoom);
 				g2.setColor(Color.red);
-				g2.drawArc(pos.x-size/2, pos.y-size/2, size, size, 0, 360);*/
+				g2.drawArc(pos.x-size, pos.y-size, size*2, size*2, 0, 360);
+				
+				drawVector(g2, Color.green, e.getPosition(), e.getVelocity().mult(50));
 			}
 			
 			//draw the grid
@@ -130,6 +145,16 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 			g2.setColor(Color.black);
 			g2.drawRect(x,y,width,height);
 		}
+	}
+	
+	public void drawVector(Graphics2D g2, Color c, Vec pos, Vec vec)	{
+		Color old = g2.getColor();
+		g2.setColor(c);
+		Point posP = toLabelSpace(pos).getPoint();
+		Point vecP = (toLabelSpace(pos.plus(vec))).getPoint();
+		g2.drawLine(posP.x, posP.y, vecP.x, vecP.y);
+		g2.fillArc(vecP.x - 2, vecP.y - 2, 4, 4, 0, 360);
+		g2.setColor(old);
 	}
 	
 	public void mousePressed(MouseEvent me)	{
