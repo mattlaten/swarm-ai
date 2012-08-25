@@ -147,7 +147,7 @@ public class UserInterface extends JFrame {
 		viewAxes = new JCheckBoxMenuItem("Show Axes", canv.renderAxes);
 		viewAxes.addActionListener(new ActionListener()	{
 			public void actionPerformed(ActionEvent ae)	{
-				canv.renderAxes = viewGrid.isSelected();
+				canv.renderAxes = viewAxes.isSelected();
 				canv.repaint();
 			}
 		});

@@ -46,13 +46,13 @@ public class PropertiesPanel extends JPanel implements CellEditorListener  {
 		jt.repaint();
 	}
 
-	@Override
+	//@Override
 	public void editingCanceled(ChangeEvent arg0) {
 		// TODO Auto-generated method stub
 		System.out.print("derp");
 	}
 
-	@Override
+	//@Override
 	public void editingStopped(ChangeEvent arg0) {
 		// TODO Auto-generated method stub
 		System.out.print("herp");
