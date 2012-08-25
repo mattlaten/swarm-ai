@@ -40,6 +40,11 @@ public class Vec implements Serializable	{
 		return x == other.x && y == other.y;
 	}
 	
+	public boolean withinRadius(Vec other, double r)
+	{
+		return Math.pow(x - other.x, 2) + Math.pow(y - other.y, 2) <= Math.pow(r, 2);
+	}
+	
 	public String toString()	{
 		return "<" + x + ", " + y + ">";
 	}

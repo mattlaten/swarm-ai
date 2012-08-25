@@ -17,13 +17,11 @@ import backend.environment.Property;
 
 public class PropertiesPanel extends JPanel implements CellEditorListener  {
 	
-
 	JTable jt;
 	JTextField propKey, propVal;
 	JLabel heading;
 	PropertyTableModel model;
-	public PropertiesPanel()
-	{
+	public PropertiesPanel()	{
 		heading = new JLabel("Properties");
 		model = new PropertyTableModel();
 		jt = new JTable(model);
