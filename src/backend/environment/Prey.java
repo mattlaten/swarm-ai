@@ -30,12 +30,13 @@ public class Prey extends Element implements Cloneable {
 		velocity = new Vec(0,0);
 		size = 5;
 		maxSpeed = 0.2;
-		sightRadius = 20;
+		sightRadius = 100;
 	}
 	
 	public Prey(double x, double y, double xvel, double yvel, double size)	{
+		this();
 		position = new Vec(x,y);
-		velocity = new Vec(0,0);
+		velocity = new Vec(xvel,yvel);
 		this.size = size;
 	}
 	
@@ -43,7 +44,7 @@ public class Prey extends Element implements Cloneable {
 	public double getMaxSpeed()	{	return maxSpeed;	}
 	public double getRadius()	{	return sightRadius;	}
 	public Vec getPosition() 	{	return position;	}
-	public Vec getVelocity() 	{	return (oldVelocity == null ? velocity : oldVelocity);	}
+	public Vec getVelocity() 	{	return (oldVelocity == null ? velocity : oldVelocity).mult(getMaxSpeed());	}
 	
 	public Object clone()		{	return new Prey(this);	}
 
@@ -58,8 +59,8 @@ public class Prey extends Element implements Cloneable {
 			if(dir.size() > 0 && dir.size() <= getRadius())	{
 				neighbourhoodCount ++;	
 				collisionAvoidance = collisionAvoidance.plus(dir.unit().mult((getRadius()-dir.size())/getRadius()).neg());
-				velocityMatching.plus(e.getVelocity());
-				flockCentering.plus(dir.unit().mult(dir.size()/getRadius()));
+				velocityMatching = velocityMatching.plus(e.getVelocity().mult(1.0/e.getMaxSpeed()));
+				flockCentering = flockCentering.plus(dir.unit().mult(dir.size()/getRadius()));
 			}
 		}
 		
@@ -70,13 +71,17 @@ public class Prey extends Element implements Cloneable {
 			flockCentering = flockCentering.mult(1.0/neighbourhoodCount);
 		}
 		
+		/*System.out.println("Collision Avoidance: " + collisionAvoidance + "(" + collisionAvoidance.size() + ")");
+		System.out.println("Velocity Matching: " + velocityMatching + "(" + velocityMatching.size() + ")");
+		System.out.println("Flocking: " + flockCentering + "(" + flockCentering.size() + ")");*/
+		
 		//now perform accumulation
 		Vec ret = new Vec(collisionAvoidance);
 		if(ret.size() < 1)
 			ret = ret.plus(velocityMatching);
 		if(ret.size() < 1)
 			ret = ret.plus(flockCentering);
-		velocity = velocity.plus(ret.truncate(1).mult(getMaxSpeed())).truncate(1);
+		velocity = velocity.plus(ret.truncate(1)).truncate(1);
 	}
 	
 	public void update()	{

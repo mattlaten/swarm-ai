@@ -19,14 +19,14 @@ public class Simulation extends Thread {
 	
 	public Simulation()	{
 		elements = new ArrayList<Element>();
-		Prey p = new Prey();
+		/*Prey p = new Prey();
 		p.position = new Vec(10, 10);
 		p.velocity = new Vec(1,1).truncate(p.getMaxSpeed());
 		elements.add(p);
 		p = new Prey();
 		p.position = new Vec(20, 10);
 		p.velocity = new Vec(1,1).truncate(p.getMaxSpeed());
-		elements.add(p);
+		elements.add(p);*/
 		
 		snapshots = new ArrayList<Object>();
 		
@@ -50,8 +50,6 @@ public class Simulation extends Thread {
 					e.calculateUpdate(elements);
 				for(Element e : elements)	{
 					e.update();
-					System.out.println(e.getPosition());
-					System.out.println(e.getVelocity());
 				}
 			}
 		}
