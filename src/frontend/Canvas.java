@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -23,6 +24,9 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 	UserInterface ui;
 	Vec origin = new Vec();	//the origin relative to the center of the Canvas
 	Vec mPoint = new Vec();	//the position of the mouse in labelSpace
+	Vec startPoint = new Vec();
+	
+	Rectangle selection = null;
 	
 	int dotDiff = 10;
 	HeightMapCache hmc = null;
@@ -106,6 +110,13 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 				g2.fillRect(0, o.y, getSize().width, 1);
 				g2.fillRect(o.x, 0, 1, getSize().height);
 			}
+			
+			if(selection != null)
+			{
+				g2.setColor(Color.gray);
+				g2.draw(selection);
+			}
+			
 		}
 		else	{
 			int width = getSize().width/3,
@@ -125,20 +136,63 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 		if(hmc.completion >= 1)
 		{
 			mPoint = new Vec(me.getPoint());
-			
+			startPoint = new Vec(me.getPoint());
+			//System.out.println(startPoint);
 		}
 	}
 	
 	public void mouseDragged(MouseEvent me)	{
 		if(hmc.completion >= 1)	{
-			Vec mp = new Vec(me.getPoint());
-			origin = origin.minus(mPoint.minus(mp).mult(1/zoom));
-			mPoint = mp;
-			repaint();
+			switch(me.getModifiers()) {
+		      case InputEvent.BUTTON1_MASK: {
+		    	  	//select prey box
+		    	  	Vec current = new Vec(me.getPoint());
+		    	  	int startx = (int) Math.min(startPoint.x, current.x);
+		    	  	int starty = (int) Math.min(startPoint.y, current.y);
+		    	  	int width = (int) Math.abs(startPoint.x - current.x);
+		    	  	int height = (int) Math.abs(startPoint.y - current.y);
+		    	  	selection = new Rectangle(startx, starty, width, height);
+		    	    repaint();
+		    	  	break;
+			  }
+		      case InputEvent.BUTTON2_MASK: {
+		    	  System.out.println("That's the MIDDLE button");     
+			      break;
+			  }
+		      case InputEvent.BUTTON3_MASK: {
+		    	  System.out.println("That's the RIGHT button");     
+		    	  //drag canvas around
+		    	  Vec mp = new Vec(me.getPoint());
+		    	  origin = origin.minus(mPoint.minus(mp).mult(1/zoom));
+		    	  mPoint = mp;
+		    	  repaint();
+		    	  break;
+		      }
+	    	
+		   }
 		}
 	}
 	
-	public void mouseReleased(MouseEvent me) {}
+	public void mouseReleased(MouseEvent me) {
+		switch(me.getModifiers()) {
+	      case InputEvent.BUTTON1_MASK: {
+		        //select prey box
+	    	  	Vec endPoint = new Vec(me.getPoint());
+	    	  	//System.out.println(endPoint);
+	    	  	ui.selectBox(toWorldSpace(startPoint), toWorldSpace(endPoint));
+	    	  	selection = null;
+	    	  	repaint();
+	    	  	break;
+		  }
+	      case InputEvent.BUTTON2_MASK: {   
+		      break;
+		  }
+	      case InputEvent.BUTTON3_MASK: {
+	    	  break;
+	      }
+	   }
+	}
+	
 	public void mouseClicked(MouseEvent me) {
 		switch(me.getModifiers()) {
 	      case InputEvent.BUTTON1_MASK: {

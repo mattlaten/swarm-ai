@@ -259,6 +259,31 @@ public class UserInterface extends JFrame {
 		}
 		canv.repaint();
 	}
+	
+	public void selectBox(Vec start, Vec end)
+	{
+		double minx = Math.min(start.x, end.x);
+		double maxx = Math.max(start.x, end.x);
+		double miny = Math.min(start.y, end.y);
+		double maxy = Math.max(start.y, end.y);
+		
+		//System.out.println("WorldSpace: " + start);
+		//System.out.println("WorldSpace: " + end);
+		
+		//System.out.println("x " + maxx + " : " + minx);
+		//System.out.println("y " + maxy + " : " + miny);
+		
+		for (Element e : sim.elements)
+		{
+			Vec pos = e.getPosition();
+			if (pos.x >= minx && pos.x <= maxx && pos.y >= miny && pos.y <= maxy)
+			{
+				//System.out.println(e);
+				selection.add(e);
+			}
+		}
+		canv.repaint();
+	}
 
 	public void placePrey(Vec mPoint) {
 		//convert mPoint to worldspace

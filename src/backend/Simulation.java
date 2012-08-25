@@ -44,6 +44,7 @@ public class Simulation extends Thread {
 				for(Element e : elements)	{
 					//do something
 				}
+				//redraw?
 			}
 		}
 		catch(InterruptedException ie)	{}
