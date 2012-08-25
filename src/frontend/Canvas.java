@@ -102,6 +102,8 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 				size = (int)(e.getRadius()*zoom);
 				g2.setColor(Color.red);
 				g2.drawArc(pos.x-size, pos.y-size, size*2, size*2, 0, 360);
+				
+				drawVector(g2, Color.green, e.getPosition(), e.getVelocity().mult(50));
 			}
 			
 			//draw the grid
@@ -132,6 +134,16 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 			g2.setColor(Color.black);
 			g2.drawRect(x,y,width,height);
 		}
+	}
+	
+	public void drawVector(Graphics2D g2, Color c, Vec pos, Vec vec)	{
+		Color old = g2.getColor();
+		g2.setColor(c);
+		Point posP = toLabelSpace(pos).getPoint();
+		Point vecP = (toLabelSpace(pos.plus(vec))).getPoint();
+		g2.drawLine(posP.x, posP.y, vecP.x, vecP.y);
+		g2.fillArc(vecP.x - 2, vecP.y - 2, 4, 4, 0, 360);
+		g2.setColor(old);
 	}
 	
 	public void mousePressed(MouseEvent me)	{

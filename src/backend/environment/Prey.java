@@ -1,6 +1,7 @@
 package backend.environment;
 
-import java.util.ArrayList;
+
+import java.util.List;
 
 import math.Vec;
 
@@ -48,7 +49,7 @@ public class Prey extends Element implements Cloneable {
 	
 	public Object clone()		{	return new Prey(this);	}
 
-	public void calculateUpdate(ArrayList<Element> influences) {
+	public void calculateUpdate(List<Element> influences) {
 		//calculate the sums
 		Vec collisionAvoidance = new Vec(),
 			velocityMatching = new Vec(),
@@ -58,9 +59,9 @@ public class Prey extends Element implements Cloneable {
 			Vec dir = e.getPosition().minus(getPosition());
 			if(dir.size() > 0 && dir.size() <= getRadius())	{
 				neighbourhoodCount ++;	
-				collisionAvoidance = collisionAvoidance.plus(dir.unit().mult((getRadius()-dir.size())/getRadius()).neg());
+				collisionAvoidance = collisionAvoidance.plus(dir.unit().mult(Math.pow((getRadius()-dir.size())/getRadius(),3)).neg());
 				velocityMatching = velocityMatching.plus(e.getVelocity().mult(1.0/e.getMaxSpeed()));
-				flockCentering = flockCentering.plus(dir.unit().mult(dir.size()/getRadius()));
+				flockCentering = flockCentering.plus(dir.unit().mult(Math.pow(dir.size()/getRadius(),3)));
 			}
 		}
 		
@@ -78,9 +79,9 @@ public class Prey extends Element implements Cloneable {
 		//now perform accumulation
 		Vec ret = new Vec(collisionAvoidance);
 		if(ret.size() < 1)
-			ret = ret.plus(velocityMatching);
-		if(ret.size() < 1)
 			ret = ret.plus(flockCentering);
+		if(ret.size() < 1)
+			ret = ret.plus(velocityMatching);
 		velocity = velocity.plus(ret.truncate(1)).truncate(1);
 	}
 	
