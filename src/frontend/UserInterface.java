@@ -225,7 +225,7 @@ public class UserInterface extends JFrame {
 		boolean added = false;
 		for (Element e : sim.elements)
 		{
-			if (e.getPosition().withinRadius(point, e.getSize()/2))	
+			if (e.getPosition().withinRadius(point, e.getSize()))	
 			{
 				selection.clear();
 				selection.add(e);
@@ -247,7 +247,7 @@ public class UserInterface extends JFrame {
 		//Colour it differently (green?)
 		for (Element e : sim.elements)
 		{
-			if (e.getPosition().withinRadius(point, e.getSize()/2))	
+			if (e.getPosition().withinRadius(point, e.getSize()))	
 			{
 				selection.add(e);
 				System.out.println("Added element " + e.getPosition() + " : " + point);
@@ -273,7 +273,7 @@ public class UserInterface extends JFrame {
 				validLocation = false;
 		
 		if (validLocation)
-			sim.elements.add(new Prey(xloc,yloc,0,0,10));
+			sim.elements.add(new Prey(xloc,yloc,0,0,5));
 		canv.repaint();
 	}
 

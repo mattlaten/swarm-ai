@@ -19,7 +19,7 @@ public class Prey extends Element implements Cloneable {
 	{
 		position = new Vec(0,0);
 		velocity = new Vec(0,0);
-		size = 10;
+		size = 5;
 	}
 	
 	public Prey(double x, double y, double xvel, double yvel, double size)
