@@ -61,7 +61,7 @@ public class Prey extends Element implements Cloneable {
 				neighbourhoodCount ++;	
 				collisionAvoidance = collisionAvoidance.plus(dir.unit().mult(Math.pow((getRadius()-dir.size())/getRadius(),3)).neg());
 				velocityMatching = velocityMatching.plus(e.getVelocity().mult(1.0/e.getMaxSpeed()));
-				flockCentering = flockCentering.plus(dir.unit().mult(Math.pow(dir.size()/getRadius(),3)));
+				flockCentering = flockCentering.plus(dir.unit().mult(Math.pow(dir.size()/getRadius(),2)));
 			}
 		}
 		
