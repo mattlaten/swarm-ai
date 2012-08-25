@@ -21,6 +21,11 @@ public class Simulation extends Thread {
 		elements = new ArrayList<Element>();
 		Prey p = new Prey();
 		p.position = new Vec(10, 10);
+		p.velocity = new Vec(1,1).truncate(p.getMaxSpeed());
+		elements.add(p);
+		p = new Prey();
+		p.position = new Vec(20, 10);
+		p.velocity = new Vec(1,1).truncate(p.getMaxSpeed());
 		elements.add(p);
 		
 		snapshots = new ArrayList<Object>();
@@ -41,8 +46,12 @@ public class Simulation extends Thread {
 				if(time == totalTime && time % (timeStep*stepsPerSave) == 0)	{
 					snapshots.add(elements.clone());
 				}
+				for(Element e : elements)
+					e.calculateUpdate(elements);
 				for(Element e : elements)	{
-					//do something
+					e.update();
+					System.out.println(e.getPosition());
+					System.out.println(e.getVelocity());
 				}
 			}
 		}

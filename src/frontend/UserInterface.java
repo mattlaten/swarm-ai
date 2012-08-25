@@ -5,6 +5,7 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.HashSet;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
@@ -19,6 +20,7 @@ import javax.swing.JSplitPane;
 import util.Logger;
 import backend.HeightMap;
 import backend.Simulation;
+import backend.environment.Element;
 
 public class UserInterface extends JFrame {
 	
@@ -40,6 +42,8 @@ public class UserInterface extends JFrame {
 	Canvas canv;
 	
 	StatusBar status;
+	
+	HashSet<Element> selected = new HashSet<Element>();
 	
 	public UserInterface(final Simulation sim) throws Exception	{
 		super("Swarm AI");

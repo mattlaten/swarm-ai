@@ -18,14 +18,14 @@ import backend.environment.Element;
 
 import math.Vec;
 
-class Canvas extends JLabel implements MouseListener, MouseMotionListener, MouseWheelListener	{
+class Canvas extends JLabel implements MouseListener, MouseMotionListener, MouseWheelListener, Runnable	{
 	UserInterface ui;
 	Vec origin = new Vec();	//the origin relative to the center of the Canvas
 	Vec mPoint = new Vec();	//the position of the mouse in labelSpace
 	
 	int dotDiff = 10;
 	HeightMapCache hmc = null;
-	double zoom = 2;
+	double zoom = 1;
 	
 	public boolean renderGrid = true, renderAxes = true;
 	
@@ -37,6 +37,8 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 		addMouseListener(this);
 		addMouseMotionListener(this);
 		addMouseWheelListener(this);
+		
+		new Thread(this).start();
 	}
 	
 	//public Vec toLabelSpace(Vec v)	{	return v.invertY().plus(origin).plus(new Vec(getSize().width/2, getSize().height/2));	}
@@ -45,6 +47,16 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 	public Vec toWorldSpace(Vec v)	{	return v.minus(originInLabelSpace()).mult(1/zoom).invertY();	}
 	public Vec originInLabelSpace()	{	return toLabelSpace(Vec.ZERO);	}
 	public Vec mouseInWorldSpace()	{	return toWorldSpace(mPoint);	}
+	
+	public void run()	{
+		try {
+			while(true)	{
+				Thread.sleep(40);
+				repaint();
+			}
+		}
+		catch(InterruptedException ie)	{}
+	}
 	
 	public void paint(Graphics g)	{
 		Graphics2D g2 = (Graphics2D)g;
@@ -74,14 +86,14 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 							  clampedTl.x-tl.x, clampedTl.y-tl.y, (int)hmc.width-(br.x-clampedBr.x), (int)hmc.height-(br.y-clampedBr.y), null);*/
 			
 			//draw elements
-			g2.setColor(Color.blue);
 			for(Element e: ui.sim.elements)	{
+				g2.setColor(Color.blue);
 				int size = (int)(e.getSize()*zoom);
 				Point pos = toLabelSpace(e.getPosition()).getPoint();
-				g2.fillArc(pos.x-size/2, pos.y-size/2, size, size, 0, 360);
-				/*size = (int)(e.getSightRadius()*zoom);
+				g2.fillArc(pos.x-size, pos.y-size, size*2, size*2, 0, 360);
+				size = (int)(e.getRadius()*zoom);
 				g2.setColor(Color.red);
-				g2.drawArc(pos.x-size/2, pos.y-size/2, size, size, 0, 360);*/
+				g2.drawArc(pos.x-size, pos.y-size, size*2, size*2, 0, 360);
 			}
 			
 			//draw the grid

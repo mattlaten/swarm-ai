@@ -26,6 +26,12 @@ public class Vec implements Serializable	{
 	
 	public Vec invertY()			{	return new Vec(x, -y);						}
 	
+	public Vec truncate(double mag)	{
+		if(size() == 0)
+			return new Vec(this);
+		return unit().mult(mag);
+	}
+	
 	public Point getPoint()	{
 		return new Point((int)x, (int)y);
 	}
