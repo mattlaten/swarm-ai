@@ -305,7 +305,11 @@ public class UserInterface extends JFrame {
 	}
 
 	public void setPreyDirection(Vec mPoint) {
-		//set all elements in selection's dir to mPoint
+		for (Element e : sim.elements)
+		{
+			((Prey) e).velocity = mPoint.minus(((Prey) e).position).truncate(e.getMaxSpeed());
+		}
+ 		//set all elements in selection's dir to mPoint
 		
 	}
 }
