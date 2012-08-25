@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -25,9 +26,9 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 	
 	int dotDiff = 10;
 	HeightMapCache hmc = null;
-	double zoom = 2;
+	double zoom = 1;
 	
-	public boolean renderGrid = true, renderAxes = true;
+	public boolean renderGrid = true, renderAxes = true, renderHeightMap = true;
 	
 	public Canvas(UserInterface ui)	{
 		this.ui = ui;
@@ -63,22 +64,28 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 				dotYEnd   = (o.y + dotDiffZoomed*Math.floor((getSize().height-o.y)/dotDiffZoomed) + 2*dotDiffZoomed);
 			
 			//render the heightMap
-			BufferedImage img = hmc.getImage();
-			Rectangle2D.Double bounds = hmc.hm.getRenderBounds();
-			Point tl = toLabelSpace(new Vec(bounds.x, bounds.y)).getPoint(),
-				  br = toLabelSpace(new Vec(bounds.x+bounds.width, bounds.y-bounds.height)).getPoint();
-			g2.drawImage(hmc.getImage(), (int)tl.x, (int)tl.y, (int)br.x, (int)br.y, 0, 0, (int)(hmc.width), (int)(hmc.height), null);
-			/*Point clampedTl = new Point(Math.max(tl.x, 0), Math.max(tl.y, 0)),
-				  clampedBr = new Point(Math.min(br.x, getSize().width), Math.min(br.y, getSize().height));
-			g2.drawImage(img, clampedTl.x, clampedTl.y, clampedBr.x, clampedBr.y,
-							  clampedTl.x-tl.x, clampedTl.y-tl.y, (int)hmc.width-(br.x-clampedBr.x), (int)hmc.height-(br.y-clampedBr.y), null);*/
-			
+			if (renderHeightMap)
+			{
+				BufferedImage img = hmc.getImage();
+				Rectangle2D.Double bounds = hmc.hm.getRenderBounds();
+				Point tl = toLabelSpace(new Vec(bounds.x, bounds.y)).getPoint(),
+					  br = toLabelSpace(new Vec(bounds.x+bounds.width, bounds.y-bounds.height)).getPoint();
+				g2.drawImage(hmc.getImage(), (int)tl.x, (int)tl.y, (int)br.x, (int)br.y, 0, 0, (int)(hmc.width), (int)(hmc.height), null);
+				/*Point clampedTl = new Point(Math.max(tl.x, 0), Math.max(tl.y, 0)),
+					  clampedBr = new Point(Math.min(br.x, getSize().width), Math.min(br.y, getSize().height));
+				g2.drawImage(img, clampedTl.x, clampedTl.y, clampedBr.x, clampedBr.y,
+								  clampedTl.x-tl.x, clampedTl.y-tl.y, (int)hmc.width-(br.x-clampedBr.x), (int)hmc.height-(br.y-clampedBr.y), null);*/
+			}	
 			//draw elements
 			g2.setColor(Color.blue);
 			for(Element e: ui.sim.elements)	{
+				if (ui.selection.contains(e))
+					g2.setColor(Color.green);	
 				int size = (int)(e.getSize()*zoom);
 				Point pos = toLabelSpace(e.getPosition()).getPoint();
 				g2.fillArc(pos.x-size/2, pos.y-size/2, size, size, 0, 360);
+				if (ui.selection.contains(e))
+					g2.setColor(Color.blue);	
 				/*size = (int)(e.getSightRadius()*zoom);
 				g2.setColor(Color.red);
 				g2.drawArc(pos.x-size/2, pos.y-size/2, size, size, 0, 360);*/
@@ -116,7 +123,10 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 	
 	public void mousePressed(MouseEvent me)	{
 		if(hmc.completion >= 1)
+		{
 			mPoint = new Vec(me.getPoint());
+			
+		}
 	}
 	
 	public void mouseDragged(MouseEvent me)	{
@@ -129,7 +139,32 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 	}
 	
 	public void mouseReleased(MouseEvent me) {}
-	public void mouseClicked(MouseEvent me) {}
+	public void mouseClicked(MouseEvent me) {
+		switch(me.getModifiers()) {
+	      case InputEvent.BUTTON1_MASK: {
+	    	  System.out.println("That's the LEFT button");
+		        //select prey
+	    	  	if (me.isControlDown())
+	    	  		ui.addToSelection(toWorldSpace(mPoint));
+	    	  	else
+	    	  		ui.selectPrey(toWorldSpace(mPoint));
+		        break;
+		  }
+	      case InputEvent.BUTTON2_MASK: {
+	    	  System.out.println("That's the MIDDLE button");     
+		      break;
+		  }
+	      case InputEvent.BUTTON3_MASK: {
+	    	  System.out.println("That's the RIGHT button");     
+	    	  //set direction for hashSet
+	    	  if (ui.selection.isEmpty())
+	    		  ui.placePrey(toWorldSpace(mPoint));
+	    	  else	
+	    		  ui.setPreyDirection(toWorldSpace(mPoint));
+	    	  break;
+	      }
+	   }
+	}
 	public void mouseEntered(MouseEvent me) {}
 	public void mouseExited(MouseEvent me) {}
 	public void mouseMoved(MouseEvent me)	{
@@ -138,10 +173,10 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 	}
 	public void mouseWheelMoved(MouseWheelEvent mwe)	{
 		if(hmc.completion >= 1) {
-			Vec m1 = toWorldSpace(new Vec(mwe.getPoint()));
+			Vec m1 = toWorldSpace(new Vec(mwe.getPoint())); //mouse point in worldSpace before zoom
 			zoom -= mwe.getWheelRotation()*(0.01+ (zoom-0.1)/9.99);
 			zoom = Math.min(Math.max(0.01, zoom), 10);
-			Vec m2 = toWorldSpace(new Vec(mwe.getPoint()));
+			Vec m2 = toWorldSpace(new Vec(mwe.getPoint())); //mouse point in worldSpace after zoom
 			origin = origin.plus(m2.minus(m1).invertY());
 			repaint();
 		}

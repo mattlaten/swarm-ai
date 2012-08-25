@@ -5,6 +5,7 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.HashSet;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
@@ -16,9 +17,13 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 
+import math.Vec;
+
 import util.Logger;
 import backend.HeightMap;
 import backend.Simulation;
+import backend.environment.Element;
+import backend.environment.Prey;
 
 public class UserInterface extends JFrame {
 	
@@ -32,18 +37,22 @@ public class UserInterface extends JFrame {
 	JMenuBar menubar;
 	JMenu file, view;
 	JMenuItem fileLoadTerrain, fileGenerateRandomTerrain, fileExit;
-	JCheckBoxMenuItem viewGrid, viewAxes;
+	JCheckBoxMenuItem viewGrid, viewAxes, viewMap;
 	
 	File terrainFile;
 	
 	Simulation sim;
 	Canvas canv;
 	
+	HashSet<Element> selection;
+	
 	StatusBar status;
 	
 	public UserInterface(final Simulation sim) throws Exception	{
 		super("Swarm AI");
 		this.sim = sim;
+		
+		selection = new HashSet<Element>();
 		
 		//set up things
 		setSize(800, 600);
@@ -151,6 +160,14 @@ public class UserInterface extends JFrame {
 				canv.repaint();
 			}
 		});
+
+		viewMap = new JCheckBoxMenuItem("Show Map", canv.renderHeightMap);
+		viewMap.addActionListener(new ActionListener()	{
+			public void actionPerformed(ActionEvent ae)	{
+				canv.renderHeightMap = viewMap.isSelected();
+				canv.repaint();
+			}
+		});
 		
 		menubar = new JMenuBar();
 			file = new JMenu("File");
@@ -161,6 +178,7 @@ public class UserInterface extends JFrame {
 			view = new JMenu("View");
 				view.add(viewGrid);
 				view.add(viewAxes);
+				view.add(viewMap);
 		menubar.add(file);
 		menubar.add(view);
 		
@@ -199,6 +217,69 @@ public class UserInterface extends JFrame {
 		
 		setVisible(true);
 		sim.start();
+	}
+
+	public void selectPrey(Vec point) {
+		//Add prey to selection
+		//Colour it differently (green?)
+		boolean added = false;
+		for (Element e : sim.elements)
+		{
+			if (e.getPosition().withinRadius(point, e.getSize()/2))	
+			{
+				selection.clear();
+				selection.add(e);
+				added = true;
+				System.out.println("Added element " + e.getPosition() + " : " + point);
+			}
+			else
+			{
+				System.out.println("Did not add element " + e.getPosition() + " : " + point);
+			}
+		}
+		if (!added)
+			selection.clear();
+		canv.repaint();
+	}
+	
+	public void addToSelection(Vec point) {
+		//Add prey to selection
+		//Colour it differently (green?)
+		for (Element e : sim.elements)
+		{
+			if (e.getPosition().withinRadius(point, e.getSize()/2))	
+			{
+				selection.add(e);
+				System.out.println("Added element " + e.getPosition() + " : " + point);
+			}
+			else
+			{
+				System.out.println("Did not add element " + e.getPosition() + " : " + point);
+			}
+		}
+		canv.repaint();
+	}
+
+	public void placePrey(Vec mPoint) {
+		//convert mPoint to worldspace
+		//place prey on closest dot
+		double xloc = Math.round((mPoint.x/10))*10;
+		double yloc = Math.round(mPoint.y/10)*10;
+		
+		boolean validLocation = true;
+		
+		for (Element e : sim.elements)
+			if (e.getPosition().equals(new Vec(xloc, yloc)))
+				validLocation = false;
+		
+		if (validLocation)
+			sim.elements.add(new Prey(xloc,yloc,0,0,10));
+		canv.repaint();
+	}
+
+	public void setPreyDirection(Vec mPoint) {
+		//set all elements in selection's dir to mPoint
+		
 	}
 }
 
