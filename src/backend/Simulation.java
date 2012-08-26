@@ -58,6 +58,11 @@ public class Simulation extends Thread {
 	public void setTime(int t)	{
 		time = Math.max(t - t%timeStep, 0);
 	}
+	
+	public void setTotalTime(int t)	{
+		totalTime = Math.max(t - t%timeStep, 0);
+	}
+	
 	public int getTime()	{
 		return time;
 	}

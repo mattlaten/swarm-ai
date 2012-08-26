@@ -29,7 +29,8 @@ public class UserInterface extends JFrame {
 	
 	Logger log = new Logger(UserInterface.class, System.out, System.err);
 	JPanel toolbar;// control, menu, viewPort, viewPortControl;
-	JButton modeSelect, modePrey, modePredator, modeModifier, modeObstacle, modeLoad, modeRandom, startStop;
+	JButton modeSelect, modePrey, modePredator, modeModifier, 
+			modeObstacle, modeLoad, modeRandom, startStop, clearButton;
 	JFileChooser fc;
 	
 	PropertiesPanel properties;
@@ -47,8 +48,9 @@ public class UserInterface extends JFrame {
 	HashSet<Element> selection;
 	
 	StatusBar status;
+	ControlBar control;
 	
-	HashSet<Element> selected = new HashSet<Element>();
+	//HashSet<Element> selected = new HashSet<Element>();
 	
 	public UserInterface(final Simulation sim) throws Exception	{
 		super("Swarm AI");
@@ -98,6 +100,13 @@ public class UserInterface extends JFrame {
 		modeObstacle.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent ae)	{
 				status.setMode("Placing obstacle");
+			}
+		});
+		
+		clearButton = new JButton("Clear");
+		clearButton.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent ae)	{
+				clear();
 			}
 		});
 		
@@ -197,6 +206,7 @@ public class UserInterface extends JFrame {
 		toolbar.add(modePredator);
 		toolbar.add(modeModifier);
 		toolbar.add(modeObstacle);
+		toolbar.add(clearButton);
 		
 		//properties.targetEntity(sim.elements.get(0));
 		
@@ -206,10 +216,12 @@ public class UserInterface extends JFrame {
 		getContentPane().add(toolbar, BorderLayout.PAGE_START);
 		getContentPane().add(status, BorderLayout.PAGE_END);
 		
+		control = new ControlBar(sim);
+		
 		JPanel centerThings = new JPanel();
 		centerThings.setLayout(new BorderLayout());
 		centerThings.add(canv, BorderLayout.CENTER);
-		centerThings.add(new ControlBar(sim), BorderLayout.PAGE_END);
+		centerThings.add(control, BorderLayout.PAGE_END);
 		
 		sPane.add(centerThings);
 		
@@ -305,12 +317,20 @@ public class UserInterface extends JFrame {
 	}
 
 	public void setPreyDirection(Vec mPoint) {
-		for (Element e : sim.elements)
+		for (Element e : selection)
 		{
 			((Prey) e).velocity = mPoint.minus(((Prey) e).position).truncate(e.getMaxSpeed());
 		}
  		//set all elements in selection's dir to mPoint
 		
+	}
+	
+	public void clear()
+	{
+		selection.clear();
+		sim.elements.clear();
+		sim.setTime(0);
+		sim.setTotalTime(0);
 	}
 }
 
