@@ -28,9 +28,10 @@ import backend.environment.Prey;
 public class UserInterface extends JFrame {
 	
 	Logger log = new Logger(UserInterface.class, System.out, System.err);
-	JPanel toolbar;
+	JPanel toolbar, viewPort;
 	JButton modeSelect, modePrey, modePredator, modeModifier, 
 			modeObstacle, modeLoad, modeRandom, clearButton;
+	
 	JFileChooser fc;
 	
 	PropertiesPanel properties;
@@ -63,14 +64,41 @@ public class UserInterface extends JFrame {
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		
-		canv = new Canvas(this);
-		
 		fc = new JFileChooser("./maps/");
+
+		properties = new PropertiesPanel();
+		//properties.targetEntity(sim.elements.get(0));
+		canv = new Canvas(this);
+		control = new ControlBar(sim);
+		status = new StatusBar();		
 		
-		/*
-		 * MENU
-		 */
+		initMenu();
+		setJMenuBar(menubar);
 		
+		initToolbar();
+		
+		viewPort = new JPanel();
+		viewPort.setLayout(new BorderLayout());
+		viewPort.add(toolbar, BorderLayout.PAGE_START);
+		viewPort.add(canv, BorderLayout.CENTER);
+		viewPort.add(control, BorderLayout.PAGE_END);
+		
+		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+		splitPane.add(properties);
+		splitPane.add(viewPort);
+		
+		getContentPane().add(status, BorderLayout.PAGE_END);
+		getContentPane().add(splitPane, BorderLayout.CENTER);
+		
+		/*PropertyDialog pd = new PropertyDialog(this);
+		pd.targetEntity(sim.elements.get(0));*/
+		
+		setVisible(true);
+		sim.start();
+	}
+	
+	public void initMenu()
+	{
 		//FILE
 		fileLoadTerrain = new JMenuItem("Load Terrain");
 		fileLoadTerrain.addActionListener(new ActionListener(){
@@ -156,12 +184,10 @@ public class UserInterface extends JFrame {
 				view.add(viewMap);
 		menubar.add(file);
 		menubar.add(view);
-		
-		setJMenuBar(menubar);
-		
-		/*
-		 * TOOLBAR
-		 */
+	}
+
+	public void initToolbar()
+	{
 		//BUTTONS
 		modeSelect = new JButton("Select");
 		modeSelect.addActionListener(new ActionListener(){
@@ -169,24 +195,28 @@ public class UserInterface extends JFrame {
 				status.setMode("Selecting");
 			}
 		});
+		
 		modePrey = new JButton("Prey");
 		modePrey.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent ae)	{
 				status.setMode("Placing prey");
 			}
 		});
+		
 		modePredator = new JButton("Predator");
 		modePredator.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent ae)	{
 				status.setMode("Placing predator");
 			}
 		});
+		
 		modeModifier = new JButton("Modifier");
 		modeModifier.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent ae)	{
 				status.setMode("Placing modifier");
 			}
 		});
+		
 		modeObstacle = new JButton("Obstacle");
 		modeObstacle.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent ae)	{
@@ -211,50 +241,8 @@ public class UserInterface extends JFrame {
 			toolbar.add(modeModifier);
 			toolbar.add(modeObstacle);
 			toolbar.add(clearButton);
-		
-		//properties.targetEntity(sim.elements.get(0));
-		
-		/*
-		 * PPOPERTIES PANEL
-		 */
-		properties = new PropertiesPanel();
-		status = new StatusBar();		
-		/*
-		 * SPLIT PANE
-		 * +----+-------+
-		 * |	|		|
-		 * |	|		|
-		 * |	|		|
-		 * +----+-------+
-		 */
-		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-
-		control = new ControlBar(sim);
-		splitPane.add(properties);
-		
-			
-		JPanel viewPort = new JPanel();
-		viewPort.setLayout(new BorderLayout());
-		viewPort.add(toolbar, BorderLayout.PAGE_START);
-		viewPort.add(canv, BorderLayout.CENTER);
-		viewPort.add(control, BorderLayout.PAGE_END);
-		splitPane.add(viewPort);
-		
-		/*
-		 * FRAME CONSTRUCTION
-		 */
-
-
-		getContentPane().add(status, BorderLayout.PAGE_END);
-		getContentPane().add(splitPane, BorderLayout.CENTER);
-		
-		/*PropertyDialog pd = new PropertyDialog(this);
-		pd.targetEntity(sim.elements.get(0));*/
-		
-		setVisible(true);
-		sim.start();
 	}
-
+	
 	public void selectPrey(Vec point) {
 		//Add prey to selection
 		//Colour it differently (green?)
@@ -265,12 +253,18 @@ public class UserInterface extends JFrame {
 			{
 				selection.clear();
 				selection.add(e);
+				try {
+					properties.targetEntity(e);
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 				added = true;
-				System.out.println("Added element " + e.getPosition() + " : " + point);
+				log.info("Added element " + e.getPosition() + " : " + point);
 			}
 			else
 			{
-				System.out.println("Did not add element " + e.getPosition() + " : " + point);
+				log.info("Did not add element " + e.getPosition() + " : " + point);
 			}
 		}
 		if (!added)
@@ -286,11 +280,11 @@ public class UserInterface extends JFrame {
 			if (e.getPosition().withinRadius(point, e.getSize()))	
 			{
 				selection.add(e);
-				System.out.println("Added element " + e.getPosition() + " : " + point);
+				log.info("Added element " + e.getPosition() + " : " + point);
 			}
 			else
 			{
-				System.out.println("Did not add element " + e.getPosition() + " : " + point);
+				log.info("Did not add element " + e.getPosition() + " : " + point);
 			}
 		}
 		canv.repaint();

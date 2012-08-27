@@ -162,7 +162,6 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 		{
 			mPoint = new Vec(me.getPoint());
 			startPoint = new Vec(me.getPoint());
-			//System.out.println(startPoint);
 		}
 	}
 	
@@ -180,12 +179,10 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 		    	    repaint();
 		    	  	break;
 			  }
-		      case InputEvent.BUTTON2_MASK: {
-		    	  System.out.println("That's the MIDDLE button");     
+		      case InputEvent.BUTTON2_MASK: {    
 			      break;
 			  }
-		      case InputEvent.BUTTON3_MASK: {
-		    	  System.out.println("That's the RIGHT button");     
+		      case InputEvent.BUTTON3_MASK: {   
 		    	  //drag canvas around
 		    	  Vec mp = new Vec(me.getPoint());
 		    	  origin = origin.minus(mPoint.minus(mp).mult(1/zoom));
@@ -221,7 +218,6 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 	public void mouseClicked(MouseEvent me) {
 		switch(me.getModifiers()) {
 	      case InputEvent.BUTTON1_MASK: {
-	    	  System.out.println("That's the LEFT button");
 		        //select prey
 	    	  	if (me.isControlDown())
 	    	  		ui.addToSelection(toWorldSpace(mPoint));
@@ -229,12 +225,10 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 	    	  		ui.selectPrey(toWorldSpace(mPoint));
 		        break;
 		  }
-	      case InputEvent.BUTTON2_MASK: {
-	    	  System.out.println("That's the MIDDLE button");     
+	      case InputEvent.BUTTON2_MASK: {   
 		      break;
 		  }
-	      case InputEvent.BUTTON3_MASK: {
-	    	  System.out.println("That's the RIGHT button");     
+	      case InputEvent.BUTTON3_MASK: {  
 	    	  //set direction for hashSet
 	    	  if (ui.selection.isEmpty())
 	    		  ui.placePrey(toWorldSpace(mPoint));
