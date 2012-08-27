@@ -265,49 +265,21 @@ public class UserInterface extends JFrame {
 		canv.repaint();
 	}
 	
-	//not working properly yet - need control click
-	/*
-	public void addToSelection(Vec point) {
-		//Add prey to selection
-		//Colour it differently (green?)
-		boolean added = false;
-		for (Element e : sim.elements)
-		{
-			if (e.getPosition().withinRadius(point, e.getSize()))	
-			{
-				selection.add(e);
-				log.info("Added element " + e.getPosition() + " : " + point);
-				added = true;
-			}
-			else
-				log.info("Did not add element " + e.getPosition() + " : " + point);
-		}
-		if (!added)
-			selection.clear();
-		canv.repaint();
-	}
-	*/
-	public void selectBox(Vec start, Vec end)
+	public void selectBox(Vec start, Vec end, boolean addToSelection)
 	{
 		double minx = Math.min(start.x, end.x);
 		double maxx = Math.max(start.x, end.x);
 		double miny = Math.min(start.y, end.y);
 		double maxy = Math.max(start.y, end.y);
 		
-		//System.out.println("WorldSpace: " + start);
-		//System.out.println("WorldSpace: " + end);
-		
-		//System.out.println("x " + maxx + " : " + minx);
-		//System.out.println("y " + maxy + " : " + miny);
+		if (!addToSelection)
+			selection.clear();
 		
 		for (Element e : sim.elements)
 		{
 			Vec pos = e.getPosition();
 			if (pos.x >= minx && pos.x <= maxx && pos.y >= miny && pos.y <= maxy)
-			{
-				//System.out.println(e);
 				selection.add(e);
-			}
 		}
 		canv.repaint();
 	}

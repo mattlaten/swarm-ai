@@ -26,7 +26,7 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 	Vec mPoint = new Vec();	//the position of the mouse in labelSpace
 	Vec startPoint = new Vec();
 	
-	Rectangle selection = null;
+	Rectangle selectRect = null;
 	
 	int dotDiff = 10;
 	HeightMapCache hmc = null;
@@ -160,10 +160,10 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 				g2.fillRect(o.x, 0, 1, getSize().height);
 			}
 			
-			if(selection != null)
+			if(selectRect != null)
 			{
 				g2.setColor(Color.gray);
-				g2.draw(selection);
+				g2.draw(selectRect);
 			}
 		}
 		else	{
@@ -201,50 +201,43 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 	
 	public void mouseDragged(MouseEvent me)	{
 		if(hmc.completion >= 1)	{
-			switch(me.getModifiers()) {
-			case InputEvent.BUTTON1_MASK: {
+			Vec current = new Vec(me.getPoint());
+			if ((me.getModifiers() & InputEvent.BUTTON1_MASK) == InputEvent.BUTTON1_MASK)
+			{
 				//select prey box
-				Vec current = new Vec(me.getPoint());
 				int startx = (int) Math.min(startPoint.x, current.x);
 				int starty = (int) Math.min(startPoint.y, current.y);
 				int width = (int) Math.abs(startPoint.x - current.x);
 				int height = (int) Math.abs(startPoint.y - current.y);
-				selection = new Rectangle(startx, starty, width, height);
-				repaint();
-				break;
+				selectRect = new Rectangle(startx, starty, width, height);
 			}
-			case InputEvent.BUTTON2_MASK: {    
-				break;
-			}
-			case InputEvent.BUTTON3_MASK: {   
+			else if ((me.getModifiers() & InputEvent.BUTTON3_MASK) == InputEvent.BUTTON3_MASK)
+			{
 				//drag canvas around
-				Vec mp = new Vec(me.getPoint());
-				origin = origin.minus(mPoint.minus(mp).mult(1/zoom));
-				mPoint = mp;
-				repaint();
-				break;
+				origin = origin.minus(mPoint.minus(current).mult(1/zoom));
+				mPoint = current;
 			}
-			}
+			repaint();
 		}
 	}
 	
 	public void mouseReleased(MouseEvent me) {
-		switch(me.getModifiers()) {
-		case InputEvent.BUTTON1_MASK: {
-			//select prey box
-			Vec endPoint = new Vec(me.getPoint());
-			ui.selectBox(toWorldSpace(startPoint), toWorldSpace(endPoint));
-			selection = null;
-			repaint();
-			break;
+		Vec endPoint = new Vec(me.getPoint());
+		if ((me.getModifiers() & InputEvent.BUTTON1_MASK) == InputEvent.BUTTON1_MASK)
+		{
+			ui.selectBox(toWorldSpace(startPoint), toWorldSpace(endPoint), me.isControlDown());
+			selectRect = null;	
 		}
-		case InputEvent.BUTTON2_MASK: {   
-			break;
-		}
-		case InputEvent.BUTTON3_MASK: {
-			break;
-		}
-		}
+		/*
+		else if ((me.getModifiers() & InputEvent.BUTTON3_MASK) == InputEvent.BUTTON3_MASK)
+			if (ui.selection.isEmpty())
+				ui.placePrey(toWorldSpace(mPoint));
+			else	
+				ui.setPreyDirection(toWorldSpace(mPoint));
+		else
+			System.out.println("wat");
+		*/
+		repaint();
 	}
 	
 	public String binary(int i)	{
@@ -253,10 +246,7 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 	
 	public void mouseClicked(MouseEvent me) {
 		if ((me.getModifiers() & InputEvent.BUTTON1_MASK) == InputEvent.BUTTON1_MASK)
-			if (me.isControlDown())
-				ui.selectPrey(toWorldSpace(mPoint), true);	
-			else
-				ui.selectPrey(toWorldSpace(mPoint), false);
+			ui.selectPrey(toWorldSpace(mPoint), me.isControlDown());	
 		else if ((me.getModifiers() & InputEvent.BUTTON3_MASK) == InputEvent.BUTTON3_MASK)
 			if (ui.selection.isEmpty())
 				ui.placePrey(toWorldSpace(mPoint));

@@ -30,7 +30,7 @@ public class HeightMap {
 	{
 		log = new Logger(HeightMap.class, System.out, System.err);
 		readInFile(file);
-		normalizeTerrain(5);
+		normalizeTerrain(1);
 		//printGrid();
 	}
 	
