@@ -25,4 +25,8 @@ public class Rect implements Serializable {
 	public boolean equals(Rect other)	{
 		return topLeft.equals(other.topLeft) && botRight.equals(other.botRight);
 	}
+	
+	public String toString()	{
+		return "[" + topLeft + ", " + botRight + "]";
+	}
 }

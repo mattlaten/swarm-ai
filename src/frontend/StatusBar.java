@@ -1,6 +1,7 @@
 package frontend;
 
 import java.awt.BorderLayout;
+import java.text.DecimalFormat;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -9,7 +10,9 @@ import math.Vec;
 
 class StatusBar extends JPanel	{
 	JLabel mousePoint = new JLabel(),
-		   mode = new JLabel();
+		   mode = new JLabel(),
+		   zoom = new JLabel();
+	DecimalFormat d = new DecimalFormat("0.00");
 	
 	public StatusBar()	{
 		super();
@@ -18,6 +21,7 @@ class StatusBar extends JPanel	{
 		JPanel pane = new JPanel();
 		//pane.setBorder(new SoftBevelBorder(BevelBorder.LOWERED));
 		pane.add(mousePoint);
+		pane.add(zoom);
 		
 		add(pane, BorderLayout.LINE_END);
 		add(mode, BorderLayout.LINE_START);
@@ -25,6 +29,10 @@ class StatusBar extends JPanel	{
 	
 	public void setMousePoint(Vec m)	{
 		mousePoint.setText("x: " + (int)(m.x) + ", y: " + (int)(m.y));
+	}
+	
+	public void setZoom(double z)	{
+		zoom.setText("zoom: " + d.format(z));
 	}
 	
 	public void setMode(String mode)	{

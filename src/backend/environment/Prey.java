@@ -37,7 +37,7 @@ public class Prey extends Element implements Cloneable {
 	public Prey(double x, double y, double xvel, double yvel, double size)	{
 		this();
 		position = new Vec(x,y);
-		velocity = new Vec(xvel,yvel);
+		setVelocity(new Vec(xvel,yvel));
 		this.size = size;
 	}
 	
@@ -46,6 +46,9 @@ public class Prey extends Element implements Cloneable {
 	public double getRadius()	{	return sightRadius;	}
 	public Vec getPosition() 	{	return position;	}
 	public Vec getVelocity() 	{	return (oldVelocity == null ? velocity : oldVelocity).mult(getMaxSpeed());	}
+	public void setVelocity(Vec v)	{
+		velocity = new Vec(v).truncate(1);
+	}
 	
 	public Object clone()		{	return new Prey(this);	}
 
