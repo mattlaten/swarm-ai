@@ -32,8 +32,8 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 	HeightMapCache hmc = null;
 	double zoom = 1;
 	
-	public boolean renderGrid = false,
-			renderAxes = false,
+	public boolean renderGrid = true,
+			renderAxes = true,
 			renderHeightMap = false;
 	
 	public Canvas(UserInterface ui)	{
@@ -168,75 +168,68 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 	public void mouseDragged(MouseEvent me)	{
 		if(hmc.completion >= 1)	{
 			switch(me.getModifiers()) {
-		      case InputEvent.BUTTON1_MASK: {
-		    	  	//select prey box
-		    	  	Vec current = new Vec(me.getPoint());
-		    	  	int startx = (int) Math.min(startPoint.x, current.x);
-		    	  	int starty = (int) Math.min(startPoint.y, current.y);
-		    	  	int width = (int) Math.abs(startPoint.x - current.x);
-		    	  	int height = (int) Math.abs(startPoint.y - current.y);
-		    	  	selection = new Rectangle(startx, starty, width, height);
-		    	    repaint();
-		    	  	break;
-			  }
-		      case InputEvent.BUTTON2_MASK: {    
-			      break;
-			  }
-		      case InputEvent.BUTTON3_MASK: {   
-		    	  //drag canvas around
-		    	  Vec mp = new Vec(me.getPoint());
-		    	  origin = origin.minus(mPoint.minus(mp).mult(1/zoom));
-		    	  mPoint = mp;
-		    	  repaint();
-		    	  break;
-		      }
-	    	
-		   }
+			case InputEvent.BUTTON1_MASK: {
+				//select prey box
+				Vec current = new Vec(me.getPoint());
+				int startx = (int) Math.min(startPoint.x, current.x);
+				int starty = (int) Math.min(startPoint.y, current.y);
+				int width = (int) Math.abs(startPoint.x - current.x);
+				int height = (int) Math.abs(startPoint.y - current.y);
+				selection = new Rectangle(startx, starty, width, height);
+				repaint();
+				break;
+			}
+			case InputEvent.BUTTON2_MASK: {    
+				break;
+			}
+			case InputEvent.BUTTON3_MASK: {   
+				//drag canvas around
+				Vec mp = new Vec(me.getPoint());
+				origin = origin.minus(mPoint.minus(mp).mult(1/zoom));
+				mPoint = mp;
+				repaint();
+				break;
+			}
+			}
 		}
 	}
 	
 	public void mouseReleased(MouseEvent me) {
 		switch(me.getModifiers()) {
-	      case InputEvent.BUTTON1_MASK: {
-		        //select prey box
-	    	  	Vec endPoint = new Vec(me.getPoint());
-	    	  	//System.out.println(endPoint);
-	    	  	ui.selectBox(toWorldSpace(startPoint), toWorldSpace(endPoint));
-	    	  	selection = null;
-	    	  	repaint();
-	    	  	break;
-		  }
-	      case InputEvent.BUTTON2_MASK: {   
-		      break;
-		  }
-	      case InputEvent.BUTTON3_MASK: {
-	    	  break;
-	      }
-	   }
+		case InputEvent.BUTTON1_MASK: {
+			//select prey box
+			Vec endPoint = new Vec(me.getPoint());
+			ui.selectBox(toWorldSpace(startPoint), toWorldSpace(endPoint));
+			selection = null;
+			repaint();
+			break;
+		}
+		case InputEvent.BUTTON2_MASK: {   
+			break;
+		}
+		case InputEvent.BUTTON3_MASK: {
+			break;
+		}
+		}
+	}
+	
+	public String binary(int i)	{
+		return Integer.toString(i, 2);
 	}
 	
 	public void mouseClicked(MouseEvent me) {
-		switch(me.getModifiers()) {
-	      case InputEvent.BUTTON1_MASK: {
-		        //select prey
-	    	  	if (me.isControlDown())
-	    	  		ui.addToSelection(toWorldSpace(mPoint));
-	    	  	else
-	    	  		ui.selectPrey(toWorldSpace(mPoint));
-		        break;
-		  }
-	      case InputEvent.BUTTON2_MASK: {   
-		      break;
-		  }
-	      case InputEvent.BUTTON3_MASK: {  
-	    	  //set direction for hashSet
-	    	  if (ui.selection.isEmpty())
-	    		  ui.placePrey(toWorldSpace(mPoint));
-	    	  else	
-	    		  ui.setPreyDirection(toWorldSpace(mPoint));
-	    	  break;
-	      }
-	   }
+		if ((me.getModifiers() & InputEvent.BUTTON1_MASK) == InputEvent.BUTTON1_MASK)
+			if (me.isControlDown())
+				ui.selectPrey(toWorldSpace(mPoint), true);	
+			else
+				ui.selectPrey(toWorldSpace(mPoint), false);
+		else if ((me.getModifiers() & InputEvent.BUTTON3_MASK) == InputEvent.BUTTON3_MASK)
+			if (ui.selection.isEmpty())
+				ui.placePrey(toWorldSpace(mPoint));
+			else	
+				ui.setPreyDirection(toWorldSpace(mPoint));
+		else
+			System.out.println("wat");
 	}
 	public void mouseEntered(MouseEvent me) {}
 	public void mouseExited(MouseEvent me) {}

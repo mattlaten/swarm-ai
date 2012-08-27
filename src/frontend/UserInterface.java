@@ -51,27 +51,24 @@ public class UserInterface extends JFrame {
 	StatusBar status;
 	ControlBar control;
 	
-	//HashSet<Element> selected = new HashSet<Element>();
+	public enum Mode {SELECT, PAINT_PREY, PAINT_PREDATOR};
 	
 	public UserInterface(final Simulation sim) throws Exception	{
 		super("Swarm AI");
 		this.sim = sim;
 		
 		selection = new HashSet<Element>();
+		fc = new JFileChooser("./maps/");
+		properties = new PropertiesPanel();
+		canv = new Canvas(this);
+		control = new ControlBar(sim);
+		status = new StatusBar();
 		
 		//set up things
 		setSize(800, 600);
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
-		
-		fc = new JFileChooser("./maps/");
-
-		properties = new PropertiesPanel();
-		//properties.targetEntity(sim.elements.get(0));
-		canv = new Canvas(this);
-		control = new ControlBar(sim);
-		status = new StatusBar();		
-		
+			
 		initMenu();
 		setJMenuBar(menubar);
 		
@@ -117,9 +114,7 @@ public class UserInterface extends JFrame {
 					status.setMode("");
 				}
 				else
-				{
-					status.setMode("Can't change terrain while simulation is running!");					
-				}
+					status.setMode("Can't change terrain while simulation is running");
 			}
 		});
 		
@@ -134,9 +129,7 @@ public class UserInterface extends JFrame {
 					status.setMode("");
 				}
 				else
-				{
 					status.setMode("Can't change terrain while simulation is running!");
-				}
 		}});
 		
 		fileExit = new JMenuItem("Exit");
@@ -243,7 +236,7 @@ public class UserInterface extends JFrame {
 			toolbar.add(clearButton);
 	}
 	
-	public void selectPrey(Vec point) {
+	public void selectPrey(Vec point, boolean addToSelection) {
 		//Add prey to selection
 		//Colour it differently (green?)
 		boolean added = false;
@@ -251,7 +244,8 @@ public class UserInterface extends JFrame {
 		{
 			if (e.getPosition().withinRadius(point, e.getSize()))	
 			{
-				selection.clear();
+				if (!addToSelection)
+					selection.clear();
 				selection.add(e);
 				try {
 					properties.targetEntity(e);
@@ -260,36 +254,39 @@ public class UserInterface extends JFrame {
 					e1.printStackTrace();
 				}
 				added = true;
-				log.info("Added element " + e.getPosition() + " : " + point);
+				//log.info("Added element " + e.getPosition() + " : " + point);
 			}
 			else
-			{
-				log.info("Did not add element " + e.getPosition() + " : " + point);
-			}
+				continue;
+				//log.info("Did not add element " + e.getPosition() + " : " + point);
 		}
 		if (!added)
 			selection.clear();
 		canv.repaint();
 	}
 	
+	//not working properly yet - need control click
+	/*
 	public void addToSelection(Vec point) {
 		//Add prey to selection
 		//Colour it differently (green?)
+		boolean added = false;
 		for (Element e : sim.elements)
 		{
 			if (e.getPosition().withinRadius(point, e.getSize()))	
 			{
 				selection.add(e);
 				log.info("Added element " + e.getPosition() + " : " + point);
+				added = true;
 			}
 			else
-			{
 				log.info("Did not add element " + e.getPosition() + " : " + point);
-			}
 		}
+		if (!added)
+			selection.clear();
 		canv.repaint();
 	}
-	
+	*/
 	public void selectBox(Vec start, Vec end)
 	{
 		double minx = Math.min(start.x, end.x);
