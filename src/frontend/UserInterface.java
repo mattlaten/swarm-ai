@@ -28,9 +28,9 @@ import backend.environment.Prey;
 public class UserInterface extends JFrame {
 	
 	Logger log = new Logger(UserInterface.class, System.out, System.err);
-	JPanel toolbar;// control, menu, viewPort, viewPortControl;
+	JPanel toolbar;
 	JButton modeSelect, modePrey, modePredator, modeModifier, 
-			modeObstacle, modeLoad, modeRandom, startStop, clearButton;
+			modeObstacle, modeLoad, modeRandom, clearButton;
 	JFileChooser fc;
 	
 	PropertiesPanel properties;
@@ -65,51 +65,13 @@ public class UserInterface extends JFrame {
 		
 		canv = new Canvas(this);
 		
-		status = new StatusBar();
-		
 		fc = new JFileChooser("./maps/");
-
-		properties = new PropertiesPanel();
 		
+		/*
+		 * MENU
+		 */
 		
-		modeSelect = new JButton("Select");
-		modeSelect.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent ae)	{
-				status.setMode("Selecting");
-			}
-		});
-		modePrey = new JButton("Prey");
-		modePrey.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent ae)	{
-				status.setMode("Placing prey");
-			}
-		});
-		modePredator = new JButton("Predator");
-		modePredator.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent ae)	{
-				status.setMode("Placing predator");
-			}
-		});
-		modeModifier = new JButton("Modifier");
-		modeModifier.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent ae)	{
-				status.setMode("Placing modifier");
-			}
-		});
-		modeObstacle = new JButton("Obstacle");
-		modeObstacle.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent ae)	{
-				status.setMode("Placing obstacle");
-			}
-		});
-		
-		clearButton = new JButton("Clear");
-		clearButton.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent ae)	{
-				clear();
-			}
-		});
-		
+		//FILE
 		fileLoadTerrain = new JMenuItem("Load Terrain");
 		fileLoadTerrain.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent ae)	{
@@ -156,6 +118,7 @@ public class UserInterface extends JFrame {
 			}
 		});
 		
+		//VIEW
 		viewGrid = new JCheckBoxMenuItem("Show Grid", canv.renderGrid);
 		viewGrid.addActionListener(new ActionListener()	{
 			public void actionPerformed(ActionEvent ae)	{
@@ -180,6 +143,7 @@ public class UserInterface extends JFrame {
 			}
 		});
 		
+		//MENU BAR
 		menubar = new JMenuBar();
 			file = new JMenu("File");
 				file.add(fileLoadTerrain);
@@ -195,37 +159,95 @@ public class UserInterface extends JFrame {
 		
 		setJMenuBar(menubar);
 		
+		/*
+		 * TOOLBAR
+		 */
+		//BUTTONS
+		modeSelect = new JButton("Select");
+		modeSelect.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent ae)	{
+				status.setMode("Selecting");
+			}
+		});
+		modePrey = new JButton("Prey");
+		modePrey.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent ae)	{
+				status.setMode("Placing prey");
+			}
+		});
+		modePredator = new JButton("Predator");
+		modePredator.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent ae)	{
+				status.setMode("Placing predator");
+			}
+		});
+		modeModifier = new JButton("Modifier");
+		modeModifier.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent ae)	{
+				status.setMode("Placing modifier");
+			}
+		});
+		modeObstacle = new JButton("Obstacle");
+		modeObstacle.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent ae)	{
+				status.setMode("Placing obstacle");
+			}
+		});
+		
+		clearButton = new JButton("Clear");
+		clearButton.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent ae)	{
+				clear();
+			}
+		});
+
+		//TOOLBAR
 		toolbar = new JPanel();
 		toolbar.setLayout(new FlowLayout());
-		
 		getContentPane().setLayout(new BorderLayout());
-		
-		//add things
-		toolbar.add(modeSelect);
-		toolbar.add(modePrey);
-		toolbar.add(modePredator);
-		toolbar.add(modeModifier);
-		toolbar.add(modeObstacle);
-		toolbar.add(clearButton);
+			toolbar.add(modeSelect);
+			toolbar.add(modePrey);
+			toolbar.add(modePredator);
+			toolbar.add(modeModifier);
+			toolbar.add(modeObstacle);
+			toolbar.add(clearButton);
 		
 		//properties.targetEntity(sim.elements.get(0));
 		
-		JSplitPane sPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-		sPane.add(properties);
-		
-		getContentPane().add(toolbar, BorderLayout.PAGE_START);
-		getContentPane().add(status, BorderLayout.PAGE_END);
-		
+		/*
+		 * PPOPERTIES PANEL
+		 */
+		properties = new PropertiesPanel();
+		status = new StatusBar();		
+		/*
+		 * SPLIT PANE
+		 * +----+-------+
+		 * |	|		|
+		 * |	|		|
+		 * |	|		|
+		 * +----+-------+
+		 */
+		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+
 		control = new ControlBar(sim);
+		splitPane.add(properties);
 		
-		JPanel centerThings = new JPanel();
-		centerThings.setLayout(new BorderLayout());
-		centerThings.add(canv, BorderLayout.CENTER);
-		centerThings.add(control, BorderLayout.PAGE_END);
+			
+		JPanel viewPort = new JPanel();
+		viewPort.setLayout(new BorderLayout());
+		viewPort.add(toolbar, BorderLayout.PAGE_START);
+		viewPort.add(canv, BorderLayout.CENTER);
+		viewPort.add(control, BorderLayout.PAGE_END);
+		splitPane.add(viewPort);
 		
-		sPane.add(centerThings);
+		/*
+		 * FRAME CONSTRUCTION
+		 */
+
+
+		getContentPane().add(status, BorderLayout.PAGE_END);
+		getContentPane().add(splitPane, BorderLayout.CENTER);
 		
-		getContentPane().add(sPane, BorderLayout.CENTER);
 		/*PropertyDialog pd = new PropertyDialog(this);
 		pd.targetEntity(sim.elements.get(0));*/
 		
