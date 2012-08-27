@@ -16,9 +16,9 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.JLabel;
 
-import backend.environment.Element;
-
+import math.Rect;
 import math.Vec;
+import backend.environment.Element;
 
 class Canvas extends JLabel implements MouseListener, MouseMotionListener, MouseWheelListener, Runnable	{
 	UserInterface ui;
@@ -30,11 +30,14 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 	
 	int dotDiff = 10;
 	HeightMapCache hmc = null;
-	double zoom = 1;
+	double zoom = 1, defaultZoom = 1, minZoom = 0.01, maxZoom = 10,
+		   trackingZoom = 0.8;
 	
 	public boolean renderGrid = false,
 			renderAxes = false,
-			renderHeightMap = false;
+			renderHeightMap = false,
+			renderDirections = true,
+			renderRadii = true;
 	
 	public Canvas(UserInterface ui)	{
 		this.ui = ui;
@@ -59,14 +62,42 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 		try {
 			while(true)	{
 				Thread.sleep(40);
+				ui.status.setZoom(zoom);
 				repaint();
 			}
 		}
 		catch(InterruptedException ie)	{}
 	}
 	
+	public void focusOnSelection()	{
+		if(ui.selection.size() == 0)	return;
+		//calculate bounding box of selection
+		Rect r = new Rect(new Vec(Double.MAX_VALUE, -Double.MAX_VALUE),new Vec(-Double.MAX_VALUE, Double.MAX_VALUE));
+		
+		for(Element e: ui.selection)	{
+			Vec p = e.getPosition();
+			double size = e.getSize();
+			r.topLeft.x = Math.min(r.topLeft.x, p.x-size);
+			r.topLeft.y = Math.max(r.topLeft.y, p.y+size);
+			r.botRight.x = Math.max(r.botRight.x, p.x+size);
+			r.botRight.y = Math.min(r.botRight.y, p.y-size);
+		}
+		
+		//center the origin on the centroid of the bounds
+		Vec centroid = r.topLeft.minus(r.botRight).mult(0.5).plus(r.botRight);
+		origin = centroid.neg().invertY();
+		
+		//zooming to fit everything in
+		Vec diff = r.botRight.minus(r.topLeft).invertY();
+		/*if(diff.x < diff.y)
+			zoom = Math.max(0.1, Math.min(1, getSize().height*trackingZoom/diff.y));
+		else
+			zoom = Math.max(0.1, Math.min(1, getSize().width*trackingZoom/diff.x));*/
+	}
+	
 	public void paint(Graphics g)	{
 		Graphics2D g2 = (Graphics2D)g;
+		focusOnSelection();
 		//System.out.println(hmc.completion);
 		if(hmc.completion >= 1)	{
 			Point o = originInLabelSpace().getPoint();
@@ -75,7 +106,7 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 			g2.fillRect(0, 0, getSize().width, getSize().height);
 			
 			//calculate the drawing range
-			double dotDiffZoomed = Math.max(dotDiff*zoom, 2);
+			double dotDiffZoomed = dotDiff*zoom;//Math.max(dotDiff*zoom, 2);
 			double dotXStart = (o.x - dotDiffZoomed*Math.floor(o.x/dotDiffZoomed) - dotDiffZoomed),
 				dotYStart = (o.y - dotDiffZoomed*Math.floor(o.y/dotDiffZoomed) - dotDiffZoomed),
 				dotXEnd   = (o.x + dotDiffZoomed*Math.floor((getSize().width-o.x)/dotDiffZoomed) + 2*dotDiffZoomed),
@@ -103,15 +134,18 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 				Point pos = toLabelSpace(e.getPosition()).getPoint();
 				g2.fillArc(pos.x-size, pos.y-size, size*2, size*2, 0, 360);
 				
-				size = (int)(e.getRadius()*zoom);
-				g2.setColor(Color.red);
-				g2.drawArc(pos.x-size, pos.y-size, size*2, size*2, 0, 360);
+				if(renderRadii)	{
+					size = (int)(e.getRadius()*zoom);
+					g2.setColor(Color.red);
+					g2.drawArc(pos.x-size, pos.y-size, size*2, size*2, 0, 360);
+				}
 				
-				drawVector(g2, Color.green, e.getPosition(), e.getVelocity().mult(50));
+				if(renderDirections)
+					drawVector(g2, Color.green, e.getPosition(), e.getVelocity().mult(Math.min(70*zoom, 70)));
 			}
 			
 			//draw the grid
-			if(renderGrid)	{
+			if(renderGrid && dotDiffZoomed >= 2)	{
 				if(dotDiffZoomed < 5)	dotDiffZoomed *= 2;
 				g2.setColor(Color.white);
 				for(double y = dotYStart; y <= dotYEnd; y += dotDiffZoomed)
@@ -131,7 +165,6 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 				g2.setColor(Color.gray);
 				g2.draw(selection);
 			}
-			
 		}
 		else	{
 			int width = getSize().width/3,
@@ -153,13 +186,14 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 		Point posP = toLabelSpace(pos).getPoint();
 		Point vecP = (toLabelSpace(pos.plus(vec))).getPoint();
 		g2.drawLine(posP.x, posP.y, vecP.x, vecP.y);
-		g2.fillArc(vecP.x - 2, vecP.y - 2, 4, 4, 0, 360);
+		int size = (int)(zoom);
+		if(size > 0)
+			g2.fillArc(vecP.x - size, vecP.y - size, 2*size, 2*size, 0, 360);
 		g2.setColor(old);
 	}
 	
 	public void mousePressed(MouseEvent me)	{
-		if(hmc.completion >= 1)
-		{
+		if(hmc.completion >= 1)	{
 			mPoint = new Vec(me.getPoint());
 			startPoint = new Vec(me.getPoint());
 		}
@@ -247,9 +281,12 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 	public void mouseWheelMoved(MouseWheelEvent mwe)	{
 		if(hmc.completion >= 1) {
 			Vec m1 = toWorldSpace(new Vec(mwe.getPoint())); //mouse point in worldSpace before zoom
-			zoom -= mwe.getWheelRotation()*(0.01+ (zoom-0.1)/9.99);
-			zoom = Math.min(Math.max(0.01, zoom), 10);
+			if(true || ui.selection.size() == 0)	{
+				zoom -= mwe.getWheelRotation()*(minZoom + (zoom-minZoom)/(maxZoom-minZoom));
+				zoom = Math.min(Math.max(minZoom, zoom), maxZoom);	//clamp
+			}
 			Vec m2 = toWorldSpace(new Vec(mwe.getPoint())); //mouse point in worldSpace after zoom
+			//adjust origin to ensure mouse is where it was (in the world) when the zoom began
 			origin = origin.plus(m2.minus(m1).invertY());
 			repaint();
 		}

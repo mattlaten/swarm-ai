@@ -14,6 +14,7 @@ public abstract class Element implements Serializable, Cloneable	{
 	abstract public double getRadius();
 	abstract public Vec getPosition();
 	abstract public Vec getVelocity();
+	abstract public void setVelocity(Vec v);
 	abstract public void calculateUpdate(List<Element> influences);
 	abstract public void update();
 	abstract public RenderObject getROb();
