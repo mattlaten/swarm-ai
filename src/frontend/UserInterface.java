@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.File;
 import java.util.HashSet;
 
@@ -25,7 +27,7 @@ import backend.Simulation;
 import backend.environment.Element;
 import backend.environment.Prey;
 
-public class UserInterface extends JFrame {
+public class UserInterface extends JFrame implements KeyListener {
 	
 	Logger log = new Logger(UserInterface.class, System.out, System.err);
 	JPanel toolbar, viewPort;
@@ -39,7 +41,7 @@ public class UserInterface extends JFrame {
 	JMenuBar menubar;
 	JMenu file, view;
 	JMenuItem fileLoadTerrain, fileGenerateRandomTerrain, fileExit;
-	JCheckBoxMenuItem viewGrid, viewAxes, viewMap;
+	JCheckBoxMenuItem viewGrid, viewAxes, viewMap, viewDirections, viewRadii;
 	
 	File terrainFile;
 	
@@ -56,6 +58,8 @@ public class UserInterface extends JFrame {
 	public UserInterface(final Simulation sim) throws Exception	{
 		super("Swarm AI");
 		this.sim = sim;
+		
+		addKeyListener(this);
 		
 		selection = new HashSet<Element>();
 		fc = new JFileChooser("./maps/");
@@ -164,6 +168,22 @@ public class UserInterface extends JFrame {
 			}
 		});
 		
+		viewDirections = new JCheckBoxMenuItem("Show Directional Vectors", canv.renderDirections);
+		viewDirections.addActionListener(new ActionListener()	{
+			public void actionPerformed(ActionEvent ae)	{
+				canv.renderDirections = viewDirections.isSelected();
+				canv.repaint();
+			}
+		});
+		
+		viewRadii = new JCheckBoxMenuItem("Show Radii", canv.renderRadii);
+		viewRadii.addActionListener(new ActionListener()	{
+			public void actionPerformed(ActionEvent ae)	{
+				canv.renderRadii = viewRadii.isSelected();
+				canv.repaint();
+			}
+		});
+		
 		//MENU BAR
 		menubar = new JMenuBar();
 			file = new JMenu("File");
@@ -175,6 +195,9 @@ public class UserInterface extends JFrame {
 				view.add(viewGrid);
 				view.add(viewAxes);
 				view.add(viewMap);
+				view.addSeparator();
+				view.add(viewDirections);
+				view.add(viewRadii);
 		menubar.add(file);
 		menubar.add(view);
 	}
@@ -316,6 +339,32 @@ public class UserInterface extends JFrame {
 		sim.elements.clear();
 		sim.setTime(0);
 		sim.setTotalTime(0);
+	}
+
+	@Override
+	public void keyPressed(KeyEvent event) {
+		
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void keyReleased(KeyEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void keyTyped(KeyEvent event) {
+		// TODO Auto-generated method stub
+		char eventChar = event.getKeyChar();
+        int eventCode = event.getKeyCode();
+        System.out.println(eventChar);
+        System.out.println(eventCode);
+        if (eventChar == ' ')
+        {
+            control.flip();
+        }
 	}
 }
 

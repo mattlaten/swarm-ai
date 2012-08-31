@@ -75,6 +75,12 @@ public class ControlBar extends JPanel implements Runnable, ActionListener {
 		playPause.setText(sim.isRunning ? "Pause" : "Play");
 	}
 	
+	public void flip()
+	{
+		sim.isRunning = !sim.isRunning;
+		playPause.setText(sim.isRunning ? "Pause" : "Play");
+	}
+	
 	public void run()	{
 		try {
 			while(true)	{
