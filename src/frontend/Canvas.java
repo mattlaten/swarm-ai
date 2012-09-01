@@ -16,9 +16,13 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.JLabel;
 
+import frontend.UserInterface.Mode;
+
 import math.Rect;
 import math.Vec;
 import backend.environment.Element;
+import backend.environment.Predator;
+import backend.environment.Prey;
 
 class Canvas extends JLabel implements MouseListener, MouseMotionListener, MouseWheelListener, Runnable	{
 	UserInterface ui;
@@ -127,9 +131,18 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 			}	
 			//draw elements
 			for(Element e: ui.sim.elements)	{
-				g2.setColor(Color.blue);
-				if (ui.selection.contains(e))
-					g2.setColor(Color.green);	
+				if (e.getClass() == Prey.class)
+				{
+					g2.setColor(Color.blue);
+					if (ui.selection.contains(e))
+						g2.setColor(new Color(0.2f,0.2f,1.0f));
+				}
+				if (e.getClass() == Predator.class)
+				{
+					g2.setColor(Color.red);
+					if (ui.selection.contains(e))
+						g2.setColor(new Color(1.0f,0.2f,0.2f));
+				}
 				int size = (int)(e.getSize()*zoom);
 				Point pos = toLabelSpace(e.getPosition()).getPoint();
 				g2.fillArc(pos.x-size, pos.y-size, size*2, size*2, 0, 360);
@@ -249,7 +262,26 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 			ui.selectPrey(toWorldSpace(mPoint), me.isControlDown());	
 		else if ((me.getModifiers() & InputEvent.BUTTON3_MASK) == InputEvent.BUTTON3_MASK)
 			if (ui.selection.isEmpty())
-				ui.placePrey(toWorldSpace(mPoint));
+			{	
+				try {
+					switch(ui.mode)
+					{
+						case PAINT_PREY:
+							ui.placeElement(toWorldSpace(mPoint), Prey.class);
+							break;
+						case PAINT_PREDATOR:
+							ui.placeElement(toWorldSpace(mPoint), Predator.class);
+							break;
+
+					}
+				} catch (SecurityException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (NoSuchMethodException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 			else	
 				ui.setPreyDirection(toWorldSpace(mPoint));
 		else

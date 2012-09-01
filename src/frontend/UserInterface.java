@@ -7,6 +7,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 
 import javax.swing.JButton;
@@ -55,9 +57,12 @@ public class UserInterface extends JFrame implements KeyListener {
 	
 	public enum Mode {SELECT, PAINT_PREY, PAINT_PREDATOR};
 	
+	Mode mode;
+	
 	public UserInterface(final Simulation sim) throws Exception	{
 		super("Swarm AI");
 		this.sim = sim;
+		mode = Mode.SELECT;
 		
 		addKeyListener(this);
 		
@@ -209,6 +214,7 @@ public class UserInterface extends JFrame implements KeyListener {
 		modeSelect.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent ae)	{
 				status.setMode("Selecting");
+				mode = Mode.SELECT;
 			}
 		});
 		
@@ -216,6 +222,7 @@ public class UserInterface extends JFrame implements KeyListener {
 		modePrey.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent ae)	{
 				status.setMode("Placing prey");
+				mode = Mode.PAINT_PREY;
 			}
 		});
 		
@@ -223,6 +230,7 @@ public class UserInterface extends JFrame implements KeyListener {
 		modePredator.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent ae)	{
 				status.setMode("Placing predator");
+				mode = Mode.PAINT_PREDATOR;
 			}
 		});
 		
@@ -307,7 +315,8 @@ public class UserInterface extends JFrame implements KeyListener {
 		canv.repaint();
 	}
 
-	public void placePrey(Vec mPoint) {
+	public <T> void placeElement(Vec mPoint, Class<T> cl) throws SecurityException, NoSuchMethodException {
+		Constructor c = cl.getConstructor(double.class, double.class, double.class, double.class, double.class);
 		//convert mPoint to worldspace
 		//place prey on closest dot
 		double xloc = Math.round((mPoint.x/10))*10;
@@ -320,7 +329,21 @@ public class UserInterface extends JFrame implements KeyListener {
 				validLocation = false;
 		
 		if (validLocation)
-			sim.elements.add(new Prey(xloc,yloc,1,1,5));
+			try {
+				sim.elements.add((Element)c.newInstance(xloc,yloc,1,1,5));
+			} catch (IllegalArgumentException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (InstantiationException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (IllegalAccessException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (InvocationTargetException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		canv.repaint();
 	}
 
