@@ -16,7 +16,8 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.JLabel;
 
-import frontend.UserInterface.Mode;
+import frontend.components.ContextMenu;
+
 
 import math.Rect;
 import math.Vec;
@@ -30,6 +31,7 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 	Vec mPoint = new Vec();	//the position of the mouse in labelSpace
 	Vec startPoint = new Vec();
 	
+	ContextMenu cm;	
 	Rectangle selectRect = null;
 	
 	int dotDiff = 10;
@@ -47,6 +49,9 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 		this.ui = ui;
 		origin = new Vec();
 		hmc = new HeightMapCache(this, ui.sim.hm);
+		
+		cm = new ContextMenu();
+		//setComponentPopupMenu(cm);
 		
 		addMouseListener(this);
 		addMouseMotionListener(this);
@@ -272,6 +277,9 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 						case PAINT_PREDATOR:
 							ui.placeElement(toWorldSpace(mPoint), Predator.class);
 							break;
+						case SELECT:
+							maybeShowPopup(me);
+							break;
 
 					}
 				} catch (SecurityException e) {
@@ -287,6 +295,16 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 		else
 			System.out.println("wat");
 	}
+	
+	private void maybeShowPopup(MouseEvent e) {
+		System.out.println("HERPSON");
+        //if (e.isPopupTrigger()) {
+        	System.out.println("POPUP");
+        	cm.show(e.getComponent(),
+                       e.getX(), e.getY());
+        //}
+    }
+	
 	public void mouseEntered(MouseEvent me) {}
 	public void mouseExited(MouseEvent me) {}
 	public void mouseMoved(MouseEvent me)	{

@@ -21,6 +21,11 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 
+import frontend.components.ControlBar;
+import frontend.components.PropertiesPanel;
+import frontend.components.StatusBar;
+
+
 import math.Vec;
 
 import util.Logger;

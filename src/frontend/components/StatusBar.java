@@ -1,4 +1,4 @@
-package frontend;
+package frontend.components;
 
 import java.awt.BorderLayout;
 import java.text.DecimalFormat;
@@ -8,7 +8,7 @@ import javax.swing.JPanel;
 
 import math.Vec;
 
-class StatusBar extends JPanel	{
+public class StatusBar extends JPanel	{
 	JLabel mousePoint = new JLabel(),
 		   mode = new JLabel(),
 		   zoom = new JLabel();
