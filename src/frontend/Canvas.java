@@ -71,7 +71,7 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 		try {
 			while(true)	{
 				Thread.sleep(40);
-				ui.status.setZoom(zoom);
+				ui.statusBar.setZoom(zoom);
 				repaint();
 			}
 		}
@@ -309,7 +309,7 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 	public void mouseExited(MouseEvent me) {}
 	public void mouseMoved(MouseEvent me)	{
 		if(hmc.completion >= 1)
-			ui.status.setMousePoint(toWorldSpace(new Vec(me.getPoint())));
+			ui.statusBar.setMousePoint(toWorldSpace(new Vec(me.getPoint())));
 	}
 	public void mouseWheelMoved(MouseWheelEvent mwe)	{
 		if(hmc.completion >= 1) {
