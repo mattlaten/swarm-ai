@@ -1,86 +1,66 @@
 package backend.environment;
 
-
 import java.util.List;
 
 import math.Vec;
 
-public class Prey extends Element implements Cloneable {
-	public @Property Vec position;
-	public @Property Vec velocity;
-	private Vec oldVelocity = null;
-	public @Property double size;
-	public @Property double maxSpeed;
-	public @Property double sightRadius;
+public class Prey extends Animal {
+	public Prey(Prey other)					{	super(other);	}
+	public Prey(Vec position, Vec velocity)	{	super(position, velocity);	}
+	public Prey()							{	super();	}
+	public Prey(double x, double y, double xvel, double yvel, double size)	{	super(x,y,xvel,yvel,size);	}
 	
-	public Prey(Vec position, Vec velocity)	{
-		this.position = new Vec(position);
-		this.velocity = new Vec(velocity);
-	}
-	
-	public Prey(Prey other)	{
-		this.position = new Vec(other.position);
-		this.velocity = new Vec(other.velocity);
-		this.size = other.size;
-		this.maxSpeed = other.maxSpeed;
-		this.sightRadius = other.sightRadius;
-	}
-	
-	public Prey()	{
-		position = new Vec(0,0);
-		velocity = new Vec(0,0);
-		size = 5;
-		maxSpeed = 0.2;
-		sightRadius = 100;
-	}
-	
-	public Prey(double x, double y, double xvel, double yvel, double size)	{
-		this();
-		position = new Vec(x,y);
-		setVelocity(new Vec(xvel,yvel));
-		this.size = size;
-	}
-	
-	public double getSize() 	{	return size;		}
-	public double getMaxSpeed()	{	return maxSpeed;	}
-	public double getRadius()	{	return sightRadius;	}
-	public Vec getPosition() 	{	return position;	}
-	public Vec getVelocity() 	{	return (oldVelocity == null ? velocity : oldVelocity).mult(getMaxSpeed());	}
-	public void setVelocity(Vec v)	{
-		velocity = new Vec(v).truncate(1);
-	}
-	
-	public Object clone()		{	return new Prey(this);	}
-
+	/* Here we have two general approaches when dealing with multiple vectors:
+	 * 1. take a weighted average of the vectors
+	 * 2. use an accumulator: order the vectors by priority, start adding them up and when the 
+	 * 			total length exceeds some length limit, stop adding and truncate
+	 * 
+	 * here we have a number of sources of vectors:
+	 * 		1. collision avoidance pushes the prey away from fellow prey
+	 * 		2. velocity matching makes the prey try and match it's fellow prey member's velocities (to go in the same direction)
+	 * 		3. flock centering pulls the prey towards all the other prey members
+	 * 
+	 * A total source vector for each of these sources is calculated using weighted averaging. Then the three vectors are placed in
+	 * an accumulator to find the final velocity.
+	 * 
+	 * Note: Collision avoidance and flock centering aren't linearly dependent on the distance of the other prey.
+	 */
 	public void calculateUpdate(List<Element> influences) {
 		//calculate the sums
 		Vec collisionAvoidance = new Vec(),
 			velocityMatching = new Vec(),
-			flockCentering = new Vec();
-		int neighbourhoodCount = 0;
+			flockCentering = new Vec(),
+			predatorAvoidance = new Vec();
+		int neighbourhoodCount = 0, predatorCount = 0;
 		for(Element e : influences)	{
 			Vec dir = e.getPosition().minus(getPosition());
 			if(dir.size() > 0 && dir.size() <= getRadius())	{
-				neighbourhoodCount ++;	
-				collisionAvoidance = collisionAvoidance.plus(dir.unit().mult(Math.pow((getRadius()-dir.size())/getRadius(),3)).neg());
-				velocityMatching = velocityMatching.plus(e.getVelocity().mult(1.0/e.getMaxSpeed()));
-				flockCentering = flockCentering.plus(dir.unit().mult(Math.pow(dir.size()/getRadius(),3)));
+				if(e instanceof Prey)	{
+					neighbourhoodCount ++;
+					collisionAvoidance = collisionAvoidance.plus(dir.unit().mult(Math.pow((getRadius()-dir.size())/getRadius(),3)).neg());
+					//this needs to be fixed, it's very haxxy that I must divide by e.getMaxSpeed() to get the truncated-to-unit vector, e.velocity
+					velocityMatching = velocityMatching.plus(e.getVelocity().mult(1.0/e.getMaxSpeed()));
+					flockCentering = flockCentering.plus(dir.unit().mult(Math.pow(dir.size()/getRadius(),3)));
+				}
+				else if(e instanceof Predator)	{
+					predatorCount ++;
+					predatorAvoidance = predatorAvoidance.plus(dir.unit().mult(Math.pow((getRadius()-dir.size())/getRadius(),3)).neg());
+				}
 			}
 		}
 		
 		//take the average weighting
 		if(neighbourhoodCount > 0)	{
+			predatorAvoidance = predatorAvoidance.mult(1.0/predatorCount);
 			collisionAvoidance = collisionAvoidance.mult(1.0/neighbourhoodCount);
 			velocityMatching = velocityMatching.mult(1.0/neighbourhoodCount);
 			flockCentering = flockCentering.mult(1.0/neighbourhoodCount);
 		}
 		
-		/*System.out.println("Collision Avoidance: " + collisionAvoidance + "(" + collisionAvoidance.size() + ")");
-		System.out.println("Velocity Matching: " + velocityMatching + "(" + velocityMatching.size() + ")");
-		System.out.println("Flocking: " + flockCentering + "(" + flockCentering.size() + ")");*/
-		
-		//now perform accumulation
-		Vec ret = new Vec(collisionAvoidance);
+		//now perform accumulation\
+		Vec ret = new Vec(predatorAvoidance);
+		if(ret.size() < 1)
+			ret = ret.plus(collisionAvoidance);
 		if(ret.size() < 1)
 			ret = ret.plus(flockCentering);
 		if(ret.size() < 1)
@@ -88,13 +68,7 @@ public class Prey extends Element implements Cloneable {
 		velocity = velocity.plus(ret.truncate(1)).truncate(1);
 	}
 	
-	public void update()	{
-		position = position.plus(velocity);
-		oldVelocity = new Vec(velocity);
+	public Object clone()	{
+		return new Prey(this);
 	}
-
-	public RenderObject getROb() {
-		return null;
-	}
-	
 }

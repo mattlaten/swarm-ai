@@ -16,14 +16,13 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.JLabel;
 
-import frontend.components.ContextMenu;
-
-
 import math.Rect;
 import math.Vec;
+import backend.environment.Animal;
 import backend.environment.Element;
 import backend.environment.Predator;
 import backend.environment.Prey;
+import frontend.components.ContextMenu;
 
 class Canvas extends JLabel implements MouseListener, MouseMotionListener, MouseWheelListener, Runnable	{
 	UserInterface ui;
