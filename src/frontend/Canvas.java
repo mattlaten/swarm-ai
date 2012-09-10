@@ -70,7 +70,8 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 		try {
 			while(true)	{
 				Thread.sleep(40);
-				ui.statusBar.setZoom(zoom);
+				if(ui.statusBar != null)
+					ui.statusBar.setZoom(zoom);
 				repaint();
 			}
 		}
