@@ -31,6 +31,7 @@ public class Simulation extends Thread {
 		snapshots = new ArrayList<Object>();
 		
 		hm = new HeightMap(new File("./maps/GC2.map"));
+		setName("Simulation");
 		//hm = new HeightMap();
 	}
 	
@@ -71,13 +72,11 @@ public class Simulation extends Thread {
 		return totalTime;
 	}
 	
-	public void loadHeightMap(File map)
-	{
+	public void loadHeightMap(File map) 	{
 		hm = new HeightMap(map);
 	}
 	
-	public void setHeightMap(HeightMap hm)
-	{
+	public void setHeightMap(HeightMap hm)	{
 		this.hm = hm;
 	}
 }

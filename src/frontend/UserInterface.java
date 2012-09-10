@@ -37,33 +37,22 @@ import backend.environment.Animal;
 public class UserInterface extends JFrame implements KeyListener {
 	
 	Logger log = new Logger(UserInterface.class, System.out, System.err);
-	JPanel toolbar, viewPort;
-	JButton modeSelect, modePrey, modePredator, modeModifier, 
-			modeObstacle, modeLoad, modeRandom, clearButton;
-	
-	JFileChooser fc;
-	
-	PropertiesPanel properties;
-	
-	JMenuBar menubar;
-	JMenu file, view;
-	JMenuItem fileLoadTerrain, fileGenerateRandomTerrain, fileExit;
-	JCheckBoxMenuItem viewGrid, viewAxes, viewMap, viewDirections, viewRadii;
-	
-	File terrainFile;
-	
+
 	Simulation sim;
 	Canvas canv;
 	
 	HashSet<Element> selection;
-	
-	StatusBar status;
-	ControlBar control;
+	File terrainFile;
 	
 	public enum Mode {SELECT, PAINT_PREY, PAINT_PREDATOR};
-	
 	Mode mode;
-	
+	StatusBar statusBar;
+	ControlBar controlBar;
+	PropertiesPanel properties;
+	Toolbar toolbar;
+	JPanel viewPort;
+	MenuBar menuBar;
+
 	public UserInterface(final Simulation sim) throws Exception	{
 		super("Swarm AI");
 		this.sim = sim;
@@ -72,33 +61,32 @@ public class UserInterface extends JFrame implements KeyListener {
 		addKeyListener(this);
 		
 		selection = new HashSet<Element>();
-		fc = new JFileChooser("./maps/");
+		
 		properties = new PropertiesPanel();
 		canv = new Canvas(this);
-		control = new ControlBar(sim);
-		status = new StatusBar();
+		controlBar = new ControlBar(sim);
+		statusBar = new StatusBar();
+		toolbar = new Toolbar();
+		menuBar = new MenuBar();
 		
 		//set up things
 		setSize(800, 600);
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 			
-		initMenu();
-		setJMenuBar(menubar);
-		
-		initToolbar();
-		
+		setJMenuBar(menuBar);
+			
 		viewPort = new JPanel();
 		viewPort.setLayout(new BorderLayout());
 		viewPort.add(toolbar, BorderLayout.PAGE_START);
 		viewPort.add(canv, BorderLayout.CENTER);
-		viewPort.add(control, BorderLayout.PAGE_END);
+		viewPort.add(controlBar, BorderLayout.PAGE_END);
 		
 		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		splitPane.add(properties);
 		splitPane.add(viewPort);
 		
-		getContentPane().add(status, BorderLayout.PAGE_END);
+		getContentPane().add(statusBar, BorderLayout.PAGE_END);
 		getContentPane().add(splitPane, BorderLayout.CENTER);
 		
 		/*PropertyDialog pd = new PropertyDialog(this);
@@ -108,94 +96,102 @@ public class UserInterface extends JFrame implements KeyListener {
 		sim.start();
 	}
 	
-	public void initMenu()
-	{
-		//FILE
-		fileLoadTerrain = new JMenuItem("Load Terrain");
-		fileLoadTerrain.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent ae)	{
-				if (!sim.isRunning)
-				{
-					status.setMode("Select Terrain");
-					int returnVal = fc.showOpenDialog(UserInterface.this);
-					if (returnVal == JFileChooser.APPROVE_OPTION) {
-			            terrainFile = fc.getSelectedFile();
-			            sim.loadHeightMap(terrainFile);
-			            canv.hmc.setHeightMap(sim.hm);
-			            log.info("Opening: " + terrainFile.getName());
-			            
-			        }
-					status.setMode("");
+	private class MenuBar extends JMenuBar {
+		
+		JMenuBar menubar;
+		JMenu file, view;
+		JMenuItem fileLoadTerrain, fileGenerateRandomTerrain, fileExit;
+		JCheckBoxMenuItem viewGrid, viewAxes, viewMap, viewDirections, viewRadii;
+		JFileChooser fc;
+		
+		public MenuBar()
+		{
+			fc = new JFileChooser("./maps/");
+			//FILE
+			fileLoadTerrain = new JMenuItem("Load Terrain");
+			fileLoadTerrain.addActionListener(new ActionListener(){
+				public void actionPerformed(ActionEvent ae)	{
+					if (!sim.isRunning)
+					{
+						statusBar.setMode("Select Terrain");
+						int returnVal = fc.showOpenDialog(UserInterface.this);
+						if (returnVal == JFileChooser.APPROVE_OPTION) {
+				            terrainFile = fc.getSelectedFile();
+				            sim.loadHeightMap(terrainFile);
+				            canv.hmc.setHeightMap(sim.hm);
+				            log.info("Opening: " + terrainFile.getName());
+				            
+				        }
+						statusBar.setMode("");
+					}
+					else
+						statusBar.setMode("Can't change terrain while simulation is running");
 				}
-				else
-					status.setMode("Can't change terrain while simulation is running");
-			}
-		});
-		
-		fileGenerateRandomTerrain = new JMenuItem("Generate Random Terrain");
-		fileGenerateRandomTerrain.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent ae)	{
-				if (!sim.isRunning)
-				{
-					status.setMode("Generating Random Terrain");
-					sim.setHeightMap(new HeightMap());
-					canv.hmc.setHeightMap(sim.hm);
-					status.setMode("");
+			});
+			
+			fileGenerateRandomTerrain = new JMenuItem("Generate Random Terrain");
+			fileGenerateRandomTerrain.addActionListener(new ActionListener(){
+				public void actionPerformed(ActionEvent ae)	{
+					if (!sim.isRunning)
+					{
+						statusBar.setMode("Generating Random Terrain");
+						sim.setHeightMap(new HeightMap());
+						canv.hmc.setHeightMap(sim.hm);
+						statusBar.setMode("");
+					}
+					else
+						statusBar.setMode("Can't change terrain while simulation is running!");
+			}});
+			
+			fileExit = new JMenuItem("Exit");
+			fileExit.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent ae)	{
+					System.exit(0);
 				}
-				else
-					status.setMode("Can't change terrain while simulation is running!");
-		}});
-		
-		fileExit = new JMenuItem("Exit");
-		fileExit.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent ae)	{
-				System.exit(0);
-			}
-		});
-		
-		//VIEW
-		viewGrid = new JCheckBoxMenuItem("Show Grid", canv.renderGrid);
-		viewGrid.addActionListener(new ActionListener()	{
-			public void actionPerformed(ActionEvent ae)	{
-				canv.renderGrid = viewGrid.isSelected();
-				canv.repaint();
-			}
-		});
-		
-		viewAxes = new JCheckBoxMenuItem("Show Axes", canv.renderAxes);
-		viewAxes.addActionListener(new ActionListener()	{
-			public void actionPerformed(ActionEvent ae)	{
-				canv.renderAxes = viewAxes.isSelected();
-				canv.repaint();
-			}
-		});
+			});
+			
+			//VIEW
+			viewGrid = new JCheckBoxMenuItem("Show Grid", canv.renderGrid);
+			viewGrid.addActionListener(new ActionListener()	{
+				public void actionPerformed(ActionEvent ae)	{
+					canv.renderGrid = viewGrid.isSelected();
+					canv.repaint();
+				}
+			});
+			
+			viewAxes = new JCheckBoxMenuItem("Show Axes", canv.renderAxes);
+			viewAxes.addActionListener(new ActionListener()	{
+				public void actionPerformed(ActionEvent ae)	{
+					canv.renderAxes = viewAxes.isSelected();
+					canv.repaint();
+				}
+			});
 
-		viewMap = new JCheckBoxMenuItem("Show Map", canv.renderHeightMap);
-		viewMap.addActionListener(new ActionListener()	{
-			public void actionPerformed(ActionEvent ae)	{
-				canv.renderHeightMap = viewMap.isSelected();
-				canv.repaint();
-			}
-		});
-		
-		viewDirections = new JCheckBoxMenuItem("Show Directional Vectors", canv.renderDirections);
-		viewDirections.addActionListener(new ActionListener()	{
-			public void actionPerformed(ActionEvent ae)	{
-				canv.renderDirections = viewDirections.isSelected();
-				canv.repaint();
-			}
-		});
-		
-		viewRadii = new JCheckBoxMenuItem("Show Radii", canv.renderRadii);
-		viewRadii.addActionListener(new ActionListener()	{
-			public void actionPerformed(ActionEvent ae)	{
-				canv.renderRadii = viewRadii.isSelected();
-				canv.repaint();
-			}
-		});
-		
-		//MENU BAR
-		menubar = new JMenuBar();
+			viewMap = new JCheckBoxMenuItem("Show Map", canv.renderHeightMap);
+			viewMap.addActionListener(new ActionListener()	{
+				public void actionPerformed(ActionEvent ae)	{
+					canv.renderHeightMap = viewMap.isSelected();
+					canv.repaint();
+				}
+			});
+			
+			viewDirections = new JCheckBoxMenuItem("Show Directional Vectors", canv.renderDirections);
+			viewDirections.addActionListener(new ActionListener()	{
+				public void actionPerformed(ActionEvent ae)	{
+					canv.renderDirections = viewDirections.isSelected();
+					canv.repaint();
+				}
+			});
+			
+			viewRadii = new JCheckBoxMenuItem("Show Radii", canv.renderRadii);
+			viewRadii.addActionListener(new ActionListener()	{
+				public void actionPerformed(ActionEvent ae)	{
+					canv.renderRadii = viewRadii.isSelected();
+					canv.repaint();
+				}
+			});
+
+			
 			file = new JMenu("File");
 				file.add(fileLoadTerrain);
 				file.add(fileGenerateRandomTerrain);
@@ -208,69 +204,76 @@ public class UserInterface extends JFrame implements KeyListener {
 				view.addSeparator();
 				view.add(viewDirections);
 				view.add(viewRadii);
-		menubar.add(file);
-		menubar.add(view);
+			add(file);
+			add(view);
+		}
 	}
 
-	public void initToolbar()
-	{
-		//BUTTONS
-		modeSelect = new JButton("Select");
-		modeSelect.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent ae)	{
-				status.setMode("Selecting");
-				mode = Mode.SELECT;
-			}
-		});
-		
-		modePrey = new JButton("Prey");
-		modePrey.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent ae)	{
-				status.setMode("Placing prey");
-				mode = Mode.PAINT_PREY;
-			}
-		});
-		
-		modePredator = new JButton("Predator");
-		modePredator.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent ae)	{
-				status.setMode("Placing predator");
-				mode = Mode.PAINT_PREDATOR;
-			}
-		});
-		
-		modeModifier = new JButton("Modifier");
-		modeModifier.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent ae)	{
-				status.setMode("Placing modifier");
-			}
-		});
-		
-		modeObstacle = new JButton("Obstacle");
-		modeObstacle.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent ae)	{
-				status.setMode("Placing obstacle");
-			}
-		});
-		
-		clearButton = new JButton("Clear");
-		clearButton.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent ae)	{
-				clear();
-			}
-		});
+	private class Toolbar extends JPanel {
 
-		//TOOLBAR
-		toolbar = new JPanel();
-		toolbar.setLayout(new FlowLayout());
-		getContentPane().setLayout(new BorderLayout());
-			toolbar.add(modeSelect);
-			toolbar.add(modePrey);
-			toolbar.add(modePredator);
-			toolbar.add(modeModifier);
-			toolbar.add(modeObstacle);
-			toolbar.add(clearButton);
+		JButton modeSelect, modePrey, modePredator, modeModifier, 
+		modeObstacle, modeLoad, modeRandom, clearButton;
+		
+		public Toolbar()
+		{
+			//BUTTONS
+			modeSelect = new JButton("Select");
+			modeSelect.addActionListener(new ActionListener(){
+				public void actionPerformed(ActionEvent ae)	{
+					statusBar.setMode("Selecting");
+					mode = Mode.SELECT;
+				}
+			});
+			
+			modePrey = new JButton("Prey");
+			modePrey.addActionListener(new ActionListener(){
+				public void actionPerformed(ActionEvent ae)	{
+					statusBar.setMode("Placing prey");
+					mode = Mode.PAINT_PREY;
+				}
+			});
+			
+			modePredator = new JButton("Predator");
+			modePredator.addActionListener(new ActionListener(){
+				public void actionPerformed(ActionEvent ae)	{
+					statusBar.setMode("Placing predator");
+					mode = Mode.PAINT_PREDATOR;
+				}
+			});
+			
+			modeModifier = new JButton("Modifier");
+			modeModifier.addActionListener(new ActionListener(){
+				public void actionPerformed(ActionEvent ae)	{
+					statusBar.setMode("Placing modifier");
+				}
+			});
+			
+			modeObstacle = new JButton("Obstacle");
+			modeObstacle.addActionListener(new ActionListener(){
+				public void actionPerformed(ActionEvent ae)	{
+					statusBar.setMode("Placing obstacle");
+				}
+			});
+			
+			clearButton = new JButton("Clear");
+			clearButton.addActionListener(new ActionListener(){
+				public void actionPerformed(ActionEvent ae)	{
+					clear();
+				}
+			});
+
+			//TOOLBAR
+			setLayout(new FlowLayout());
+			getContentPane().setLayout(new BorderLayout());
+			add(modeSelect);
+			add(modePrey);
+			add(modePredator);
+			add(modeModifier);
+			add(modeObstacle);
+			add(clearButton);
+		}
 	}
+	
 	
 	public void selectPrey(Vec point, boolean addToSelection) {
 		//Add prey to selection
@@ -391,7 +394,7 @@ public class UserInterface extends JFrame implements KeyListener {
         System.out.println(eventCode);
         if (eventChar == ' ')
         {
-            control.flip();
+            controlBar.flip();
         }
 	}
 }
