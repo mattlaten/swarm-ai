@@ -10,6 +10,10 @@ public class Prey extends Animal {
 	public Prey()							{	super();	}
 	public Prey(double x, double y, double xvel, double yvel, double size)	{	super(x,y,xvel,yvel,size);	}
 	
+	public double weighted(double x)	{
+		return Math.pow(x, 3)*4+0.5;
+	}
+	
 	/* Here we have two general approaches when dealing with multiple vectors:
 	 * 1. take a weighted average of the vectors
 	 * 2. use an accumulator: order the vectors by priority, start adding them up and when the 
@@ -37,21 +41,24 @@ public class Prey extends Animal {
 			if(dir.size() > 0 && dir.size() <= getRadius())	{
 				if(e instanceof Prey)	{
 					neighbourhoodCount ++;
-					collisionAvoidance = collisionAvoidance.plus(dir.unit().mult(Math.pow((getRadius()-dir.size())/getRadius(),3)).neg());
+					collisionAvoidance = collisionAvoidance.plus(dir.unit().mult(Math.pow((getRadius()-dir.size())/getRadius(),1)).neg());
+					//collisionAvoidance = collisionAvoidance.plus(dir.unit().mult(weighted((getRadius()-dir.size())/getRadius())).neg());
 					//this needs to be fixed, it's very haxxy that I must divide by e.getMaxSpeed() to get the truncated-to-unit vector, e.velocity
 					velocityMatching = velocityMatching.plus(e.getVelocity().mult(1.0/e.getMaxSpeed()));
-					flockCentering = flockCentering.plus(dir.unit().mult(Math.pow(dir.size()/getRadius(),3)));
+					flockCentering = flockCentering.plus(dir.unit().mult(Math.pow(dir.size()/getRadius(),1)));
+					//flockCentering = flockCentering.plus(dir.unit().mult(weighted(dir.size()/getRadius())));
 				}
 				else if(e instanceof Predator)	{
 					predatorCount ++;
-					predatorAvoidance = predatorAvoidance.plus(dir.unit().mult(Math.pow((getRadius()-dir.size())/getRadius(),3)).neg());
+					predatorAvoidance = predatorAvoidance.plus(dir.unit().mult(weighted((getRadius()-dir.size())/getRadius())).neg());
 				}
 			}
 		}
 		
 		//take the average weighting
-		if(neighbourhoodCount > 0)	{
+		if(predatorCount > 0)
 			predatorAvoidance = predatorAvoidance.mult(1.0/predatorCount);
+		if(neighbourhoodCount > 0)	{
 			collisionAvoidance = collisionAvoidance.mult(1.0/neighbourhoodCount);
 			velocityMatching = velocityMatching.mult(1.0/neighbourhoodCount);
 			flockCentering = flockCentering.mult(1.0/neighbourhoodCount);
@@ -60,9 +67,9 @@ public class Prey extends Animal {
 		//now perform accumulation\
 		Vec ret = new Vec(predatorAvoidance);
 		if(ret.size() < 1)
-			ret = ret.plus(collisionAvoidance);
-		if(ret.size() < 1)
-			ret = ret.plus(flockCentering);
+			ret = ret.plus(collisionAvoidance).plus(flockCentering).mult(0.5);
+		/*if(ret.size() < 1)
+			ret = ret.plus(flockCentering);*/
 		if(ret.size() < 1)
 			ret = ret.plus(velocityMatching);
 		velocity = velocity.plus(ret.truncate(1)).truncate(1);

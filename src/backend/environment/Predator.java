@@ -37,10 +37,10 @@ public class Predator extends Animal implements Cloneable {
 			if(dir.size() > 0 && dir.size() <= getRadius())	{
 				neighbourhoodCount ++;
 				if(e instanceof Predator)	{
-					collisionAvoidance = collisionAvoidance.plus(dir.unit().mult(Math.pow((getRadius()-dir.size())/getRadius(),3)).neg());
+					collisionAvoidance = collisionAvoidance.plus(dir.unit().mult(Math.pow((getRadius()-dir.size())/getRadius(),2)).neg());
 					//this needs to be fixed, it's very haxxy that I must divide by e.getMaxSpeed() to get the truncated-to-unit vector, e.velocity
 					velocityMatching = velocityMatching.plus(e.getVelocity().mult(1.0/e.getMaxSpeed()));
-					flockCentering = flockCentering.plus(dir.unit().mult(Math.pow(dir.size()/getRadius(),3)));
+					flockCentering = flockCentering.plus(dir.unit().mult(Math.pow(dir.size()/getRadius(),2)));
 				}
 			}
 		}

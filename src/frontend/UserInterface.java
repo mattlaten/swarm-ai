@@ -46,7 +46,7 @@ public class UserInterface extends JFrame implements KeyListener {
 	
 	public enum Mode {SELECT, PAINT_PREY, PAINT_PREDATOR};
 	Mode mode;
-	StatusBar statusBar;
+	StatusBar statusBar = null;
 	ControlBar controlBar;
 	PropertiesPanel properties;
 	Toolbar toolbar;
@@ -62,8 +62,9 @@ public class UserInterface extends JFrame implements KeyListener {
 		
 		selection = new HashSet<Element>();
 		
-		properties = new PropertiesPanel();
 		canv = new Canvas(this);
+		
+		properties = new PropertiesPanel();
 		controlBar = new ControlBar(sim);
 		statusBar = new StatusBar();
 		toolbar = new Toolbar();
@@ -75,7 +76,7 @@ public class UserInterface extends JFrame implements KeyListener {
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 			
 		setJMenuBar(menuBar);
-			
+		
 		viewPort = new JPanel();
 		viewPort.setLayout(new BorderLayout());
 		viewPort.add(toolbar, BorderLayout.PAGE_START);
