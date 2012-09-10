@@ -30,32 +30,41 @@ public class Predator extends Animal implements Cloneable {
 		//calculate the sums
 		Vec collisionAvoidance = new Vec(),
 			velocityMatching = new Vec(),
-			flockCentering = new Vec();
-		int neighbourhoodCount = 0;
+			flockCentering = new Vec(),
+			preyAttacking = new Vec();
+		int neighbourhoodCount = 0, predatorCount = 0;
 		for(Element e : influences)	{
 			Vec dir = e.getPosition().minus(getPosition());
 			if(dir.size() > 0 && dir.size() <= getRadius())	{
-				neighbourhoodCount ++;
 				if(e instanceof Predator)	{
-					collisionAvoidance = collisionAvoidance.plus(dir.unit().mult(Math.pow((getRadius()-dir.size())/getRadius(),2)).neg());
+					neighbourhoodCount ++;
+					collisionAvoidance = collisionAvoidance.plus(dir.unit().mult(Math.pow((getRadius()-dir.size())/getRadius(),1.0/3)).neg());
 					//this needs to be fixed, it's very haxxy that I must divide by e.getMaxSpeed() to get the truncated-to-unit vector, e.velocity
 					velocityMatching = velocityMatching.plus(e.getVelocity().mult(1.0/e.getMaxSpeed()));
-					flockCentering = flockCentering.plus(dir.unit().mult(Math.pow(dir.size()/getRadius(),2)));
+					flockCentering = flockCentering.plus(dir.unit().mult(Math.pow(dir.size()/getRadius(),1)));
+				}
+				else if(e instanceof Prey)	{
+					predatorCount ++;
+					preyAttacking = preyAttacking.plus(dir.unit().mult(Math.pow((getRadius()-dir.size())/getRadius(), 1.0/4)));
 				}
 			}
 		}
 		
 		//take the average weighting
+		if(predatorCount > 0)
+			preyAttacking = preyAttacking.mult(1.0/predatorCount);
 		if(neighbourhoodCount > 0)	{
 			collisionAvoidance = collisionAvoidance.mult(1.0/neighbourhoodCount);
 			velocityMatching = velocityMatching.mult(1.0/neighbourhoodCount);
 			flockCentering = flockCentering.mult(1.0/neighbourhoodCount);
 		}
 		
-		//now perform accumulation
-		Vec ret = new Vec(collisionAvoidance);
+		//now perform accumulation\
+		Vec ret = collisionAvoidance.plus(flockCentering).mult(0.5);
 		if(ret.size() < 1)
-			ret = ret.plus(flockCentering);
+			ret = ret.plus(preyAttacking);
+		/*if(ret.size() < 1)
+			ret = ret.plus(flockCentering);*/
 		if(ret.size() < 1)
 			ret = ret.plus(velocityMatching);
 		velocity = velocity.plus(ret.truncate(1)).truncate(1);

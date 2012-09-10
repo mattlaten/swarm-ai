@@ -41,16 +41,14 @@ public class Prey extends Animal {
 			if(dir.size() > 0 && dir.size() <= getRadius())	{
 				if(e instanceof Prey)	{
 					neighbourhoodCount ++;
-					collisionAvoidance = collisionAvoidance.plus(dir.unit().mult(Math.pow((getRadius()-dir.size())/getRadius(),1)).neg());
-					//collisionAvoidance = collisionAvoidance.plus(dir.unit().mult(weighted((getRadius()-dir.size())/getRadius())).neg());
+					collisionAvoidance = collisionAvoidance.plus(dir.unit().mult(Math.pow((getRadius()-dir.size())/getRadius(),1.0/3)).neg());
 					//this needs to be fixed, it's very haxxy that I must divide by e.getMaxSpeed() to get the truncated-to-unit vector, e.velocity
 					velocityMatching = velocityMatching.plus(e.getVelocity().mult(1.0/e.getMaxSpeed()));
 					flockCentering = flockCentering.plus(dir.unit().mult(Math.pow(dir.size()/getRadius(),1)));
-					//flockCentering = flockCentering.plus(dir.unit().mult(weighted(dir.size()/getRadius())));
 				}
 				else if(e instanceof Predator)	{
 					predatorCount ++;
-					predatorAvoidance = predatorAvoidance.plus(dir.unit().mult(weighted((getRadius()-dir.size())/getRadius())).neg());
+					predatorAvoidance = predatorAvoidance.plus(dir.unit().mult(Math.pow((getRadius()-dir.size())/getRadius(), 1.0/4)).neg());
 				}
 			}
 		}
