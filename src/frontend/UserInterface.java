@@ -96,6 +96,124 @@ public class UserInterface extends JFrame implements KeyListener {
 		sim.start();
 	}
 	
+	public void selectPrey(Vec point, boolean addToSelection) {
+		//Add prey to selection
+		//Colour it differently (green?)
+		boolean added = false;
+		for (Element e : sim.elements)
+		{
+			if (e.getPosition().withinRadius(point, e.getSize()))	
+			{
+				if (!addToSelection)
+					selection.clear();
+				selection.add(e);
+				try {
+					properties.targetEntity(e);
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				added = true;
+				//log.info("Added element " + e.getPosition() + " : " + point);
+			}
+			else
+				continue;
+				//log.info("Did not add element " + e.getPosition() + " : " + point);
+		}
+		if (!added)
+			selection.clear();
+		canv.repaint();
+	}
+	
+	public void selectBox(Vec start, Vec end, boolean addToSelection)
+	{
+		double minx = Math.min(start.x, end.x);
+		double maxx = Math.max(start.x, end.x);
+		double miny = Math.min(start.y, end.y);
+		double maxy = Math.max(start.y, end.y);
+		
+		if (!addToSelection)
+			selection.clear();
+		
+		for (Element e : sim.elements)	{
+			Vec pos = e.getPosition();
+			if (pos.x >= minx && pos.x <= maxx && pos.y >= miny && pos.y <= maxy)
+				selection.add(e);
+		}
+		canv.repaint();
+	}
+
+	public <T> void placeElement(Vec mPoint, Class<T> cl) throws SecurityException, NoSuchMethodException {
+		Constructor c = cl.getConstructor(double.class, double.class, double.class, double.class, double.class);
+		//convert mPoint to worldspace
+		//place prey on closest dot
+		double xloc = Math.round((mPoint.x/10))*10;
+		double yloc = Math.round(mPoint.y/10)*10;
+		
+		boolean validLocation = true;
+		
+		for (Element e : sim.elements)
+			if (e.getPosition().equals(new Vec(xloc, yloc)))
+				validLocation = false;
+		
+		if (validLocation)
+			try {
+				sim.elements.add((Element)c.newInstance(xloc,yloc,1,1,5));
+			} catch (IllegalArgumentException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (InstantiationException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (IllegalAccessException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (InvocationTargetException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		canv.repaint();
+	}
+
+	public void setPreyDirection(Vec mPoint) {
+		for (Element e : selection)
+			e.setVelocity(mPoint.minus(e.getPosition()));
+	}
+	
+	public void clear()
+	{
+		selection.clear();
+		sim.elements.clear();
+		sim.setTime(0);
+		sim.setTotalTime(0);
+	}
+
+	@Override
+	public void keyPressed(KeyEvent event) {
+		
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void keyReleased(KeyEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void keyTyped(KeyEvent event) {
+		// TODO Auto-generated method stub
+		char eventChar = event.getKeyChar();
+        int eventCode = event.getKeyCode();
+        System.out.println(eventChar);
+        System.out.println(eventCode);
+        if (eventChar == ' ')
+        {
+            controlBar.flip();
+        }
+	}
+	
 	private class MenuBar extends JMenuBar {
 		
 		JMenuBar menubar;
@@ -272,130 +390,6 @@ public class UserInterface extends JFrame implements KeyListener {
 			add(modeObstacle);
 			add(clearButton);
 		}
-	}
-	
-	
-	public void selectPrey(Vec point, boolean addToSelection) {
-		//Add prey to selection
-		//Colour it differently (green?)
-		boolean added = false;
-		for (Element e : sim.elements)
-		{
-			if (e.getPosition().withinRadius(point, e.getSize()))	
-			{
-				if (!addToSelection)
-					selection.clear();
-				selection.add(e);
-				try {
-					properties.targetEntity(e);
-				} catch (Exception e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				added = true;
-				//log.info("Added element " + e.getPosition() + " : " + point);
-			}
-			else
-				continue;
-				//log.info("Did not add element " + e.getPosition() + " : " + point);
-		}
-		if (!added)
-			selection.clear();
-		canv.repaint();
-	}
-	
-	public void selectBox(Vec start, Vec end, boolean addToSelection)
-	{
-		double minx = Math.min(start.x, end.x);
-		double maxx = Math.max(start.x, end.x);
-		double miny = Math.min(start.y, end.y);
-		double maxy = Math.max(start.y, end.y);
-		
-		if (!addToSelection)
-			selection.clear();
-		
-		for (Element e : sim.elements)
-		{
-			Vec pos = e.getPosition();
-			if (pos.x >= minx && pos.x <= maxx && pos.y >= miny && pos.y <= maxy)
-				selection.add(e);
-		}
-		canv.repaint();
-	}
-
-	public <T> void placeElement(Vec mPoint, Class<T> cl) throws SecurityException, NoSuchMethodException {
-		Constructor c = cl.getConstructor(double.class, double.class, double.class, double.class, double.class);
-		//convert mPoint to worldspace
-		//place prey on closest dot
-		double xloc = Math.round((mPoint.x/10))*10;
-		double yloc = Math.round(mPoint.y/10)*10;
-		
-		boolean validLocation = true;
-		
-		for (Element e : sim.elements)
-			if (e.getPosition().equals(new Vec(xloc, yloc)))
-				validLocation = false;
-		
-		if (validLocation)
-			try {
-				sim.elements.add((Element)c.newInstance(xloc,yloc,1,1,5));
-			} catch (IllegalArgumentException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (InstantiationException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (IllegalAccessException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (InvocationTargetException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		canv.repaint();
-	}
-
-	public void setPreyDirection(Vec mPoint) {
-		for (Element e : selection)
-		{
-			e.setVelocity(mPoint.minus(e.getPosition()));
-		}
- 		//set all elements in selection's dir to mPoint
-		
-	}
-	
-	public void clear()
-	{
-		selection.clear();
-		sim.elements.clear();
-		sim.setTime(0);
-		sim.setTotalTime(0);
-	}
-
-	@Override
-	public void keyPressed(KeyEvent event) {
-		
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void keyReleased(KeyEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void keyTyped(KeyEvent event) {
-		// TODO Auto-generated method stub
-		char eventChar = event.getKeyChar();
-        int eventCode = event.getKeyCode();
-        System.out.println(eventChar);
-        System.out.println(eventCode);
-        if (eventChar == ' ')
-        {
-            controlBar.flip();
-        }
 	}
 }
 
