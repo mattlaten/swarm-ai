@@ -49,7 +49,7 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 		origin = new Vec();
 		hmc = new HeightMapCache(this, ui.sim.hm);
 		
-		cm = new ContextMenu();
+		cm = new ContextMenu(ui);
 		//setComponentPopupMenu(cm);
 		
 		addMouseListener(this);
@@ -296,12 +296,10 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 	}
 	
 	private void maybeShowPopup(MouseEvent e) {
-		System.out.println("HERPSON");
-        //if (e.isPopupTrigger()) {
-        	System.out.println("POPUP");
-        	cm.show(e.getComponent(),
+        cm.position = toWorldSpace(new Vec(e.getX(), e.getY()));
+		cm.show(e.getComponent(),
                        e.getX(), e.getY());
-        //}
+        
     }
 	
 	public void mouseEntered(MouseEvent me) {}
