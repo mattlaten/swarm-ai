@@ -32,7 +32,7 @@ import util.Logger;
 import backend.HeightMap;
 import backend.Simulation;
 import backend.environment.Element;
-import backend.environment.Prey;
+import backend.environment.Animal;
 
 public class UserInterface extends JFrame implements KeyListener {
 	
