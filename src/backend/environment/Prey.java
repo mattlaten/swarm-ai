@@ -24,8 +24,12 @@ public class Prey extends Animal {
 	 * 		2. velocity matching makes the prey try and match it's fellow prey member's velocities (to go in the same direction)
 	 * 		3. flock centering pulls the prey towards all the other prey members
 	 * 
-	 * A total source vector for each of these sources is calculated using weighted averaging. Then the three vectors are placed in
-	 * an accumulator to find the final velocity.
+	 * //A total source vector for each of these sources is calculated using weighted averaging. Then the three vectors are placed in
+	 * //an accumulator to find the final velocity.
+	 * We used to use an accumulator, now we take an "informed weighted sum" of the weighted averages. To understand what I mean by "informed"
+	 * consider the case where we weight collisionAvoidance 0.2, flockCentering 0.2, velocityMatching 0.1 and predatorAvoidance 0.5.
+	 * Now if there were no predator's to avoid, then the other factors should make a total weighting of 1 and not 0.5. This "accounting for
+	 * absent impulses" is what we understand as "informed".
 	 * 
 	 * Note: Collision avoidance and flock centering aren't linearly dependent on the distance of the other prey.
 	 */
@@ -35,6 +39,10 @@ public class Prey extends Animal {
 			velocityMatching = new Vec(),
 			flockCentering = new Vec(),
 			predatorAvoidance = new Vec();
+		double collisionAvoidanceWeight = 0.2,
+			   velocityMatchingWeight = 0.1,
+			   flockCenteringWeight = 0.2,
+			   predatorAvoidanceWeight = 0.5;
 		int neighbourhoodCount = 0, predatorCount = 0;
 		for(Element e : influences)	{
 			Vec dir = e.getPosition().minus(getPosition());
@@ -48,7 +56,7 @@ public class Prey extends Animal {
 				}
 				else if(e instanceof Predator)	{
 					predatorCount ++;
-					predatorAvoidance = predatorAvoidance.plus(dir.unit().mult(Math.pow((getRadius()-dir.size())/getRadius(), 1.0/4)).neg());
+					predatorAvoidance = predatorAvoidance.plus(dir.unit().mult(Math.pow((getRadius()-dir.size())/getRadius(), 1.0/3)).neg());
 				}
 			}
 		}
@@ -63,13 +71,16 @@ public class Prey extends Animal {
 		}
 		
 		//now perform accumulation\
-		Vec ret = new Vec(predatorAvoidance);
+		/*Vec ret = new Vec(predatorAvoidance);
 		if(ret.size() < 1)
 			ret = ret.plus(collisionAvoidance).plus(flockCentering).mult(0.5);
-		/*if(ret.size() < 1)
-			ret = ret.plus(flockCentering);*/
 		if(ret.size() < 1)
-			ret = ret.plus(velocityMatching);
+			ret = ret.plus(velocityMatching);*/
+		Vec ret = predatorAvoidance.mult(predatorAvoidanceWeight)
+						.plus(collisionAvoidance.mult(collisionAvoidanceWeight)
+						.plus(flockCentering.mult(flockCenteringWeight)
+						.plus(velocityMatching.mult(velocityMatchingWeight))))
+						.mult(1.0/(predatorAvoidanceWeight+collisionAvoidanceWeight+flockCenteringWeight+velocityMatchingWeight));
 		velocity = velocity.plus(ret.truncate(1)).truncate(1);
 	}
 	
