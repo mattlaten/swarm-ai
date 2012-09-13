@@ -6,7 +6,6 @@ import java.util.List;
 import math.Vec;
 
 public abstract class Animal extends Element implements Cloneable {
-	public @Property Vec position;
 	public @Property Vec velocity;	//this stores a vector that is at most a unit vector which is multiplied by the maxSpeed 
 	private Vec oldVelocity = null;
 	public @Property double size;
@@ -44,7 +43,6 @@ public abstract class Animal extends Element implements Cloneable {
 	public double getSize() 	{	return size;		}
 	public double getMaxSpeed()	{	return maxSpeed;	}
 	public double getRadius()	{	return sightRadius;	}
-	public Vec getPosition() 	{	return position;	}
 	public Vec getVelocity() 	{	return (oldVelocity == null ? velocity : oldVelocity).mult(getMaxSpeed());	}
 	public void setVelocity(Vec v)	{
 		velocity = new Vec(v).truncate(1);
@@ -58,9 +56,4 @@ public abstract class Animal extends Element implements Cloneable {
 		position = position.plus(velocity);
 		oldVelocity = new Vec(velocity);
 	}
-
-	public RenderObject getROb() {
-		return null;
-	}
-	
 }
