@@ -18,10 +18,10 @@ import javax.swing.JLabel;
 
 import math.Rect;
 import math.Vec;
-import backend.environment.Animal;
 import backend.environment.Element;
 import backend.environment.Predator;
 import backend.environment.Prey;
+import backend.environment.Waypoint;
 import frontend.components.ContextMenu;
 
 class Canvas extends JLabel implements MouseListener, MouseMotionListener, MouseWheelListener, Runnable	{
@@ -42,7 +42,8 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 			renderAxes = true,
 			renderHeightMap = false,
 			renderDirections = true,
-			renderRadii = false;
+			renderRadii = false,
+			renderWaypoints = true;
 	
 	public Canvas(UserInterface ui)	{
 		this.ui = ui;
@@ -136,17 +137,29 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 			}	
 			//draw elements
 			for(Element e: ui.sim.elements)	{
-				if (e.getClass() == Prey.class)
-				{
+				//if (e.getClass() == Prey.class)	{
+				if (e instanceof Prey)	{
 					g2.setColor(Color.blue);
 					if (ui.selection.contains(e))
 						g2.setColor(new Color(0.2f,0.2f,1.0f));
 				}
-				if (e.getClass() == Predator.class)
-				{
+				//if (e.getClass() == Predator.class)	{
+				else if (e instanceof Predator)	{
 					g2.setColor(Color.red);
 					if (ui.selection.contains(e))
 						g2.setColor(new Color(1.0f,0.2f,0.2f));
+				}
+				else if(e instanceof Waypoint)	{
+					g2.setColor(Color.orange);
+					if (ui.selection.contains(e))
+						g2.setColor(new Color(1.0f,0.2f,0.2f));
+					if(!renderWaypoints)
+						continue;
+					else if(e.getTarget() != null)	{	//if we're here then we know we're going to render this waypoint. so also render the path to the next waypoint
+						Point epos = toLabelSpace(e.getPosition()).getPoint(),
+							  tpos = toLabelSpace(e.getTarget().getPosition()).getPoint();
+						g2.drawLine(epos.x, epos.y, tpos.x, tpos.y);
+					}
 				}
 				int size = (int)(e.getSize()*zoom);
 				Point pos = toLabelSpace(e.getPosition()).getPoint();

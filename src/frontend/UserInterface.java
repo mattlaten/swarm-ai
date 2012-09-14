@@ -21,18 +21,15 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 
-import frontend.components.ControlBar;
-import frontend.components.PropertiesPanel;
-import frontend.components.StatusBar;
-
-
 import math.Vec;
-
 import util.Logger;
 import backend.HeightMap;
 import backend.Simulation;
 import backend.environment.Element;
-import backend.environment.Animal;
+import backend.environment.Waypoint;
+import frontend.components.ControlBar;
+import frontend.components.PropertiesPanel;
+import frontend.components.StatusBar;
 
 public class UserInterface extends JFrame implements KeyListener {
 	
@@ -153,6 +150,13 @@ public class UserInterface extends JFrame implements KeyListener {
 		
 		boolean validLocation = true;
 		
+		Waypoint firstWaypoint = null;
+		for(Element e : sim.elements)
+			if(e instanceof Waypoint)	{
+				firstWaypoint = (Waypoint)e;
+				break;
+			}
+		
 		for (Element e : sim.elements)
 			if (e.getPosition().equals(new Vec(xloc, yloc)))
 				validLocation = false;
@@ -160,6 +164,7 @@ public class UserInterface extends JFrame implements KeyListener {
 		if (validLocation)
 			try {
 				sim.elements.add((Element)c.newInstance(xloc,yloc,1,1,5));
+				sim.elements.get(sim.elements.size()-1).setTarget(firstWaypoint);
 			} catch (IllegalArgumentException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();

@@ -27,7 +27,9 @@ public class Vec implements Serializable	{
 	public Vec invertY()			{	return new Vec(x, -y);						}
 	
 	public Vec truncate(double mag)	{
-		if(size() == 0)
+		if(mag < 0)
+			throw new InvalidTruncationValueException();
+		if(size() == 0 || size() <= mag)
 			return new Vec(this);
 		return unit().mult(mag);
 	}
@@ -47,5 +49,11 @@ public class Vec implements Serializable	{
 	
 	public String toString()	{
 		return "<" + x + ", " + y + ">";
+	}
+}
+
+class InvalidTruncationValueException extends RuntimeException	{
+	public InvalidTruncationValueException()	{
+		super("The truncation value given must be in the range [0,infty).");
 	}
 }
