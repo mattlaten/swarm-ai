@@ -57,7 +57,7 @@ public class ControlBar extends JPanel implements Runnable, ActionListener {
 		
 		setVisible(true);
 		
-		new Thread(this).start();
+		new Thread(this, "Control Bar").start();
 	}
 	
 	public void updateTime(double mousePosition)	{

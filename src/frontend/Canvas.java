@@ -56,7 +56,7 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 		addMouseMotionListener(this);
 		addMouseWheelListener(this);
 		
-		new Thread(this).start();
+		new Thread(this, "Canvas").start();
 	}
 	
 	//public Vec toLabelSpace(Vec v)	{	return v.invertY().plus(origin).plus(new Vec(getSize().width/2, getSize().height/2));	}
