@@ -1,4 +1,4 @@
-package frontend;
+package frontend.components;
 
 import java.awt.BorderLayout;
 import java.lang.reflect.Field;

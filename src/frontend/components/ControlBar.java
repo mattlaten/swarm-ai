@@ -1,4 +1,4 @@
-package frontend;
+package frontend.components;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
@@ -71,6 +71,12 @@ public class ControlBar extends JPanel implements Runnable, ActionListener {
 	}
 	
 	public void actionPerformed(ActionEvent ae)	{
+		sim.isRunning = !sim.isRunning;
+		playPause.setText(sim.isRunning ? "Pause" : "Play");
+	}
+	
+	public void flip()
+	{
 		sim.isRunning = !sim.isRunning;
 		playPause.setText(sim.isRunning ? "Pause" : "Play");
 	}

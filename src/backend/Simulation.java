@@ -2,10 +2,11 @@ package backend;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import math.Vec;
 import backend.environment.Element;
+import backend.environment.Waypoint;
 
 public class Simulation extends Thread {
 	public CopyOnWriteArrayList<Element> elements;
@@ -19,18 +20,21 @@ public class Simulation extends Thread {
 	
 	public Simulation()	{
 		elements = new CopyOnWriteArrayList<Element>();
-		/*Prey p = new Prey();
-		p.position = new Vec(10, 10);
-		p.velocity = new Vec(1,1).truncate(p.getMaxSpeed());
-		elements.add(p);
-		p = new Prey();
-		p.position = new Vec(20, 10);
-		p.velocity = new Vec(1,1).truncate(p.getMaxSpeed());
-		elements.add(p);*/
+		
+		//we add some waypoints for testing purposes
+		Waypoint prev = null;
+		for(int i = 0; i < 10; i++)	{
+			Waypoint cur = new Waypoint(new Vec(Math.random()*1000-500, Math.random()*1000-500));
+			if(prev != null)
+				prev.setTarget(cur);
+			prev = cur;
+			elements.add(cur);
+		}
 		
 		snapshots = new ArrayList<Object>();
 		
 		hm = new HeightMap(new File("./maps/GC2.map"));
+		setName("Simulation");
 		//hm = new HeightMap();
 	}
 	
@@ -58,6 +62,11 @@ public class Simulation extends Thread {
 	public void setTime(int t)	{
 		time = Math.max(t - t%timeStep, 0);
 	}
+	
+	public void setTotalTime(int t)	{
+		totalTime = Math.max(t - t%timeStep, 0);
+	}
+	
 	public int getTime()	{
 		return time;
 	}
@@ -66,13 +75,11 @@ public class Simulation extends Thread {
 		return totalTime;
 	}
 	
-	public void loadHeightMap(File map)
-	{
+	public void loadHeightMap(File map) 	{
 		hm = new HeightMap(map);
 	}
 	
-	public void setHeightMap(HeightMap hm)
-	{
+	public void setHeightMap(HeightMap hm)	{
 		this.hm = hm;
 	}
 }

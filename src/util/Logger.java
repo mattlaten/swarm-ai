@@ -7,33 +7,37 @@ import java.util.Date;
 public class Logger {
 	
 	String className = null;
-	PrintWriter info = null;
-	PrintWriter err = null;
+	PrintWriter infostream = null;
+	PrintWriter errstream = null;
 	
-	public Logger(Class<?> classRepr, OutputStream info, OutputStream err)
+	public Logger(Class<?> classRepr, OutputStream infostream, OutputStream errstream)
 	{
 		this.className = classRepr.getName();
-		this.info = new PrintWriter(info);
-		this.err = new PrintWriter(err);
+		this.infostream = new PrintWriter(infostream);
+		this.errstream = new PrintWriter(errstream);
 	}
 	
 	public void info(String message)
 	{
-		info.printf("%s : [INFO: %s] %s\n", (new Date()).toString(), className, message);
+		infostream.printf("%s : [INFO: %s] %s\n", (new Date()).toString(), className, message);
+		infostream.flush();
 	}
 	
 	public void err(String message)
 	{
-		err.printf("%s : [ERR: %s] %s\n", (new Date()).toString(), className, message);
+		errstream.printf("%s : [ERR: %s] %s\n", (new Date()).toString(), className, message);
+		errstream.flush();
 	}
 	
 	public void warn(String message)
 	{
-		info.printf("%s : [WARN: %s] %s\n", (new Date()).toString(), className, message);
+		infostream.printf("%s : [WARN: %s] %s\n", (new Date()).toString(), className, message);
+		infostream.flush();
 	}
 	
 	public void debug(String message)
 	{
-		info.printf("%s : [DEBUG: %s] %s\n", (new Date()).toString(), className, message);
+		infostream.printf("%s : [DEBUG: %s] %s\n", (new Date()).toString(), className, message);
+		infostream.flush();
 	}
 }
