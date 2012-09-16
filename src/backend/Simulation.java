@@ -22,14 +22,18 @@ public class Simulation extends Thread {
 		elements = new CopyOnWriteArrayList<Element>();
 		
 		//we add some waypoints for testing purposes
-		Waypoint prev = null;
+		Waypoint prev = null, first = null;
 		for(int i = 0; i < 10; i++)	{
 			Waypoint cur = new Waypoint(new Vec(Math.random()*1000-500, Math.random()*1000-500));
 			if(prev != null)
 				prev.setTarget(cur);
+			if(first == null)
+				first = cur;
 			prev = cur;
 			elements.add(cur);
 		}
+		if(prev != null && first != null && prev != first)
+			prev.setTarget(first);
 		
 		snapshots = new ArrayList<Object>();
 		
