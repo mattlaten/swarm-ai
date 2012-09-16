@@ -6,6 +6,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import math.Vec;
 import backend.environment.Element;
+import backend.environment.Obstacle;
 import backend.environment.Waypoint;
 
 public class Simulation extends Thread {
@@ -34,6 +35,14 @@ public class Simulation extends Thread {
 		}
 		if(prev != null && first != null && prev != first)
 			prev.setTarget(first);
+		
+		//create an obstacle
+		elements.add(new Obstacle(
+				new Waypoint(50, 0),
+				new Waypoint(50, 50),
+				new Waypoint(0, 50),
+				new Waypoint(0, 0)
+		));
 		
 		snapshots = new ArrayList<Object>();
 		

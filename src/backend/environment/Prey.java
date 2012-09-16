@@ -47,7 +47,12 @@ public class Prey extends Animal {
 			velocityMatching = new Vec(),
 			flockCentering = new Vec(),
 			predatorAvoidance = new Vec(),
-			waypointAttraction = new Vec();
+			waypointAttraction = new Vec(),
+			obstacleAvoidance = new Vec();
+		
+		/* obstacleAvoidance has a dynamic weight. this is
+		 * because we can't afford to EVER run into obstacles.
+		 */
 		double collisionAvoidanceWeight = 0.15,
 			   velocityMatchingWeight = 0.1,
 			   flockCenteringWeight = 0.15,
@@ -96,7 +101,9 @@ public class Prey extends Animal {
 					totalFlock += flockTargets.get(w);
 				}
 				if(mVote != null)	{
-					//if we are sufficiently close to the waypoint, we can move to the next one
+					/* if we are sufficiently close to the waypoint and sufficiently many flock
+					 * members have started towards the next, then we can move to the next one
+					 */
 					if(flockCount/totalFlock > 0.5 && getPosition().minus(getTarget().getPosition()).size() < getTarget().getRadius()*0.5)
 						setTarget(mVote);
 				}
