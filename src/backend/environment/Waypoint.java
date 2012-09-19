@@ -24,7 +24,7 @@ public class Waypoint extends Element {
 	
 	public double getSize() 	{	return 3;		}
 	public double getMaxSpeed()	{	return 0;		}
-	public double getRadius()	{	return 0;		}
+	public double getRadius()	{	return 50;		}
 	public Vec getVelocity() 	{	return new Vec();	}
 	public void setVelocity(Vec v)	{}
 	

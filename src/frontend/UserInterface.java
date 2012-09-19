@@ -194,20 +194,20 @@ public class UserInterface extends JFrame implements KeyListener {
 		sim.setTotalTime(0);
 	}
 
-	@Override
+	//@Override
 	public void keyPressed(KeyEvent event) {
 		
 		// TODO Auto-generated method stub
 		
 	}
 
-	@Override
+	//@Override
 	public void keyReleased(KeyEvent arg0) {
 		// TODO Auto-generated method stub
 		
 	}
 
-	@Override
+	//@Override
 	public void keyTyped(KeyEvent event) {
 		// TODO Auto-generated method stub
 		char eventChar = event.getKeyChar();

@@ -13,6 +13,7 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.util.LinkedList;
 
 import javax.swing.JLabel;
 
@@ -22,6 +23,7 @@ import backend.environment.Element;
 import backend.environment.Predator;
 import backend.environment.Prey;
 import backend.environment.Waypoint;
+import backend.environment.Obstacle;
 import frontend.components.ContextMenu;
 
 class Canvas extends JLabel implements MouseListener, MouseMotionListener, MouseWheelListener, Runnable	{
@@ -137,7 +139,8 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 			}	
 			//draw elements
 			for(Element e: ui.sim.elements)	{
-				//if (e.getClass() == Prey.class)	{
+				if(e instanceof Obstacle)
+					continue;
 				if (e instanceof Prey)	{
 					g2.setColor(Color.blue);
 					if (ui.selection.contains(e))
@@ -173,6 +176,28 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 				
 				if(renderDirections)
 					drawVector(g2, Color.green, e.getPosition(), e.getVelocity().mult(Math.min(70*zoom, 70)));
+			}
+			
+			//draw obstacles
+			g2.setColor(Color.red);
+			for(Element e : ui.sim.elements)	{
+				if(e instanceof Obstacle)	{
+					Waypoint s = ((Obstacle)e).start;
+					LinkedList<Vec> points = new LinkedList<Vec>();
+					points.add(s.getPosition());
+					Waypoint cur = s.getTarget();
+					while(cur != s)	{
+						points.add(cur.getPosition());
+						cur = cur.getTarget();
+					}
+					int [] xs = new int[points.size()], ys = new int[points.size()];
+					for(int i = 0; i < xs.length; i++)	{
+						Point p = toLabelSpace(points.remove(0)).getPoint();
+						xs[i] = p.x;
+						ys[i] = p.y;
+					}
+					g2.fillPolygon(xs, ys, xs.length);
+				}
 			}
 			
 			//draw the grid
