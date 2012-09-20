@@ -39,8 +39,8 @@ public class Simulation extends Thread {
 		//create an obstacle
 		elements.add(new Obstacle(
 				new Waypoint(50, 0),
-				new Waypoint(50, 50),
-				new Waypoint(0, 50),
+				new Waypoint(60, 50),
+				new Waypoint(0, 100),
 				new Waypoint(0, 0)
 		));
 		

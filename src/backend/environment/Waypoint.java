@@ -22,7 +22,7 @@ public class Waypoint extends Element {
 		this.position = new Vec(other.position);
 	}
 	
-	public double getSize() 	{	return 3;		}
+	public double getSize() 	{	return 20;		}
 	public double getMaxSpeed()	{	return 0;		}
 	public double getRadius()	{	return 50;		}
 	public Vec getVelocity() 	{	return new Vec();	}

@@ -37,6 +37,17 @@ public class Obstacle extends Element {
 	public Vec getVelocity() 	{	return new Vec();	}
 	public void setVelocity(Vec v)	{}
 	
+	public Vec getPosition()	{
+		int count = 0;
+		Vec pos = start.getPosition();
+		Waypoint cur = start.getTarget();
+		while(cur != start)	{
+			pos = pos.plus(cur.getPosition());
+			cur = cur.getTarget();
+		}
+		return pos.mult(1.0/count);
+	}
+	
 	public Object clone()		{	return new Obstacle(this);	}
 
 }
