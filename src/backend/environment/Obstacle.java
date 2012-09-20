@@ -1,13 +1,13 @@
 package backend.environment;
 
-import java.awt.Polygon;
+import java.util.Iterator;
 import java.util.List;
 
 import math.Vec;
 
 /* An obstacle is a polygon defined by a list of waypoints
  */
-public class Obstacle extends Element {
+public class Obstacle extends Element implements Iterable<Waypoint> {
 	public Waypoint start;
 	
 	public Obstacle(Waypoint... ws)	{
@@ -49,6 +49,32 @@ public class Obstacle extends Element {
 	}
 	
 	public Object clone()		{	return new Obstacle(this);	}
+	
+	public Iterator<Waypoint> iterator()	{
+		return new ObstacleWaypointIterator(start);
+	}
+	
+	class ObstacleWaypointIterator implements Iterator<Waypoint>	{
+		private Waypoint cur, start;
+		public ObstacleWaypointIterator(Waypoint cur)	{
+			this.cur = cur;
+			this.start = cur;
+		}
+		
+		public boolean hasNext()	{
+			return cur.getTarget() != start;
+		}
+		
+		public Waypoint next()	{
+			Waypoint r = cur;
+			cur = cur.getTarget();
+			return r;
+		}
+		
+		public void remove()	{
+			throw new UnsupportedOperationException("Why are you removing waypoints son?");
+		}
+	}
 
 }
 

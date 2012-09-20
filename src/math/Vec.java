@@ -50,6 +50,13 @@ public class Vec implements Serializable	{
 	public String toString()	{
 		return "<" + x + ", " + y + ">";
 	}
+	
+	public int crossCompare(Vec other)	{
+		double z = x*other.y - y*other.x;
+		if (z == 0)
+			return 0;
+		return (z > 0 ? 1 : -1);
+	}
 }
 
 class InvalidTruncationValueException extends RuntimeException	{
