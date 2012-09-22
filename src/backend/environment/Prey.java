@@ -86,7 +86,7 @@ public class Prey extends Animal {
 				}
 				System.out.println(mostLeft + " " + mostRight + "\n");
 				if(mostLeft != null || mostRight != null)	{
-					obstacleAvoidance = (Math.abs(mostLeftAngle) > Math.abs(mostRightAngle) ? mostLeft : mostRight).unit();
+					obstacleAvoidance = (Math.abs(mostLeftAngle) < Math.abs(mostRightAngle) ? mostLeft : mostRight).unit();
 					obstacleCount++;
 				}
 			}
