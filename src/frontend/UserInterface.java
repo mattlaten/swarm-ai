@@ -26,6 +26,8 @@ import util.Logger;
 import backend.HeightMap;
 import backend.Simulation;
 import backend.environment.Element;
+import backend.environment.Predator;
+import backend.environment.Prey;
 import backend.environment.Waypoint;
 import frontend.components.ControlBar;
 import frontend.components.PropertiesPanel;
@@ -158,7 +160,7 @@ public class UserInterface extends JFrame implements KeyListener {
 			}
 		
 		for (Element e : sim.elements)
-			if (e.getPosition().equals(new Vec(xloc, yloc)))
+			if ((e instanceof Prey || e instanceof Predator) && e.getPosition().equals(new Vec(xloc, yloc)))
 				validLocation = false;
 		
 		if (validLocation)
