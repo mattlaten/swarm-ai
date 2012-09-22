@@ -17,6 +17,7 @@ public class Obstacle extends Element {
 		for(int i = 1; i < ws.length; i++)
 			ws[i-1].setTarget(ws[i]);
 		ws[ws.length-1].setTarget(start);
+		position = new Vec();
 	}
 	
 	public Obstacle(List<Waypoint> ws)	{
@@ -26,6 +27,7 @@ public class Obstacle extends Element {
 		for(int i = 1; i < ws.size(); i++)
 			ws.get(i-1).setTarget(ws.get(i));
 		ws.get(ws.size()-1).setTarget(start);
+		position = new Vec();
 	}
 	
 	public Obstacle(Obstacle other)	{

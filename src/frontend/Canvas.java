@@ -304,8 +304,8 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 		if ((me.getModifiers() & InputEvent.BUTTON1_MASK) == InputEvent.BUTTON1_MASK)
 			ui.selectPrey(toWorldSpace(mPoint), me.isControlDown());	
 		else if ((me.getModifiers() & InputEvent.BUTTON3_MASK) == InputEvent.BUTTON3_MASK)
-			if (ui.selection.isEmpty())
-			{	
+			//if (ui.selection.isEmpty())
+			//{	
 				try {
 					switch(ui.mode)
 					{
@@ -327,9 +327,9 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-			}
-			else	
-				ui.setPreyDirection(toWorldSpace(mPoint));
+			//}
+			//else	
+			//	ui.setSelectionDirection(toWorldSpace(mPoint));
 		else
 			System.out.println("wat");
 	}

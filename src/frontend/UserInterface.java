@@ -35,10 +35,10 @@ public class UserInterface extends JFrame implements KeyListener {
 	
 	Logger log = new Logger(UserInterface.class, System.out, System.err);
 
-	Simulation sim;
+	public Simulation sim;
 	Canvas canv;
 	
-	HashSet<Element> selection;
+	public HashSet<Element> selection;
 	File terrainFile;
 	
 	public enum Mode {SELECT, PAINT_PREY, PAINT_PREDATOR};
@@ -181,7 +181,7 @@ public class UserInterface extends JFrame implements KeyListener {
 		canv.repaint();
 	}
 
-	public void setPreyDirection(Vec mPoint) {
+	public void setSelectionDirection(Vec mPoint) {
 		for (Element e : selection)
 			e.setVelocity(mPoint.minus(e.getPosition()));
 	}
