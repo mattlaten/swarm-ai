@@ -40,12 +40,12 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 	double zoom = 1, defaultZoom = 1, minZoom = 0.01, maxZoom = 10,
 		   trackingZoom = 0.8;
 	
-	public boolean renderGrid = true,
-			renderAxes = true,
-			renderHeightMap = false,
+	public boolean renderGrid = false,
+			renderAxes = false,
+			renderHeightMap = true,
 			renderDirections = true,
-			renderRadii = false,
-			renderWaypoints = true;
+			renderRadii = true,
+			renderWaypoints = false;
 	
 	public Canvas(UserInterface ui)	{
 		this.ui = ui;
