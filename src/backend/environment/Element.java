@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import math.Vec;
+import backend.HeightMap;
 
 /*
  * Abstract class that models a single element in our environment
@@ -23,7 +24,7 @@ public abstract class Element implements Serializable, Cloneable	{
 		return new Vec(position);
 	}
 	
-	public void calculateUpdate(List<Element> influences)	{}
+	public void calculateUpdate(List<Element> influences, HeightMap hm)	{}
 	public void update()									{}
 	
 	abstract public double getSize();

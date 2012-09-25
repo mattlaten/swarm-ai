@@ -49,8 +49,6 @@ public abstract class Animal extends Element implements Cloneable {
 	}
 	
 	//public Object clone()		{	return new Animal(this);	}
-
-	public abstract void calculateUpdate(List<Element> influences);
 	
 	public void update()	{
 		position = position.plus(velocity);

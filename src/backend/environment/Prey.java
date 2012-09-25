@@ -4,9 +4,16 @@ import java.util.HashMap;
 import java.util.List;
 
 import math.Vec;
+import backend.HeightMap;
 
+/* TODO
+ * 1. speed needs to increase/decrese depending on whether the prey is moving up- or downhill
+ * 2. obstacles need to be fixed
+ */
 public class Prey extends Animal {
 	Waypoint previousTarget = null;
+	double maxSpeedVar = 0.2,
+			maxTurningAngle = Math.PI/8;
 	
 	public Prey(Prey other)					{	super(other);	}
 	public Prey(Vec position, Vec velocity)	{	super(position, velocity);	}
@@ -41,14 +48,15 @@ public class Prey extends Animal {
 	 * 
 	 * Note: Collision avoidance and flock centering aren't linearly dependent on the distance of the other prey.
 	 */
-	public void calculateUpdate(List<Element> influences) {
+	public void calculateUpdate(List<Element> influences, HeightMap hm) {
 		//calculate the sums
 		Vec collisionAvoidance = new Vec(),
 			velocityMatching = new Vec(),
 			flockCentering = new Vec(),
 			predatorAvoidance = new Vec(),
 			waypointAttraction = new Vec(),
-			obstacleAvoidance = new Vec();
+			obstacleAvoidance = new Vec(),
+			terrainAvoidance = new Vec();
 		
 		/* obstacleAvoidance has a dynamic weight. this is
 		 * because we can't afford to EVER run into obstacles.
@@ -57,15 +65,16 @@ public class Prey extends Animal {
 			   velocityMatchingWeight = 0.1,
 			   flockCenteringWeight = 0.15,
 			   predatorAvoidanceWeight = 0.4,
-			   waypointAttractionWeight = 0.2;
+			   waypointAttractionWeight = 0.2,
+			   terrainAvoidanceWeight = 1.0;
 		int neighbourhoodCount = 0, predatorCount = 0, obstacleCount = 0;
 		HashMap<Waypoint, Integer> flockTargets = new HashMap<Waypoint, Integer>();
 		for(Element e : influences)	{
 			if(e instanceof Obstacle)	{
 				Vec mostLeft = null,
 						mostRight = null;
-				double mostLeftAngle = 0,
-						mostRightAngle = 0;
+				double mostLeftAngle = Double.MAX_VALUE,
+						mostRightAngle = Double.MAX_VALUE;
 				Vec dir = velocity.unit();
 				for(Waypoint w : (Obstacle)e)	{
 					//get the cos of the angle between this waypoint and the dir vector
@@ -85,7 +94,7 @@ public class Prey extends Animal {
 					}
 				}
 				System.out.println(mostLeft + " " + mostRight + "\n");
-				if(mostLeft != null || mostRight != null)	{
+				if(mostLeft != null || mostRight != null && Math.min(mostRightAngle, mostLeftAngle) < 0.25)	{
 					obstacleAvoidance = (Math.abs(mostLeftAngle) < Math.abs(mostRightAngle) ? mostLeft : mostRight).unit();
 					obstacleCount++;
 				}
@@ -141,6 +150,31 @@ public class Prey extends Animal {
 			}
 		}
 		
+		/* Terrain avoidance is acheived by sending out 24 feelers in different directions
+		 * and then checking which one have the greatest change in height. Those are then
+		 * inverted proportionate to their changes
+		 */
+		if(hm != null)	{
+			double height = hm.getInterpolatedHeightAt(getPosition());
+			for(double rad = 0; rad < 2*Math.PI; rad += Math.PI/6)	{
+				//get the option-vector (as a unit vector)
+				Vec v = new Vec(Math.cos(rad), Math.sin(rad));
+				
+				/* move out in increments of the size of the prey until we go beyond
+				 * the sight-radius of this prey.
+				 */
+				int scale = 1;
+				double totalHeightDiff = 0;
+				while(scale*getSize() <= getRadius())	{
+					Vec modOption = v.mult(scale*getSize());
+					totalHeightDiff += Math.abs(height
+							- hm.getInterpolatedHeightAt(getPosition().plus(modOption)))/(scale++);
+				}
+				totalHeightDiff /= scale - 1;
+				terrainAvoidance = terrainAvoidance.plus(v.neg().mult(totalHeightDiff));
+			}
+		}
+		
 		//take the average weighting
 		if(predatorCount > 0)
 			predatorAvoidance = predatorAvoidance.mult(1.0/predatorCount);
@@ -163,9 +197,62 @@ public class Prey extends Animal {
 						.plus(collisionAvoidance.mult(collisionAvoidanceWeight)
 						.plus(flockCentering.mult(flockCenteringWeight)
 						.plus(velocityMatching.mult(velocityMatchingWeight)
-						.plus(waypointAttraction.mult(waypointAttractionWeight)))))
-						.mult(1.0/(predatorAvoidanceWeight+collisionAvoidanceWeight+flockCenteringWeight+velocityMatchingWeight+waypointAttractionWeight));
-		velocity = velocity.plus(ret.truncate(1)).plus(obstacleAvoidance.mult(10)).truncate(1);
+						.plus(waypointAttraction.mult(waypointAttractionWeight)
+						.plus(terrainAvoidance.mult(terrainAvoidanceWeight))))))
+						.mult(1.0/(predatorAvoidanceWeight
+								+collisionAvoidanceWeight
+								+flockCenteringWeight
+								+velocityMatchingWeight
+								+waypointAttractionWeight
+								+terrainAvoidanceWeight));
+		/*System.out.println("predator avoidance: " + predatorAvoidance
+				+ "\ncollision avoidance: " + collisionAvoidance
+				+ "\nflock centering: " + flockCentering
+				+ "\nvelocity matching: " + velocityMatching
+				+ "\nwaypoint attraction: " + waypointAttraction
+				+ "\nterrain avoidance: " + terrainAvoidance
+				+ "\n");*/
+		//velocity = velocity.plus(ret.truncate(1)).plus(obstacleAvoidance.mult(10)).truncate(1);
+		//velocity = velocity.plus(ret.truncate(1)).truncate(1);
+		/* ret is the vector we wish to be facing. we want to affect the
+		 * current velocity so that it's pointing in the direction of ret.
+		 * however, the prey has a maximum turning angle and a maximum speed
+		 * variation (how much it can speed up or slow down in a given period
+		 * of time). so we try to adjust the velocity as much as possible.
+		 */
+		ret = velocity.plus(ret.truncate(1)).truncate(1);
+		double retSize = ret.size(), velSize = velocity.size();
+		if(retSize > 0)	{
+			//first ensure that speed variation is maintained
+			if(velSize + maxSpeedVar < retSize)
+				//ret = ret.mult((retSize - maxSpeedVar)/retSize);
+				retSize = velSize + maxSpeedVar;
+			else if(velSize - maxSpeedVar > retSize)
+				//ret = ret.mult((retSize + maxSpeedVar)/retSize);
+				retSize = velSize - maxSpeedVar;
+		
+			/* then ensure turning angle
+			 * 1. convert to polar co-ordinates
+			 * 2. compare angle like we just compared size
+			 * 3. convert back to cartesian co-ordinates
+			 */
+			double retAngle = Math.atan2(ret.y, ret.x),
+					velAngle = Math.atan2(velocity.y, velocity.x);
+			
+			//fix the case where we're in 1st and 4th quadrants
+			if(retAngle < Math.PI/2 && velAngle > 3*Math.PI/2)
+				velAngle -= 2*Math.PI;
+			else if(retAngle > 3*Math.PI/2 && velAngle < Math.PI/2)
+				retAngle -= 2*Math.PI;
+			
+			if(velAngle - maxTurningAngle > retAngle)
+				retAngle = velAngle - maxTurningAngle;
+			else if(velAngle + maxTurningAngle < retAngle)
+				retAngle = velAngle + maxTurningAngle;
+			
+			ret = new Vec(Math.cos(retAngle), Math.sin(retAngle)).mult(retSize);
+		}
+		velocity = ret.truncate(1);
 	}
 	
 	public Object clone()	{

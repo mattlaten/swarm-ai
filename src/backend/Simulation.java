@@ -37,12 +37,12 @@ public class Simulation extends Thread {
 			prev.setTarget(first);*/
 		
 		//create an obstacle
-		elements.add(new Obstacle(
+		/*elements.add(new Obstacle(
 				new Waypoint(50, 0),
 				new Waypoint(60, 50),
 				new Waypoint(0, 100),
 				new Waypoint(0, 0)
-		));
+		));*/
 		
 		snapshots = new ArrayList<Object>();
 		
@@ -64,7 +64,7 @@ public class Simulation extends Thread {
 					snapshots.add(elements.clone());
 				}
 				for(Element e : elements)
-					e.calculateUpdate(elements);
+					e.calculateUpdate(elements, hm);
 				for(Element e : elements)
 					e.update();
 			}
