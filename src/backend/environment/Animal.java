@@ -45,13 +45,15 @@ public abstract class Animal extends Element implements Cloneable {
 	public double getRadius()	{	return sightRadius;	}
 	public Vec getVelocity() 	{	return (oldVelocity == null ? velocity : oldVelocity).mult(getMaxSpeed());	}
 	public void setVelocity(Vec v)	{
-		velocity = new Vec(v).truncate(1);
+		velocity = new Vec(v).mult(1.0/getMaxSpeed()).truncate(1);
 	}
 	
 	//public Object clone()		{	return new Animal(this);	}
 	
 	public void update()	{
-		position = position.plus(velocity);
-		oldVelocity = new Vec(velocity);
+		if(isAlive())	{
+			position = position.plus(velocity);
+			oldVelocity = new Vec(velocity);
+		}
 	}
 }

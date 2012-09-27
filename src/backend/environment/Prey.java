@@ -49,6 +49,8 @@ public class Prey extends Animal {
 	 * Note: Collision avoidance and flock centering aren't linearly dependent on the distance of the other prey.
 	 */
 	public void calculateUpdate(List<Element> influences, HeightMap hm) {
+		if(!isAlive())
+			return;
 		//calculate the sums
 		Vec collisionAvoidance = new Vec(),
 			velocityMatching = new Vec(),

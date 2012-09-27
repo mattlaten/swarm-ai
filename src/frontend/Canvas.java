@@ -48,8 +48,8 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 			renderAxes = true,
 			renderHeightMap = true,
 			renderDirections = true,
-			renderRadii = false,
-			renderWaypoints = true;
+			renderRadii = true,
+			renderWaypoints = false;
 	
 	public Canvas(UserInterface ui)	{
 		this.ui = ui;
