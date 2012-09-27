@@ -152,9 +152,17 @@ public class Prey extends Animal {
 			}
 		}
 		
-		/* Terrain avoidance is acheived by sending out 24 feelers in different directions
-		 * and then checking which one have the greatest change in height. Those are then
-		 * inverted proportionate to their changes
+		/* The goal of terrain avoidance is to determine no-go areas. In order to do this we need
+		 * the following few principles:
+		 * 	1. a slope that is further away is less no-go
+		 * 	2. a slope that is behind or next to me is irrelevant with regard to my continuing
+		 * 		in the same direction
+		 * 	3. a slope with a small gradient is better than one with a large gradient
+		 * 	4. a down-slope is better than up-slope
+		 * 
+		 * We look in 24 directions around the current position and for each direction we determine
+		 * a slope value. These are used to determine no-go areas. Later, these are used to push
+		 * the velocity vector out of these no-go areas.
 		 */
 		if(hm != null)	{
 			double height = hm.getInterpolatedHeightAt(getPosition());
