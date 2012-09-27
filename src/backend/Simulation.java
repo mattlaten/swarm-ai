@@ -161,6 +161,7 @@ public class Simulation extends Thread {
 	
 	public void setTime(int t)	{
 		//time = Math.max(t - t%timeStep, 0);
+		isRunning = false;
 		time = getRoundedTime(t);
 		int ind = Math.min(snapshots.size()-1, getSnapshotsIndex(time));
 		
