@@ -26,6 +26,10 @@ import backend.environment.Waypoint;
 import backend.environment.Obstacle;
 import frontend.components.ContextMenu;
 
+/**
+ * Canvas class used to paint Simulation on screen
+ */
+
 class Canvas extends JLabel implements MouseListener, MouseMotionListener, MouseWheelListener, Runnable	{
 	UserInterface ui;
 	Vec origin = new Vec();	//the origin relative to the center of the Canvas
@@ -42,7 +46,7 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 	
 	public boolean renderGrid = true,
 			renderAxes = true,
-			renderHeightMap = false,
+			renderHeightMap = true,
 			renderDirections = true,
 			renderRadii = false,
 			renderWaypoints = true;
@@ -53,7 +57,6 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 		hmc = new HeightMapCache(this, ui.sim.hm);
 		
 		cm = new ContextMenu(ui);
-		//setComponentPopupMenu(cm);
 		
 		addMouseListener(this);
 		addMouseMotionListener(this);
@@ -62,9 +65,7 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 		new Thread(this, "Canvas").start();
 	}
 	
-	//public Vec toLabelSpace(Vec v)	{	return v.invertY().plus(origin).plus(new Vec(getSize().width/2, getSize().height/2));	}
 	public Vec toLabelSpace(Vec v)	{	return v.mult(zoom).invertY().plus(origin.mult(zoom)).plus(new Vec(getSize().width/2, getSize().height/2));	}
-	//public Vec toWorldSpace(Vec v)	{	return v.minus(originInLabelSpace()).invertY();	}
 	public Vec toWorldSpace(Vec v)	{	return v.minus(originInLabelSpace()).mult(1/zoom).invertY();	}
 	public Vec originInLabelSpace()	{	return toLabelSpace(Vec.ZERO);	}
 	public Vec mouseInWorldSpace()	{	return toWorldSpace(mPoint);	}

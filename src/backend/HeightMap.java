@@ -2,9 +2,12 @@ package backend;
 
 import java.awt.geom.Rectangle2D;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 
 import util.Logger;
 
@@ -31,17 +34,25 @@ public class HeightMap {
 		log = new Logger(HeightMap.class, System.out, System.err);
 		readInFile(file);
 		normalizeTerrain(1);
-		//printGrid();
 	}
 	
+	/*
 	public HeightMap()
 	{
 		log = new Logger(HeightMap.class, System.out, System.err);
 		terrain = new double [y][x];
 		generateRandomHeights();
 		normalizeTerrain(1);
-		//printGrid();
 	}
+	*/
+	
+	public HeightMap()
+	{
+		log = new Logger(HeightMap.class, System.out, System.err);
+		terrain = new double [y][x];
+		normalizeTerrain(1);
+	}
+	
 	
 	public void readInFile(File file)
 	{
@@ -52,25 +63,25 @@ public class HeightMap {
 			String tokens [] = line.split(" ");			
 			x = Integer.parseInt(tokens[0]);
 			y = Integer.parseInt(tokens[0]);
-			terrain = new double[x][y];
+			terrain = new double[y][x];
 			
-			int i = 0;
-			int j = 0;
-			int k = 2;
+			int xcoord = 0; //xcoord
+			int ycoord = 0; //ycoord
+			int k = 2; //pos in list
 			while (true)
 			{
-				terrain[i][j] = Double.parseDouble(tokens[k]);
+				terrain[xcoord][ycoord] = Double.parseDouble(tokens[k]);
 				//System.out.println(terrain[i][j]);
-				max = Math.max(max, terrain[i][j]);
-				min = Math.min(min, terrain[i][j]);
-				i++;
+				max = Math.max(max, terrain[xcoord][ycoord]);
+				min = Math.min(min, terrain[xcoord][ycoord]);
+				xcoord++;
 				k++;
-				if (i == x)
+				if (xcoord == x)
 				{
-					j++;
-					i = 0;
+					ycoord++;
+					xcoord = 0;
 				}
-				if (j == y)
+				if (ycoord == y)
 					break;
 			}
 		}
@@ -91,21 +102,40 @@ public class HeightMap {
 		}
 	}
 	
+	/**
+	 * Writes the HeightMap into Wavefront OBJ file
+	 * @param file Output File
+	 * @throws IOException
+	 */
+	public void writeOBJ(File file) throws IOException
+	{
+		PrintWriter pw = new PrintWriter(new FileWriter(file));
+		for (int j = 0; j < y; j++)	
+			for (int i = 0; i < x; i++)
+				pw.println(String.format("v %f %f %f", i + 0.0, j + 0.0, terrain[j][i]));
+	}
+	
+	/**
+	 * Takes heights in HeightMap and normalizes them (transpose to range (0,1))
+	 * @param factor Scaling factor used by zoom
+	 */
 	public void normalizeTerrain(double factor)
 	{
 		log.info("Normalizing Terrain");
-		range = max - min;
-		//System.out.println("Max: " + max + " Min: " + min);
+		range = max - min; //calc range
 		
+		//normalize range
 		for (int j = 0; j < y; j++)
-			for (int i = 0; i < x; i++)	{
-				terrain[i][j] = (terrain[i][j]-min)/range;
-				//System.out.println(terrain[i][j]);
-			}
+			for (int i = 0; i < x; i++)	
+				terrain[j][i] = (terrain[j][i]-min)/range;
+		
 		topLeft = new Vec(-x*factor, y*factor);
 		botRight= new Vec(x*factor, -y*factor);
 	}
 	
+	/**
+	 * Debugging method
+	 */
 	public void printGrid()
 	{
 		String line = null;
@@ -118,88 +148,18 @@ public class HeightMap {
 		}
 	}
 	
+	/**
+	 * Generate a HeightMap composed of random heights at each point
+	 */
 	public void generateRandomHeights()
-	{
-		fillGrid(terrain,512);
-		
-		for (int i = 0; i < x; i++) 
-			for (int j = 0; j < y; j++)
+	{	
+		for (int j = 0; j < y; j++) 
+			for (int i = 0; i < x; i++)
 			{
-				//terrain[i][j] = Math.random();
-				//algorithm for generating terain at i,j
-				/*
-				if (i == 0)
-					if (j == 0)
-						terrain[i][j] = Math.random()*30;
-					else
-						terrain[i][j] = Math.max(0, terrain[i][j-1] + (Math.random()*10)-5);
-				else 
-					if (j == 0)
-						terrain[i][j] = Math.max(0, terrain[i-1][j] + (Math.random()*10)-5);
-					else
-						if (i%10 == 0 && j%10 == 0)
-							terrain[i][j] = Math.random()*10 + terrain[i-1][j-1];
-						else
-							terrain[i][j] = Math.max(0, (terrain[i-1][j-1] + (Math.random()*10)-5
-									  + terrain[i-1][j] + (Math.random()*10)-5
-									  + terrain[i][j-1] + (Math.random()*10)-5)/3);
-				*/
-
-				//terrain[i][j] = terrain[(i-1)%512][j] + terrain[i][(j-1)%512] + terrain[i][j] + + terrain[(i+1)%512][j] + terrain[i][(j+1)%512];	
-				
-				//terrain[i][j] = (1/Math.sqrt(2*Math.PI*0.1))*Math.pow(Math.E,-((Math.pow(i,2)+Math.pow(j,2))/(2*Math.pow(0.1, 2))));
-				//terrain[i][j] = (terrain[Math.max(i-1,0)][j] + terrain[i][Math.max(j-1,0)] + terrain[i][j] + terrain[(i+1)%512][j] + terrain[i][(j+1)%512])/5;	
+				terrain[j][i] = Math.random();
 				max = Math.max(max, terrain[i][j]);
 				min = Math.min(min, terrain[i][j]);
 			}
-	}
-	
-	public void fillGrid(double grid[][], int x)
-	{
-		int base = 0;
-		int size = x;
-		
-		grid[0][0] = Math.random();
-		grid[x][0] = Math.random();
-		grid[0][x] = Math.random();
-		grid[x][x] = Math.random();
-	
-		/*
-		grid[0][0] = 0.3;
-		grid[x][0] = 0.5;
-		grid[0][x] = 0.4;
-		grid[x][x] = 0.6;
-		*/
-		
-		while (size > 0)
-		{
-			for (int i = 0; i < x; i += size)
-				for (int j = 0; j < x; j += size)
-				{
-					double a = grid[i][j];
-					double b = grid[i][j+size]; 
-					double c = grid[i+size][j];
-					double d = grid[i+size][j+size];
-					grid[i+size/2][j+size/2] = (a+b+c+d)/4 + Math.random();
-				}
-			for (int i = size/2; i < x; i += size)
-				for (int j = size/2; j < x; j += size)
-				{
-					double a = grid[i-size/2][j-size/2];
-					double b = grid[i-size/2][j+size/2];
-					double c = grid[i+size/2][j-size/2];
-					double d = grid[i+size/2][j+size/2];
-					grid[i][j] = (a+b+c+d)/4 + Math.random();
-				}
-			size /= 2;
-		}
-		/*
-		terrain[y][x] += Math.random();
-		if (x > 0 && y > 0) fillGrid(grid,x-1,y-1);			
-		if (x > 0 && y < grid.length) fillGrid(grid,x-1,y+1);
-		if (x < grid[0].length && y > 0)fillGrid(grid,x+1,y-1);
-		if (x < grid[0].length && y < grid.length) fillGrid(grid,x+1,y+1);
-		*/
 	}
 	
 	public double getHeightAt(int x, int y)	{
@@ -242,7 +202,6 @@ public class HeightMap {
 			a = (getHeightAt(tx1, ty1)*(y2-tp.y) + getHeightAt(tx1, ty2)*(tp.y-y1))/(y2-y1);
 		else
 			a = getHeightAt(tx1, ty1);
-		//System.out.println(a);
 		return a;
 	}
 	

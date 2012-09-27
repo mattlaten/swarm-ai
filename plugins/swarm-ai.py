@@ -12,12 +12,23 @@ seems like this is the start-up method that needs to be
 defined for a self-installing plugin for SoftImage|XSI
 '''
 def XSILoadPlugin (in_reg):
-    in_reg.Author = 'Elliott, R. & Laten, M.'
-    in_reg.Name = 'Swarm AI Python Plugin'
-    in_reg.Major = 1
-    in_reg.Minor = 0
-    return true;
+	in_reg.Author = 'Elliott, R. & Laten, M.'
+	in_reg.Name = 'Swarm AI Python Plugin'
+	in_reg.Major = 1
+	in_reg.Minor = 0
+	bDisplayAsSubmenu = false
+	in_reg.RegisterMenu( constants.siMenuMainTopLevelID, "Swarm AI", bDisplayAsSubmenu, bDynamic)
+	strPluginName = in_reg.Name
+	Application.LogMessage(str(strPluginName) + str(" has been loaded."),constants.siVerbose)
+	return true;
 
+def XSIUnloadPlugin( in_reg ):
+
+	strPluginName = in_reg.Name
+	Application.LogMessage(str(strPluginName) + str(" has been unloaded."),constants.siVerbose)
+
+	return true
+	
 '''
 make sure terrain is in wavefront OBJ format
 perhaps load in from file and convert?

@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
@@ -226,26 +227,78 @@ public class UserInterface extends JFrame implements KeyListener {
 		
 		JMenuBar menubar;
 		JMenu file, view;
-		JMenuItem fileLoadTerrain, fileGenerateRandomTerrain, fileExit;
-		JCheckBoxMenuItem viewGrid, viewAxes, viewMap, viewDirections, viewRadii;
-		JFileChooser fc;
+		JMenuItem 	
+					fileNew,
+					fileOpen,
+					fileClose,
+					fileSave,
+					fileSaveAs,
+					fileImportTerrain,
+					fileExportTerrain,
+					fileGenerateRandomTerrain, fileExit;
+		JCheckBoxMenuItem 
+					viewGrid, 
+					viewAxes, 
+					viewMap, 
+					viewDirections, 
+					viewRadii;
+		JFileChooser fileChooser; 
+		
 		
 		public MenuBar()
 		{
-			fc = new JFileChooser("./maps/");
+			fileChooser = new JFileChooser("./maps/");
+			
 			//FILE
-			fileLoadTerrain = new JMenuItem("Load Terrain");
-			fileLoadTerrain.addActionListener(new ActionListener(){
+			
+			fileNew = new JMenuItem("New");
+			fileNew.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent ae)	{
+					System.exit(0);
+				}
+			});
+			
+			fileOpen = new JMenuItem("Open...");
+			fileOpen.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent ae)	{
+					System.exit(0);
+				}
+			});
+			
+			fileClose = new JMenuItem("Close");
+			fileClose.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent ae)	{
+					System.exit(0);
+				}
+			});
+			
+			fileSave = new JMenuItem("Save");
+			fileSave.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent ae)	{
+					System.exit(0);
+				}
+			});
+			
+			fileSaveAs = new JMenuItem("Save As...");
+			fileSaveAs.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent ae)	{
+					System.exit(0);
+				}
+			});
+			
+			fileImportTerrain = new JMenuItem("Import Terrain...");
+			fileImportTerrain.addActionListener(new ActionListener(){
 				public void actionPerformed(ActionEvent ae)	{
 					if (!sim.isRunning)
 					{
+						fileChooser.setCurrentDirectory(new File("./maps/"));
 						statusBar.setMode("Select Terrain");
-						int returnVal = fc.showOpenDialog(UserInterface.this);
+						int returnVal = fileChooser.showOpenDialog(UserInterface.this);
 						if (returnVal == JFileChooser.APPROVE_OPTION) {
-				            terrainFile = fc.getSelectedFile();
+				            terrainFile = fileChooser.getSelectedFile();
 				            sim.loadHeightMap(terrainFile);
 				            canv.hmc.setHeightMap(sim.hm);
-				            log.info("Opening: " + terrainFile.getName());
+				            log.info("Importing Terrain: " + terrainFile.getName());
 				            
 				        }
 						statusBar.setMode("");
@@ -255,13 +308,34 @@ public class UserInterface extends JFrame implements KeyListener {
 				}
 			});
 			
+			fileExportTerrain = new JMenuItem("Export Terrain...");
+			fileExportTerrain.addActionListener(new ActionListener(){
+				public void actionPerformed(ActionEvent ae){
+					fileChooser.setCurrentDirectory(new File("./maps/"));
+					int returnVal = fileChooser.showSaveDialog(UserInterface.this);
+					if (returnVal == JFileChooser.APPROVE_OPTION) {
+			            terrainFile = fileChooser.getSelectedFile();
+			            try {
+							sim.hm.writeOBJ(terrainFile);
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+			            log.info("Exporting Terrain: " + terrainFile.getName());
+			            
+			        }
+					statusBar.setMode("");
+					
+			}});
+			
 			fileGenerateRandomTerrain = new JMenuItem("Generate Random Terrain");
 			fileGenerateRandomTerrain.addActionListener(new ActionListener(){
 				public void actionPerformed(ActionEvent ae)	{
 					if (!sim.isRunning)
 					{
 						statusBar.setMode("Generating Random Terrain");
-						sim.setHeightMap(new HeightMap());
+						sim.hm = new HeightMap();
+						sim.hm.generateRandomHeights();
 						canv.hmc.setHeightMap(sim.hm);
 						statusBar.setMode("");
 					}
@@ -319,7 +393,15 @@ public class UserInterface extends JFrame implements KeyListener {
 
 			
 			file = new JMenu("File");
-				file.add(fileLoadTerrain);
+				file.add(fileNew);
+				file.add(fileOpen);
+				file.add(fileClose);
+				file.addSeparator();
+				file.add(fileSave);
+				file.add(fileSaveAs);
+				file.addSeparator();
+				file.add(fileImportTerrain);
+				file.add(fileExportTerrain);
 				file.add(fileGenerateRandomTerrain);
 				file.addSeparator();
 				file.add(fileExit);

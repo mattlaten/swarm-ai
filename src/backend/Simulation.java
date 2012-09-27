@@ -9,6 +9,12 @@ import backend.environment.Element;
 import backend.environment.Obstacle;
 import backend.environment.Waypoint;
 
+/**
+ * Simulation is the class that handles the interaction
+ * between elements and each other, as well as the
+ * environment
+ */
+
 public class Simulation extends Thread {
 	public CopyOnWriteArrayList<Element> elements;
 	public HeightMap hm = null;
@@ -46,7 +52,8 @@ public class Simulation extends Thread {
 		
 		snapshots = new ArrayList<Object>();
 		
-		hm = new HeightMap(new File("./maps/GC2.map"));
+		//hm = new HeightMap(new File("./maps/GC2.map"));
+		hm = new HeightMap();
 		setName("Simulation");
 		//hm = new HeightMap();
 	}
