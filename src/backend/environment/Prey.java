@@ -12,7 +12,7 @@ import backend.HeightMap;
  */
 public class Prey extends Animal {
 	Waypoint previousTarget = null;
-	double maxSpeedVar = 0.2,
+	double maxSpeedVar = 0.05,
 			maxTurningAngle = Math.PI/8;
 	
 	public Prey(Prey other)					{	super(other);	}
@@ -27,6 +27,14 @@ public class Prey extends Animal {
 	public void setTarget(Waypoint t)	{
 		previousTarget = getTarget();
 		super.setTarget(t);
+	}
+	
+	private int sign(double d)	{
+		if(d > 0)
+			return 1;
+		else if(d < 0)
+			return -1;
+		return 0;
 	}
 	
 	/* Here we have two general approaches when dealing with multiple vectors:
@@ -67,7 +75,7 @@ public class Prey extends Animal {
 			   velocityMatchingWeight = 0.1,
 			   flockCenteringWeight = 0.15,
 			   predatorAvoidanceWeight = 0.4,
-			   waypointAttractionWeight = 0.2,
+			   waypointAttractionWeight = 0.4,
 			   terrainAvoidanceWeight = 0.1;
 		int neighbourhoodCount = 0, predatorCount = 0, obstacleCount = 0;
 		HashMap<Waypoint, Integer> flockTargets = new HashMap<Waypoint, Integer>();
@@ -179,8 +187,39 @@ public class Prey extends Animal {
 				maxSlope = Math.max(maxSlope, totalHeightDiff);
 				terrainAvoidance = terrainAvoidance.plus(v.neg().mult(totalHeightDiff));
 			}
-			terrainAvoidance = terrainAvoidance.mult(1.0/maxSlope);
+			if(maxSlope > 0)
+				terrainAvoidance = terrainAvoidance.mult(1.0/maxSlope);
+			else
+				terrainAvoidance = new Vec();
+			/*double minSlope = Double.MAX_VALUE,
+					dir = Math.atan2(velocity.y, velocity.x);
+			
+			for(double rad = 0; rad < Math.PI/16; rad += Math.PI/64)
+				for(int i = -1; i < 2; i+=2)	{
+					Vec v = new Vec(Math.cos(rad*i+dir), Math.sin(rad*i+dir));
+					
+					int scale = 1;
+					double slope = 0;
+					while(scale*getSize() <= getRadius())	{
+						Vec modOption = v.mult(scale*getSize());
+						double heightDiff = hm.getInterpolatedHeightAt(getPosition().plus(modOption))
+								- height;
+						
+						if(sign(heightDiff) == sign(slope) || sign(slope) == 0)	{
+							slope += heightDiff;
+						}
+						scale++;
+					}
+					//dy/dx
+					//System.out.println("slope at " + (rad*i) + ": " + slope);
+					slope = slope/((scale-1)*getSize());
+					if(slope < minSlope)	{
+						minSlope = slope;
+						terrainAvoidance = v;
+					}
+				}*/
 		}
+		System.out.println();
 		
 		//take the average weighting
 		if(predatorCount > 0)
@@ -212,13 +251,13 @@ public class Prey extends Animal {
 								+velocityMatchingWeight
 								+waypointAttractionWeight
 								+terrainAvoidanceWeight));
-		System.out.println("predator avoidance: " + predatorAvoidance
+		/*System.out.println("predator avoidance: " + predatorAvoidance
 				+ "\ncollision avoidance: " + collisionAvoidance
 				+ "\nflock centering: " + flockCentering
 				+ "\nvelocity matching: " + velocityMatching
 				+ "\nwaypoint attraction: " + waypointAttraction
 				+ "\nterrain avoidance: " + terrainAvoidance
-				+ "\n");
+				+ "\n");*/
 		//velocity = velocity.plus(ret.truncate(1)).plus(obstacleAvoidance.mult(10)).truncate(1);
 		//velocity = velocity.plus(ret.truncate(1)).truncate(1);
 		/* ret is the vector we wish to be facing. we want to affect the
@@ -228,7 +267,7 @@ public class Prey extends Animal {
 		 * of time). so we try to adjust the velocity as much as possible.
 		 */
 		ret = velocity.plus(ret.truncate(1)).truncate(1);
-		double retSize = ret.size(), velSize = velocity.size();
+		/*double retSize = ret.size(), velSize = velocity.size();
 		if(retSize > 0)	{
 			//first ensure that speed variation is maintained
 			if(velSize + maxSpeedVar < retSize)
@@ -242,7 +281,7 @@ public class Prey extends Animal {
 			 * 1. convert to polar co-ordinates
 			 * 2. compare angle like we just compared size
 			 * 3. convert back to cartesian co-ordinates
-			 */
+			 * /
 			double retAngle = Math.atan2(ret.y, ret.x),
 					velAngle = Math.atan2(velocity.y, velocity.x);
 			
@@ -258,7 +297,7 @@ public class Prey extends Animal {
 				retAngle = velAngle + maxTurningAngle;
 			
 			ret = new Vec(Math.cos(retAngle), Math.sin(retAngle)).mult(retSize);
-		}
+		}*/
 		velocity = ret.truncate(1);
 	}
 	
