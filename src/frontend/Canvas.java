@@ -48,8 +48,9 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 			renderAxes = false,
 			renderHeightMap = true,
 			renderDirections = true,
-			renderRadii = false,
-			renderWaypoints = false;
+			renderRadii = true,
+			renderWaypoints = false,
+			track = false;
 	
 	public Canvas(UserInterface ui)	{
 		this.ui = ui;
@@ -110,7 +111,8 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 	
 	public void paint(Graphics g)	{
 		Graphics2D g2 = (Graphics2D)g;
-		focusOnSelection();
+		if (track)
+			focusOnSelection();
 		//System.out.println(hmc.completion);
 		if(hmc.completion >= 1)	{
 			Point o = originInLabelSpace().getPoint();
