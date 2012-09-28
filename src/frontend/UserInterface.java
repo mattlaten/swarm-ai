@@ -64,7 +64,7 @@ public class UserInterface extends JFrame implements KeyListener {
 		
 		canv = new Canvas(this);
 		
-		properties = new PropertiesPanel();
+		properties = new PropertiesPanel(this);
 		controlBar = new ControlBar(sim);
 		statusBar = new StatusBar();
 		toolbar = new Toolbar();
