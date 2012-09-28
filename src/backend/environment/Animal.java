@@ -46,6 +46,7 @@ public abstract class Animal extends Element implements Cloneable {
 	public Vec getVelocity() 	{	return (oldVelocity == null ? velocity : oldVelocity).mult(getMaxSpeed());	}
 	public void setVelocity(Vec v)	{
 		velocity = new Vec(v).mult(1.0/getMaxSpeed()).truncate(1);
+		oldVelocity = null;
 	}
 	
 	//public Object clone()		{	return new Animal(this);	}
