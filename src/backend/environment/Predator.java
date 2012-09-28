@@ -4,6 +4,7 @@ package backend.environment;
 import java.util.List;
 
 import math.Vec;
+import backend.HeightMap;
 
 public class Predator extends Animal implements Cloneable {
 	public Predator(Predator other)					{	super(other);	}
@@ -29,7 +30,7 @@ public class Predator extends Animal implements Cloneable {
 	 * 
 	 * Note: Collision avoidance and flock centering aren't linearly dependent on the distance of the other predators.
 	 */
-	public void calculateUpdate(List<Element> influences) {
+	public void calculateUpdate(List<Element> influences, HeightMap hm) {
 		//calculate the sums
 		Vec collisionAvoidance = new Vec(),
 			velocityMatching = new Vec(),
@@ -76,7 +77,10 @@ public class Predator extends Animal implements Cloneable {
 				.plus(collisionAvoidance.mult(collisionAvoidanceWeight)
 				.plus(flockCentering.mult(flockCenteringWeight)
 				.plus(velocityMatching.mult(velocityMatchingWeight))))
-				.mult(1.0/(preyAttackingWeight+collisionAvoidanceWeight+flockCenteringWeight+velocityMatchingWeight));
+				.mult(1.0/(preyAttackingWeight
+						+collisionAvoidanceWeight
+						+flockCenteringWeight
+						+velocityMatchingWeight));
 		velocity = velocity.plus(ret.truncate(1)).truncate(1);
 	}
 	

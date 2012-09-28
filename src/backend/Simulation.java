@@ -79,7 +79,7 @@ public class Simulation extends Thread {
 				//System.out.println((ind < snapshots.size() ? snapshots.get(ind).timeTaken : -1) + " " + time);
 				//if(time % (timeStep*stepsPerSave) == 0)	{
 				if(time % (timeStep*stepsPerSave) == 0 && (time == totalTime || ind >= snapshots.size()))	{
-					System.out.println("dirty and added snapshot");
+					//System.out.println("dirty and added snapshot");
 					//snapshots.add(elements.clone());
 					RenderObjectList ss = new RenderObjectList(elements.size(), time);
 					for(Element e : elements)
@@ -88,7 +88,7 @@ public class Simulation extends Thread {
 					elements.clean();
 				}
 				else if(ind < snapshots.size() && snapshots.get(ind).timeTaken == time)	{
-					System.out.println("dirty and updated snapshot");
+					//System.out.println("dirty and updated snapshot");
 					if(elements.isDirty())	{
 						while(snapshots.size() > ind+1)
 							snapshots.remove(snapshots.size()-1);
@@ -102,7 +102,7 @@ public class Simulation extends Thread {
 					apply(ind);	//this will also clean elements
 				}
 				else if(elements.isDirty())	{
-					System.out.println("dirty and inserted snapshot");
+					//System.out.println("dirty and inserted snapshot");
 					//create a new list
 					RenderObjectList ss = new RenderObjectList(elements.size(), time);
 					for(Element e : elements)

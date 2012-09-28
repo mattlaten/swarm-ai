@@ -68,7 +68,7 @@ public class Prey extends Animal {
 			   flockCenteringWeight = 0.15,
 			   predatorAvoidanceWeight = 0.4,
 			   waypointAttractionWeight = 0.2,
-			   terrainAvoidanceWeight = 1.0;
+			   terrainAvoidanceWeight = 0.1;
 		int neighbourhoodCount = 0, predatorCount = 0, obstacleCount = 0;
 		HashMap<Waypoint, Integer> flockTargets = new HashMap<Waypoint, Integer>();
 		for(Element e : influences)	{
@@ -152,23 +152,17 @@ public class Prey extends Animal {
 			}
 		}
 		
-		/* The goal of terrain avoidance is to determine no-go areas. In order to do this we need
-		 * the following few principles:
-		 * 	1. a slope that is further away is less no-go
-		 * 	2. a slope that is behind or next to me is irrelevant with regard to my continuing
-		 * 		in the same direction
-		 * 	3. a slope with a small gradient is better than one with a large gradient
-		 * 	4. a down-slope is better than up-slope
-		 * 
-		 * We look in 24 directions around the current position and for each direction we determine
-		 * a slope value. These are used to determine no-go areas. Later, these are used to push
-		 * the velocity vector out of these no-go areas.
+		/* Terrain avoidance is acheived by sending out 24 feelers in different directions
+		 * and then checking which one have the greatest change in height. Those are then
+		 * inverted proportionate to their changes
 		 */
 		if(hm != null)	{
 			double height = hm.getInterpolatedHeightAt(getPosition());
+			double dir = Math.atan2(velocity.y, velocity.x);
+			double maxSlope = 0;
 			for(double rad = 0; rad < 2*Math.PI; rad += Math.PI/6)	{
 				//get the option-vector (as a unit vector)
-				Vec v = new Vec(Math.cos(rad), Math.sin(rad));
+				Vec v = new Vec(Math.cos(rad+dir), Math.sin(rad+dir));
 				
 				/* move out in increments of the size of the prey until we go beyond
 				 * the sight-radius of this prey.
@@ -181,8 +175,11 @@ public class Prey extends Animal {
 							- hm.getInterpolatedHeightAt(getPosition().plus(modOption)))/(scale++);
 				}
 				totalHeightDiff /= scale - 1;
+				totalHeightDiff *= Math.abs(velocity.x*v.x + velocity.y*v.y);
+				maxSlope = Math.max(maxSlope, totalHeightDiff);
 				terrainAvoidance = terrainAvoidance.plus(v.neg().mult(totalHeightDiff));
 			}
+			terrainAvoidance = terrainAvoidance.mult(1.0/maxSlope);
 		}
 		
 		//take the average weighting
