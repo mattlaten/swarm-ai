@@ -1,6 +1,7 @@
 package frontend.components;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -17,7 +18,9 @@ import javax.swing.JTextField;
 import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
 
+import backend.environment.Animal;
 import backend.environment.Element;
+import backend.environment.Prey;
 import backend.environment.Property;
 
 public class PropertiesPanel extends JPanel implements CellEditorListener  {
@@ -27,20 +30,21 @@ public class PropertiesPanel extends JPanel implements CellEditorListener  {
 	JLabel heading;
 	JSlider size, maxSpeed;
 	PropertyTableModel model;
+	VelocityWheel velWheel;
+	
 	public PropertiesPanel()	{
 		//heading = new JLabel("Properties");
 		//heading.setFont(new Font("Arial", 1, 14));
-		this.setLayout(new GridLayout(8,1));
+		this.setLayout(new GridLayout(7,1));
 		this.setPreferredSize(new Dimension(200,0));
 		
 		size = new JSlider();		
 		maxSpeed = new JSlider();
-		
 		x = new JTextField(3);
 		new JLabel("y");
 		y = new JTextField(3);
-//		y.setAlignmentY(RIGHT_ALIGNMENT);
-	
+		Animal a = new Prey();
+		velWheel = new VelocityWheel(a);
 		
 		
 		//this.add(heading);
@@ -66,11 +70,18 @@ public class PropertiesPanel extends JPanel implements CellEditorListener  {
 		
 		this.add(posPan);
 		
-		JPanel velPan = new JPanel(new FlowLayout());
-		
-		velPan.add(new JLabel("Velocity"));
+		JPanel velPan = new JPanel(new BorderLayout());
+		JLabel t = new JLabel("Velocity");
+		t.setHorizontalAlignment(JLabel.CENTER);
+		velPan.add(t, BorderLayout.PAGE_START);
+		JPanel velWheelPan = new JPanel(new BorderLayout());
+		//velWheelPan.add(new JLabel("Velocity"));
+		velWheelPan.add(velWheel);
+		velPan.add(velWheelPan);
+		//this.add(velWheelPan);
 		
 		this.add(velPan);
+		
 		/*
 		model = new PropertyTableModel();
 		jt = new JTable(model);
