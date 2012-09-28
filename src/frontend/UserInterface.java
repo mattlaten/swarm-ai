@@ -254,7 +254,7 @@ public class UserInterface extends JFrame implements KeyListener {
 			fileNew = new JMenuItem("New");
 			fileNew.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent ae)	{
-					System.exit(0);
+					clear();
 				}
 			});
 			
@@ -420,7 +420,7 @@ public class UserInterface extends JFrame implements KeyListener {
 	private class Toolbar extends JPanel {
 
 		JButton modeSelect, modePrey, modePredator, modeModifier, 
-		modeObstacle, modeLoad, modeRandom, clearButton;
+		modeObstacle, modeLoad, modeRandom, trackButton;
 		
 		public Toolbar()
 		{
@@ -463,10 +463,10 @@ public class UserInterface extends JFrame implements KeyListener {
 				}
 			});
 			
-			clearButton = new JButton("Clear");
-			clearButton.addActionListener(new ActionListener(){
+			trackButton = new JButton("Track");
+			trackButton.addActionListener(new ActionListener(){
 				public void actionPerformed(ActionEvent ae)	{
-					clear();
+					canv.track = !canv.track;
 				}
 			});
 
@@ -478,7 +478,7 @@ public class UserInterface extends JFrame implements KeyListener {
 			add(modePredator);
 			add(modeModifier);
 			add(modeObstacle);
-			add(clearButton);
+			add(trackButton);
 		}
 	}
 }
