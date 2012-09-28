@@ -20,7 +20,7 @@ public class VelocityWheelTest extends JFrame {
 		Animal a = new Prey();
 		a.setVelocity(new Vec(20, 20));
 		
-		getContentPane().add(new VelocityWheel(Color.blue, a),
+		getContentPane().add(new VelocityWheel(a),
 				BorderLayout.CENTER);
 		
 		setVisible(true);
