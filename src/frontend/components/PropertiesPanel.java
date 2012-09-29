@@ -123,7 +123,7 @@ public class PropertiesPanel extends JPanel implements CellEditorListener  {
 	}
 	
 	public void targetEntity(Element e) throws Exception	{
-		String [] cols = {"Property", "Value"};
+		/*String [] cols = {"Property", "Value"};
 		ArrayList<Field> props = new ArrayList<Field>();
 		Field[] fields = e.getClass().getFields();
 		for(Field f : fields)
@@ -131,7 +131,7 @@ public class PropertiesPanel extends JPanel implements CellEditorListener  {
 			if(f.getAnnotation(Property.class) != null)
 				props.add(f);
 		model.setTarget(e, props);
-		jt.repaint();
+		jt.repaint();*/
 	}
 
 	//@Override
