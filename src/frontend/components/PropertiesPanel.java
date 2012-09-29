@@ -17,6 +17,9 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+import frontend.UserInterface;
 
 import backend.environment.Animal;
 import backend.environment.Element;
@@ -32,14 +35,42 @@ public class PropertiesPanel extends JPanel implements CellEditorListener  {
 	PropertyTableModel model;
 	VelocityWheel velWheel;
 	
-	public PropertiesPanel()	{
+	public PropertiesPanel(final UserInterface ui)	{
 		//heading = new JLabel("Properties");
 		//heading.setFont(new Font("Arial", 1, 14));
 		this.setLayout(new GridLayout(7,1));
 		this.setPreferredSize(new Dimension(200,0));
 		
-		size = new JSlider();		
+		size = new JSlider();
+		size.addChangeListener(new ChangeListener(){
+			public void stateChanged(ChangeEvent ce)
+			{
+				JSlider source = (JSlider)ce.getSource();
+				if (!source.getValueIsAdjusting())
+				{
+					for (Element e : ui.selection)
+					{
+						System.out.println(source.getValue());
+						e.setSize(source.getValue());
+					}
+				}
+			}
+		});
 		maxSpeed = new JSlider();
+		maxSpeed.addChangeListener(new ChangeListener(){
+			public void stateChanged(ChangeEvent ce)
+			{
+				JSlider source = (JSlider)ce.getSource();
+				if (!source.getValueIsAdjusting())
+				{
+					for (Element e : ui.selection)
+					{
+						System.out.println(source.getValue());
+						e.setMaxSpeed(source.getValue());
+					}
+				}
+			}
+		});
 		x = new JTextField(3);
 		new JLabel("y");
 		y = new JTextField(3);
@@ -71,14 +102,13 @@ public class PropertiesPanel extends JPanel implements CellEditorListener  {
 		this.add(posPan);
 		
 		JPanel velPan = new JPanel(new BorderLayout());
-		JLabel t = new JLabel("Velocity");
-		t.setHorizontalAlignment(JLabel.CENTER);
-		velPan.add(t, BorderLayout.PAGE_START);
+		JLabel lblVel = new JLabel("Velocity");
+		lblVel.setHorizontalAlignment(JLabel.CENTER);
+		velPan.add(lblVel, BorderLayout.PAGE_START);
+		
 		JPanel velWheelPan = new JPanel(new BorderLayout());
-		//velWheelPan.add(new JLabel("Velocity"));
 		velWheelPan.add(velWheel);
 		velPan.add(velWheelPan);
-		//this.add(velWheelPan);
 		
 		this.add(velPan);
 		

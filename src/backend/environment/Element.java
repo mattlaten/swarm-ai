@@ -6,13 +6,15 @@ import java.util.List;
 import math.Vec;
 import backend.HeightMap;
 
-/*
+/**
  * Abstract class that models a single element in our environment
  */
 public abstract class Element implements Serializable, Cloneable	{
 	protected Waypoint target = null;
 	protected Vec position;
 	protected volatile boolean alive = true;
+	double size;
+	double maxSpeed;
 	
 	public Waypoint getTarget()	{
 		return target;
@@ -31,7 +33,12 @@ public abstract class Element implements Serializable, Cloneable	{
 	
 	public void calculateUpdate(List<Element> influences, HeightMap hm)	{}
 	public void update()									{}
-	public void setSize(double s)	{}
+	public void setSize(double s)	{
+		size = s;
+	}
+	public void setMaxSpeed(double s) {
+		maxSpeed = s;
+	}
 	public void setRadius(double r)	{}
 	public synchronized void setAlive(boolean a)	{
 		alive = a;
