@@ -28,7 +28,7 @@ def XSIUnloadPlugin( in_reg ):
 	Application.LogMessage(str(strPluginName) + str(" has been unloaded."),constants.siVerbose)
 
 	return true
-	
+
 '''
 make sure terrain is in wavefront OBJ format
 perhaps load in from file and convert?

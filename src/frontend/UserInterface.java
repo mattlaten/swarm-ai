@@ -81,7 +81,7 @@ public class UserInterface extends JFrame implements KeyListener {
 		menuBar = new MenuBar();
 		
 		//set up things
-		setSize(800, 600);
+		setSize(1024, 600);
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 			

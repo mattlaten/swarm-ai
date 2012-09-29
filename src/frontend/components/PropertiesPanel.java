@@ -13,8 +13,11 @@ import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.border.Border;
+import javax.swing.border.TitledBorder;
 import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -32,10 +35,10 @@ public class PropertiesPanel extends JPanel  {
 	VelocityWheel velWheel;
 	
 	public PropertiesPanel(final UserInterface ui)	{
-		this.setLayout(new GridLayout(11,1));
-		this.setPreferredSize(new Dimension(200,0));
+		//this.setLayout(new GridLayout(11,1));
+		this.setPreferredSize(new Dimension(250,0));
 		
-		size = new JSlider(2, 30);
+		size = new JSlider(0, 30);
 		size.setPaintTicks(true);
 		size.setPaintLabels(true);
 		size.setMajorTickSpacing(10);
@@ -47,11 +50,7 @@ public class PropertiesPanel extends JPanel  {
 				JSlider source = (JSlider)ce.getSource();
 				//if (!source.getValueIsAdjusting())	{
 					for (Element e : ui.selection)
-					{	
-						double s = e.getSize();
-						System.out.println(source.getValue());
-						e.setSize(s*source.getValue()/50.0);
-					}
+						e.setSize(source.getValue());
 			}
 		});
 		maxSpeed = new JSlider();
@@ -65,6 +64,7 @@ public class PropertiesPanel extends JPanel  {
 					{
 						System.out.println(source.getValue());
 						e.setMaxSpeed(source.getValue());
+						System.out.println(e.getMaxSpeed());
 					}
 				}
 			}
@@ -76,19 +76,22 @@ public class PropertiesPanel extends JPanel  {
 		velWheel = new VelocityWheel(a);
 		
 		
-		//this.add(heading);
+		
+		/*
+		 * Construction of the Split Pane from Props and Influences
+		 */		
+		JPanel props = new JPanel(new GridLayout(4,1));
 		JPanel sizePan = new JPanel(new FlowLayout());
 		sizePan.add(new JLabel("Size"));
 		sizePan.add(size);
 		
-		this.add(sizePan);
+		props.add(sizePan);
 		
 		JPanel msPan = new JPanel(new FlowLayout());
-		
-		msPan.add(new JLabel("Max Speed"));
+		msPan.add(new JLabel("Speed"));
 		msPan.add(maxSpeed);
 		
-		this.add(msPan);
+		props.add(msPan);
 		
 		JPanel posPan = new JPanel(new FlowLayout());
 		posPan.add(new JLabel("Position"));
@@ -97,7 +100,7 @@ public class PropertiesPanel extends JPanel  {
 		posPan.add(new JLabel("y"));
 		posPan.add(y);
 		
-		this.add(posPan);
+		props.add(posPan);
 		
 		JPanel velPan = new JPanel(new BorderLayout());
 		JLabel lblVel = new JLabel("Velocity");
@@ -108,8 +111,15 @@ public class PropertiesPanel extends JPanel  {
 		velWheelPan.add(velWheel);
 		velPan.add(velWheelPan);
 		
-		this.add(velPan);
+		props.add(velPan);
 		
+		props.setBorder(new TitledBorder("Properties"));
+		
+		JPanel influences = new JPanel();
+		influences.setBorder(new TitledBorder("Influences"));	
+		
+		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, props, influences);
+		this.add(splitPane);
 		setVisible(true);
 	}
 	
