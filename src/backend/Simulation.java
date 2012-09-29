@@ -2,6 +2,7 @@ package backend;
 
 import java.awt.Point;
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -12,32 +13,20 @@ import backend.environment.Prey;
 import backend.environment.Waypoint;
 
 /**
- * 
- *
- */
-class RenderObjectList extends ArrayList<RenderObject>	{
-	int timeTaken;
-	
-	public RenderObjectList(int size, int timeTaken)	{
-		super(size);
-		this.timeTaken = timeTaken;
-	}
-}
-
-/**
  * Simulation is the class that handles the interaction
  * between elements and each other, as well as the
- * environment
+ * environment	
  */
-public class Simulation extends Thread {
+public class Simulation extends Thread implements Serializable {
 	public UnforgivingArrayList<Element> elements;
 	public HeightMap hm = null;
-	private  ArrayList<RenderObjectList> snapshots;
+	private  ArrayList<Snapshot> snapshots;
 	
 	public int timeStep = 20, stepsPerSave = 10;
 	private volatile int time = 0, totalTime = 0;
 	
 	public boolean isRunning = false;
+	public boolean saved = false;
 	
 	public Simulation()	{
 		elements = new UnforgivingArrayList<Element>(0);
@@ -64,7 +53,7 @@ public class Simulation extends Thread {
 				new Waypoint(0, 0)
 		));*/
 		
-		snapshots = new ArrayList<RenderObjectList>();
+		snapshots = new ArrayList<Snapshot>();
 		
 		hm = new HeightMap(new File("./maps/GC2.map"));
 		//hm = new HeightMap();
@@ -87,7 +76,7 @@ public class Simulation extends Thread {
 				if(time % (timeStep*stepsPerSave) == 0 && (time == totalTime || ind >= snapshots.size()))	{
 					//System.out.println("dirty and added snapshot");
 					//snapshots.add(elements.clone());
-					RenderObjectList ss = new RenderObjectList(elements.size(), time);
+					Snapshot ss = new Snapshot(elements.size(), time);
 					for(Element e : elements)
 						ss.add(new RenderObject(e));
 					snapshots.add(ss);
@@ -98,7 +87,7 @@ public class Simulation extends Thread {
 					if(elements.isDirty())	{
 						while(snapshots.size() > ind+1)
 							snapshots.remove(snapshots.size()-1);
-						RenderObjectList l = snapshots.get(ind);
+						Snapshot l = snapshots.get(ind);
 						for(Element e: elements.removed)
 							l.remove(new RenderObject(e));
 						for(Element e: elements.added)
@@ -110,7 +99,7 @@ public class Simulation extends Thread {
 				else if(elements.isDirty())	{
 					//System.out.println("dirty and inserted snapshot");
 					//create a new list
-					RenderObjectList ss = new RenderObjectList(elements.size(), time);
+					Snapshot ss = new Snapshot(elements.size(), time);
 					for(Element e : elements)
 						ss.add(new RenderObject(e));
 					//find where to insert this

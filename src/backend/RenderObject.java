@@ -47,4 +47,9 @@ public class RenderObject {
 		catch(ClassCastException cce)	{}
 		return false;
 	}
+	
+	public String toString(){
+		String str = String.format("");
+		return str;
+	}
 }

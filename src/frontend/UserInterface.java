@@ -35,6 +35,10 @@ import frontend.components.ControlBar;
 import frontend.components.PropertiesPanel;
 import frontend.components.StatusBar;
 
+/**
+ * 
+ *
+ */
 public class UserInterface extends JFrame implements KeyListener {
 	
 	Logger log = new Logger(UserInterface.class, System.out, System.err);
@@ -314,7 +318,16 @@ public class UserInterface extends JFrame implements KeyListener {
 			fileSave = new JMenuItem("Save");
 			fileSave.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent ae)	{
-					System.exit(0);
+					if (!sim.saved)
+					{
+						fileChooser.setCurrentDirectory(new File("./saves/"));
+						statusBar.setMode("Choose location to save Simulation");
+						int returnVal = fileChooser.showSaveDialog(UserInterface.this);
+						if (returnVal == JFileChooser.APPROVE_OPTION){
+							
+						}
+					}
+					
 				}
 			});
 			

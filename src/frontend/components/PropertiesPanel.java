@@ -52,6 +52,7 @@ public class PropertiesPanel extends JPanel implements CellEditorListener  {
 					{
 						System.out.println(source.getValue());
 						e.setSize(source.getValue());
+						System.out.println(e.getSize());
 					}
 				}
 			}
