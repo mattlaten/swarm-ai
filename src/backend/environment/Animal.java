@@ -8,13 +8,20 @@ import math.Vec;
 public abstract class Animal extends Element implements Cloneable {
 	public @Property Vec velocity;	//this stores a vector that is at most a unit vector which is multiplied by the maxSpeed 
 	private Vec oldVelocity = null;
-	//public @Property double size;
 	public @Property double maxSpeed;
 	public @Property double sightRadius;
+	
+	public double collisionAvoidanceWeight = 0.15,
+			   velocityMatchingWeight = 0.1,
+			   flockCenteringWeight = 0.15,
+			   otherAnimalWeight = 0.4,			//this is predatorAvoidance (for Prey) or preyAttacking (for Predators)
+			   waypointAttractionWeight = 0.3,
+			   terrainAvoidanceWeight = 0.2;
 	
 	public Animal(Vec position, Vec velocity)	{
 		this.position = new Vec(position);
 		this.velocity = new Vec(velocity);
+		initWeights();
 	}
 	
 	public Animal(Animal other)	{
@@ -23,6 +30,7 @@ public abstract class Animal extends Element implements Cloneable {
 		this.size = other.size;
 		this.maxSpeed = other.maxSpeed;
 		this.sightRadius = other.sightRadius;
+		initWeights();
 	}
 	
 	public Animal()	{
@@ -31,6 +39,7 @@ public abstract class Animal extends Element implements Cloneable {
 		size = 5;
 		maxSpeed = 0.2;
 		sightRadius = 100;
+		initWeights();
 	}
 	
 	public Animal(double x, double y, double xvel, double yvel, double size)	{
@@ -38,6 +47,7 @@ public abstract class Animal extends Element implements Cloneable {
 		position = new Vec(x,y);
 		setVelocity(new Vec(xvel,yvel));
 		this.size = size;
+		initWeights();
 	}
 	
 	public double getSize() 	{	return size;		}
@@ -50,6 +60,8 @@ public abstract class Animal extends Element implements Cloneable {
 	}
 	
 	//public Object clone()		{	return new Animal(this);	}
+	
+	protected abstract void initWeights();
 	
 	public void update()	{
 		if(isAlive())	{

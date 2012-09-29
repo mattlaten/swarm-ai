@@ -37,6 +37,15 @@ public class Prey extends Animal {
 		return 0;
 	}
 	
+	public void initWeights()	{
+		collisionAvoidanceWeight = 0.15;
+		velocityMatchingWeight = 0.1;
+		flockCenteringWeight = 0.15;
+		otherAnimalWeight = 0.4;			//this is predatorAvoidance (for Prey) or preyAttacking (for Predators)
+		waypointAttractionWeight = 0.3;
+		terrainAvoidanceWeight = 0.2;
+	}
+	
 	/* Here we have two general approaches when dealing with multiple vectors:
 	 * 1. take a weighted average of the vectors
 	 * 2. use an accumulator: order the vectors by priority, start adding them up and when the 
@@ -68,15 +77,6 @@ public class Prey extends Animal {
 			obstacleAvoidance = new Vec(),
 			terrainAvoidance = new Vec();
 		
-		/* obstacleAvoidance has a dynamic weight. this is
-		 * because we can't afford to EVER run into obstacles.
-		 */
-		double collisionAvoidanceWeight = 0.15,
-			   velocityMatchingWeight = 0.1,
-			   flockCenteringWeight = 0.15,
-			   predatorAvoidanceWeight = 0.4,
-			   waypointAttractionWeight = 0.3,
-			   terrainAvoidanceWeight = 0.2;
 		int neighbourhoodCount = 0, predatorCount = 0, obstacleCount = 0;
 		HashMap<Waypoint, Integer> flockTargets = new HashMap<Waypoint, Integer>();
 		for(Element e : influences)	{
@@ -240,13 +240,13 @@ public class Prey extends Animal {
 		if(ret.size() < 1)
 			ret = ret.plus(velocityMatching);*/
 		double nTerrainAvoidanceWeight = terrainAvoidanceWeight * velocity.size();
-		Vec ret = predatorAvoidance.mult(predatorAvoidanceWeight)
+		Vec ret = predatorAvoidance.mult(otherAnimalWeight)
 						.plus(collisionAvoidance.mult(collisionAvoidanceWeight)
 						.plus(flockCentering.mult(flockCenteringWeight)
 						.plus(velocityMatching.mult(velocityMatchingWeight)
 						.plus(waypointAttraction.mult(waypointAttractionWeight)
 						.plus(terrainAvoidance.mult(nTerrainAvoidanceWeight))))))
-						.mult(1.0/(predatorAvoidanceWeight
+						.mult(1.0/(otherAnimalWeight
 								+collisionAvoidanceWeight
 								+flockCenteringWeight
 								+velocityMatchingWeight

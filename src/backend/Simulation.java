@@ -20,7 +20,7 @@ import backend.environment.Waypoint;
 public class Simulation extends Thread implements Serializable {
 	public UnforgivingArrayList<Element> elements;
 	public HeightMap hm = null;
-	private  ArrayList<Snapshot> snapshots;
+	public ArrayList<Snapshot> snapshots;
 	
 	public int timeStep = 20, stepsPerSave = 10;
 	private volatile int time = 0, totalTime = 0;

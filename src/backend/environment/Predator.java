@@ -12,6 +12,13 @@ public class Predator extends Animal implements Cloneable {
 	public Predator()								{	super();	}
 	public Predator(double x, double y, double xvel, double yvel, double size)	{	super(x,y,xvel,yvel,size);	}
 	
+	public void initWeights()	{
+		collisionAvoidanceWeight = 0.3;
+		velocityMatchingWeight = 0.1;
+		flockCenteringWeight = 0.3;
+		otherAnimalWeight = 0.3;
+	}
+	
 	/* Here we have two general approaches when dealing with multiple vectors:
 	 * 1. take a weighted average of the vectors
 	 * 2. use an accumulator: order the vectors by priority, start adding them up and when the 
@@ -36,10 +43,10 @@ public class Predator extends Animal implements Cloneable {
 			velocityMatching = new Vec(),
 			flockCentering = new Vec(),
 			preyAttacking = new Vec();
-		double collisionAvoidanceWeight = 0.3,
+		/*double collisionAvoidanceWeight = 0.3,
 				   velocityMatchingWeight = 0.1,
 				   flockCenteringWeight = 0.3,
-				   preyAttackingWeight = 0.3;
+				   preyAttackingWeight = 0.3;*/
 		int neighbourhoodCount = 0, preyCount = 0;
 		for(Element e : influences)	{
 			Vec dir = e.getPosition().minus(getPosition());
@@ -73,11 +80,11 @@ public class Predator extends Animal implements Cloneable {
 			ret = ret.plus(preyAttacking);
 		if(ret.size() < 1)
 			ret = ret.plus(velocityMatching);*/
-		Vec ret = preyAttacking.mult(preyAttackingWeight)
+		Vec ret = preyAttacking.mult(otherAnimalWeight)
 				.plus(collisionAvoidance.mult(collisionAvoidanceWeight)
 				.plus(flockCentering.mult(flockCenteringWeight)
 				.plus(velocityMatching.mult(velocityMatchingWeight))))
-				.mult(1.0/(preyAttackingWeight
+				.mult(1.0/(otherAnimalWeight
 						+collisionAvoidanceWeight
 						+flockCenteringWeight
 						+velocityMatchingWeight));
