@@ -19,6 +19,7 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 
@@ -226,7 +227,7 @@ public class UserInterface extends JFrame implements KeyListener {
 	private class MenuBar extends JMenuBar {
 		
 		JMenuBar menubar;
-		JMenu file, view;
+		JMenu file, view, trans;
 		JMenuItem 	
 					fileNew,
 					fileOpen,
@@ -235,7 +236,11 @@ public class UserInterface extends JFrame implements KeyListener {
 					fileSaveAs,
 					fileImportTerrain,
 					fileExportTerrain,
-					fileGenerateRandomTerrain, fileExit;
+					fileGenerateRandomTerrain, 
+					fileExit,
+					transSize,
+					transMaxVel,
+					transPos;
 		JCheckBoxMenuItem 
 					viewGrid, 
 					viewAxes, 
@@ -390,7 +395,49 @@ public class UserInterface extends JFrame implements KeyListener {
 					canv.repaint();
 				}
 			});
+			
+			transSize = new JMenuItem("Set Selection Size");
+			transSize.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent ae)	{
+					if (selection.isEmpty()) {
+						JOptionPane.showMessageDialog(null, "Selection cannot be empty!");
+					}
+					else {
+						double size = Double.parseDouble(JOptionPane.showInputDialog("Enter Size"));
+						for (Element e : selection)
+							e.setSize(size);
+					}
+				}
+			});
 
+			transMaxVel = new JMenuItem("Set Selection Max Velocity");
+			transMaxVel.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent ae)	{
+					if (selection.isEmpty()) {
+						JOptionPane.showMessageDialog(null, "Selection cannot be empty!");
+					}
+					else {
+						double maxVel = Double.parseDouble(JOptionPane.showInputDialog("Enter Max Velocity"));
+						for (Element e : selection)
+							e.setMaxSpeed(maxVel);
+					}
+				}
+			});
+			
+			transPos = new JMenuItem("Set Selection Position");
+			transPos.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent ae)	{
+					if (selection.isEmpty()) {
+						JOptionPane.showMessageDialog(null, "Selection cannot be empty!");
+					}
+					else {
+						//double maxVel = Double.parseDouble(JOptionPane.showInputDialog("Enter Max Velocity"));
+						//for (Element e : selection)
+						//	e.setMaxSpeed(maxVel);
+					}
+				}
+			});
+			
 			
 			file = new JMenu("File");
 				file.add(fileNew);
@@ -412,8 +459,13 @@ public class UserInterface extends JFrame implements KeyListener {
 				view.addSeparator();
 				view.add(viewDirections);
 				view.add(viewRadii);
+			trans = new JMenu("Transform");
+				trans.add(transSize);
+				trans.add(transMaxVel);
+				trans.add(transPos);
 			add(file);
 			add(view);
+			add(trans);
 		}
 	}
 

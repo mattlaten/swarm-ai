@@ -1,5 +1,6 @@
 package backend;
 
+import java.awt.Point;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -7,6 +8,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import math.Vec;
 import backend.environment.Element;
 import backend.environment.Obstacle;
+import backend.environment.Prey;
 import backend.environment.Waypoint;
 
 /**
