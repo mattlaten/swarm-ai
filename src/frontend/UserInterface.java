@@ -42,10 +42,12 @@ public class UserInterface extends JFrame implements KeyListener {
 	public Simulation sim;
 	Canvas canv;
 	
+	Element previousWaypoint;
+	
 	public HashSet<Element> selection;
 	File terrainFile;
 	
-	public enum Mode {SELECT, PAINT_PREY, PAINT_PREDATOR};
+	public enum Mode {SELECT, PAINT_PREY, PAINT_PREDATOR, PAINT_WAYPOINT};
 	Mode mode;
 	StatusBar statusBar = null;
 	ControlBar controlBar;
@@ -96,6 +98,12 @@ public class UserInterface extends JFrame implements KeyListener {
 		
 		setVisible(true);
 		sim.start();
+	}
+	
+	public void setMode(Mode m)	{
+		mode = m;
+		if(m == Mode.PAINT_WAYPOINT)
+			previousWaypoint = null;
 	}
 	
 	public void selectPrey(Vec point, boolean addToSelection) {
@@ -182,6 +190,32 @@ public class UserInterface extends JFrame implements KeyListener {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
+		canv.repaint();
+	}
+	
+	public void placeElement(Element toAdd)	{
+		//convert mPoint to worldspace
+		//place prey on closest dot
+		Vec v = toAdd.getPosition();
+		double xloc = Math.round((v.x/10))*10;
+		double yloc = Math.round(v.y/10)*10;
+		toAdd.setPosition(new Vec(xloc, yloc));
+		
+		boolean validLocation = true;
+		
+		for (Element e : sim.elements)
+			if ((e instanceof Prey || e instanceof Predator)
+					&& e.getPosition().equals(new Vec(xloc, yloc)))
+				validLocation = false;
+		
+		if (validLocation)	{
+			sim.elements.add(toAdd);
+			if(toAdd instanceof Waypoint)	{
+				if(previousWaypoint != null && previousWaypoint.getTarget() == null)
+					previousWaypoint.setTarget((Waypoint)toAdd);
+				previousWaypoint = toAdd;
+			}
+		}
 		canv.repaint();
 	}
 
@@ -472,7 +506,7 @@ public class UserInterface extends JFrame implements KeyListener {
 	private class Toolbar extends JPanel {
 
 		JButton modeSelect, modePrey, modePredator, modeModifier, 
-		modeObstacle, modeLoad, modeRandom, trackButton;
+		modeObstacle, modeLoad, modeRandom, trackButton, modeWaypoint;
 		
 		public Toolbar()
 		{
@@ -481,7 +515,7 @@ public class UserInterface extends JFrame implements KeyListener {
 			modeSelect.addActionListener(new ActionListener(){
 				public void actionPerformed(ActionEvent ae)	{
 					statusBar.setMode("Selecting");
-					mode = Mode.SELECT;
+					setMode(Mode.SELECT);
 				}
 			});
 			
@@ -489,7 +523,7 @@ public class UserInterface extends JFrame implements KeyListener {
 			modePrey.addActionListener(new ActionListener(){
 				public void actionPerformed(ActionEvent ae)	{
 					statusBar.setMode("Placing prey");
-					mode = Mode.PAINT_PREY;
+					setMode(Mode.PAINT_PREY);
 				}
 			});
 			
@@ -497,7 +531,7 @@ public class UserInterface extends JFrame implements KeyListener {
 			modePredator.addActionListener(new ActionListener(){
 				public void actionPerformed(ActionEvent ae)	{
 					statusBar.setMode("Placing predator");
-					mode = Mode.PAINT_PREDATOR;
+					setMode(Mode.PAINT_PREDATOR);
 				}
 			});
 			
@@ -512,6 +546,14 @@ public class UserInterface extends JFrame implements KeyListener {
 			modeObstacle.addActionListener(new ActionListener(){
 				public void actionPerformed(ActionEvent ae)	{
 					statusBar.setMode("Placing obstacle");
+				}
+			});
+			
+			modeWaypoint = new JButton("Waypoint");
+			modeWaypoint.addActionListener(new ActionListener(){
+				public void actionPerformed(ActionEvent ae)	{
+					statusBar.setMode("Placing waypoints");
+					setMode(Mode.PAINT_WAYPOINT);
 				}
 			});
 			
@@ -530,6 +572,7 @@ public class UserInterface extends JFrame implements KeyListener {
 			add(modePredator);
 			add(modeModifier);
 			add(modeObstacle);
+			add(modeWaypoint);
 			add(trackButton);
 		}
 	}

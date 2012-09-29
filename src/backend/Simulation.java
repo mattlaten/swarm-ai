@@ -42,7 +42,7 @@ public class Simulation extends Thread {
 	public Simulation()	{
 		elements = new UnforgivingArrayList<Element>(0);
 		
-		//we add some waypoints for testing purposes
+		/*//we add some waypoints for testing purposes
 		Waypoint prev = null, first = null;
 		for(int i = 0; i < 10; i++)	{
 			Waypoint cur = new Waypoint(new Vec(Math.random()*1000-500, Math.random()*1000-500));
@@ -54,7 +54,7 @@ public class Simulation extends Thread {
 			elements.add(cur);
 		}
 		if(prev != null && first != null && prev != first)
-			prev.setTarget(first);
+			prev.setTarget(first);*/
 		
 		//create an obstacle
 		/*elements.add(new Obstacle(

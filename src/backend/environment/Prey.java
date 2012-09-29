@@ -75,8 +75,8 @@ public class Prey extends Animal {
 			   velocityMatchingWeight = 0.1,
 			   flockCenteringWeight = 0.15,
 			   predatorAvoidanceWeight = 0.4,
-			   waypointAttractionWeight = 0.4,
-			   terrainAvoidanceWeight = 0.1;
+			   waypointAttractionWeight = 0.3,
+			   terrainAvoidanceWeight = 0.2;
 		int neighbourhoodCount = 0, predatorCount = 0, obstacleCount = 0;
 		HashMap<Waypoint, Integer> flockTargets = new HashMap<Waypoint, Integer>();
 		for(Element e : influences)	{
@@ -184,6 +184,7 @@ public class Prey extends Animal {
 				}
 				totalHeightDiff /= scale - 1;
 				totalHeightDiff *= Math.abs(velocity.x*v.x + velocity.y*v.y);
+				totalHeightDiff = Math.pow(totalHeightDiff, 3);
 				maxSlope = Math.max(maxSlope, totalHeightDiff);
 				terrainAvoidance = terrainAvoidance.plus(v.neg().mult(totalHeightDiff));
 			}
@@ -219,7 +220,6 @@ public class Prey extends Animal {
 					}
 				}*/
 		}
-		System.out.println();
 		
 		//take the average weighting
 		if(predatorCount > 0)
@@ -239,18 +239,19 @@ public class Prey extends Animal {
 			ret = ret.plus(collisionAvoidance).plus(flockCentering).mult(0.5);
 		if(ret.size() < 1)
 			ret = ret.plus(velocityMatching);*/
+		double nTerrainAvoidanceWeight = terrainAvoidanceWeight * velocity.size();
 		Vec ret = predatorAvoidance.mult(predatorAvoidanceWeight)
 						.plus(collisionAvoidance.mult(collisionAvoidanceWeight)
 						.plus(flockCentering.mult(flockCenteringWeight)
 						.plus(velocityMatching.mult(velocityMatchingWeight)
 						.plus(waypointAttraction.mult(waypointAttractionWeight)
-						.plus(terrainAvoidance.mult(terrainAvoidanceWeight))))))
+						.plus(terrainAvoidance.mult(nTerrainAvoidanceWeight))))))
 						.mult(1.0/(predatorAvoidanceWeight
 								+collisionAvoidanceWeight
 								+flockCenteringWeight
 								+velocityMatchingWeight
 								+waypointAttractionWeight
-								+terrainAvoidanceWeight));
+								+nTerrainAvoidanceWeight));
 		/*System.out.println("predator avoidance: " + predatorAvoidance
 				+ "\ncollision avoidance: " + collisionAvoidance
 				+ "\nflock centering: " + flockCentering
