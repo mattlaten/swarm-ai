@@ -5,6 +5,7 @@ import java.util.Iterator;
 
 public class UnforgivingArrayList<T> extends ArrayList<T> implements Iterable<T>	{
 	ArrayList<T> removed, added;
+	private boolean dirty = false;
 	
 	public UnforgivingArrayList(int timeTaken)	{
 		removed = new ArrayList<T>();
@@ -43,11 +44,16 @@ public class UnforgivingArrayList<T> extends ArrayList<T> implements Iterable<T>
 	}
 	
 	public void clean()	{
+		dirty = false;
 		removed.clear();
 		added.clear();
 	}
 	
+	public void stuffChanged()	{
+		dirty = true;
+	}
+	
 	public boolean isDirty()	{
-		return removed.size() + added.size() > 0;
+		return removed.size() + added.size() > 0 || dirty;
 	}
 }
