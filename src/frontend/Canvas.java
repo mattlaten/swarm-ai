@@ -266,6 +266,8 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 			mPoint = new Vec(me.getPoint());
 			startPoint = new Vec(me.getPoint());
 			
+			//if ((me.getModifiers() & InputEvent.BUTTON1_MASK) == InputEvent.BUTTON1_MASK)ui.selectPrey(toWorldSpace(mPoint), me.isControlDown());
+			
 			draggingSelection = false;
 			if((me.getModifiers() & InputEvent.BUTTON1_MASK) == InputEvent.BUTTON1_MASK)	{
 				Vec mPointWorld = toWorldSpace(mPoint);
@@ -333,7 +335,7 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 	
 	public void mouseClicked(MouseEvent me) {
 		if ((me.getModifiers() & InputEvent.BUTTON1_MASK) == InputEvent.BUTTON1_MASK)
-			ui.selectPrey(toWorldSpace(mPoint), me.isControlDown());	
+			ui.selectPrey(toWorldSpace(mPoint), me.isControlDown());
 		else if ((me.getModifiers() & InputEvent.BUTTON3_MASK) == InputEvent.BUTTON3_MASK)
 			if (ui.selection.isEmpty())	{	
 				try {
@@ -347,6 +349,10 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 							break;
 						case SELECT:
 							maybeShowPopup(me);
+							break;
+						case PAINT_WAYPOINT:
+							//ui.placeElement(toWorldSpace(mPoint), Waypoint.class);
+							ui.placeElement(new Waypoint(toWorldSpace(mPoint)));
 							break;
 
 					}

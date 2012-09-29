@@ -220,7 +220,6 @@ public class Prey extends Animal {
 					}
 				}*/
 		}
-		System.out.println();
 		
 		//take the average weighting
 		if(predatorCount > 0)
@@ -240,18 +239,19 @@ public class Prey extends Animal {
 			ret = ret.plus(collisionAvoidance).plus(flockCentering).mult(0.5);
 		if(ret.size() < 1)
 			ret = ret.plus(velocityMatching);*/
+		double nTerrainAvoidanceWeight = terrainAvoidanceWeight * velocity.size();
 		Vec ret = predatorAvoidance.mult(predatorAvoidanceWeight)
 						.plus(collisionAvoidance.mult(collisionAvoidanceWeight)
 						.plus(flockCentering.mult(flockCenteringWeight)
 						.plus(velocityMatching.mult(velocityMatchingWeight)
 						.plus(waypointAttraction.mult(waypointAttractionWeight)
-						.plus(terrainAvoidance.mult(terrainAvoidanceWeight))))))
+						.plus(terrainAvoidance.mult(nTerrainAvoidanceWeight))))))
 						.mult(1.0/(predatorAvoidanceWeight
 								+collisionAvoidanceWeight
 								+flockCenteringWeight
 								+velocityMatchingWeight
 								+waypointAttractionWeight
-								+terrainAvoidanceWeight));
+								+nTerrainAvoidanceWeight));
 		/*System.out.println("predator avoidance: " + predatorAvoidance
 				+ "\ncollision avoidance: " + collisionAvoidance
 				+ "\nflock centering: " + flockCentering
