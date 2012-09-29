@@ -75,8 +75,8 @@ public class Prey extends Animal {
 			   velocityMatchingWeight = 0.1,
 			   flockCenteringWeight = 0.15,
 			   predatorAvoidanceWeight = 0.4,
-			   waypointAttractionWeight = 0.4,
-			   terrainAvoidanceWeight = 0.1;
+			   waypointAttractionWeight = 0.3,
+			   terrainAvoidanceWeight = 0.2;
 		int neighbourhoodCount = 0, predatorCount = 0, obstacleCount = 0;
 		HashMap<Waypoint, Integer> flockTargets = new HashMap<Waypoint, Integer>();
 		for(Element e : influences)	{
@@ -184,6 +184,7 @@ public class Prey extends Animal {
 				}
 				totalHeightDiff /= scale - 1;
 				totalHeightDiff *= Math.abs(velocity.x*v.x + velocity.y*v.y);
+				totalHeightDiff = Math.pow(totalHeightDiff, 3);
 				maxSlope = Math.max(maxSlope, totalHeightDiff);
 				terrainAvoidance = terrainAvoidance.plus(v.neg().mult(totalHeightDiff));
 			}

@@ -5,6 +5,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -43,6 +44,7 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 	HeightMapCache hmc = null;
 	double zoom = 1, defaultZoom = 1, minZoom = 0.01, maxZoom = 10,
 		   trackingZoom = 0.8;
+	boolean draggingSelection = false;
 	
 	public boolean renderGrid = false,
 			renderAxes = false,
@@ -111,6 +113,7 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 	
 	public void paint(Graphics g)	{
 		Graphics2D g2 = (Graphics2D)g;
+		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		if (track)
 			focusOnSelection();
 		//System.out.println(hmc.completion);
@@ -177,7 +180,14 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 					g2.drawArc(pos.x-size, pos.y-size, size*2, size*2, 0, 360);
 				}
 				
-				if(renderDirections)
+				if(!(e instanceof Waypoint) && ui.selection.contains(e) && e.getTarget() != null)	{
+					g2.setColor(Color.red);
+					Point epos = toLabelSpace(e.getPosition()).getPoint(),
+							  tpos = toLabelSpace(e.getTarget().getPosition()).getPoint();
+					g2.drawLine(epos.x, epos.y, tpos.x, tpos.y);
+				}
+				
+				if(renderDirections && !(e instanceof Waypoint))
 					drawVector(g2, Color.green, e.getPosition(), e.getVelocity().mult(Math.min(70*zoom, 70)));
 			}
 			
@@ -255,20 +265,37 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 		if(hmc.completion >= 1)	{
 			mPoint = new Vec(me.getPoint());
 			startPoint = new Vec(me.getPoint());
+			
+			draggingSelection = false;
+			if((me.getModifiers() & InputEvent.BUTTON1_MASK) == InputEvent.BUTTON1_MASK)	{
+				Vec mPointWorld = toWorldSpace(mPoint);
+				for(Element e : ui.selection)
+					if(mPointWorld.minus(e.getPosition()).size() < e.getSize())	{
+						draggingSelection = true;
+						break;
+					}
+			}
 		}
 	}
 	
 	public void mouseDragged(MouseEvent me)	{
 		if(hmc.completion >= 1)	{
 			Vec current = new Vec(me.getPoint());
-			if ((me.getModifiers() & InputEvent.BUTTON1_MASK) == InputEvent.BUTTON1_MASK)
-			{
-				//select prey box
-				int startx = (int) Math.min(startPoint.x, current.x);
-				int starty = (int) Math.min(startPoint.y, current.y);
-				int width = (int) Math.abs(startPoint.x - current.x);
-				int height = (int) Math.abs(startPoint.y - current.y);
-				selectRect = new Rectangle(startx, starty, width, height);
+			if ((me.getModifiers() & InputEvent.BUTTON1_MASK) == InputEvent.BUTTON1_MASK)	{
+				if(!draggingSelection)	{
+					//select prey box
+					int startx = (int) Math.min(startPoint.x, current.x);
+					int starty = (int) Math.min(startPoint.y, current.y);
+					int width = (int) Math.abs(startPoint.x - current.x);
+					int height = (int) Math.abs(startPoint.y - current.y);
+					selectRect = new Rectangle(startx, starty, width, height);
+				}
+				else	{
+					//now we're draggin selection
+					for(Element e : ui.selection)
+						e.setPosition(e.getPosition().minus(mPoint.minus(current).invertY().mult(1/zoom)));
+					mPoint = current;
+				}
 			}
 			else if ((me.getModifiers() & InputEvent.BUTTON3_MASK) == InputEvent.BUTTON3_MASK)
 			{
@@ -282,10 +309,11 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 	
 	public void mouseReleased(MouseEvent me) {
 		Vec endPoint = new Vec(me.getPoint());
-		if ((me.getModifiers() & InputEvent.BUTTON1_MASK) == InputEvent.BUTTON1_MASK)
-		{
-			ui.selectBox(toWorldSpace(startPoint), toWorldSpace(endPoint), me.isControlDown());
-			selectRect = null;	
+		if ((me.getModifiers() & InputEvent.BUTTON1_MASK) == InputEvent.BUTTON1_MASK)	{
+			if(!draggingSelection)	{
+				ui.selectBox(toWorldSpace(startPoint), toWorldSpace(endPoint), me.isControlDown());
+				selectRect = null;
+			}
 		}
 		/*
 		else if ((me.getModifiers() & InputEvent.BUTTON3_MASK) == InputEvent.BUTTON3_MASK)
@@ -307,8 +335,7 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 		if ((me.getModifiers() & InputEvent.BUTTON1_MASK) == InputEvent.BUTTON1_MASK)
 			ui.selectPrey(toWorldSpace(mPoint), me.isControlDown());	
 		else if ((me.getModifiers() & InputEvent.BUTTON3_MASK) == InputEvent.BUTTON3_MASK)
-			//if (ui.selection.isEmpty())
-			//{	
+			if (ui.selection.isEmpty())	{	
 				try {
 					switch(ui.mode)
 					{
@@ -330,7 +357,16 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-			//}
+			}
+			else {
+				Vec mPointWorld = toWorldSpace(mPoint);
+				for(Element e : ui.sim.elements)
+					if(e instanceof Waypoint && mPointWorld.minus(e.getPosition()).size() < e.getSize())	{
+						for(Element s : ui.selection)
+							s.setTarget((Waypoint)e);
+						break;
+					}
+			}
 			//else	
 			//	ui.setSelectionDirection(toWorldSpace(mPoint));
 		else
