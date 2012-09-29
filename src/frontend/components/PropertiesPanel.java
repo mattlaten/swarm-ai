@@ -47,7 +47,11 @@ public class PropertiesPanel extends JPanel  {
 				JSlider source = (JSlider)ce.getSource();
 				//if (!source.getValueIsAdjusting())	{
 					for (Element e : ui.selection)
-						e.setSize(source.getValue());
+					{	
+						double s = e.getSize();
+						System.out.println(source.getValue());
+						e.setSize(s*source.getValue()/50.0);
+					}
 			}
 		});
 		maxSpeed = new JSlider();
