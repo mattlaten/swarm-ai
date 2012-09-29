@@ -1,5 +1,6 @@
 package backend;
 
+import java.awt.Point;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -7,12 +8,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import math.Vec;
 import backend.environment.Element;
 import backend.environment.Obstacle;
+import backend.environment.Prey;
 import backend.environment.Waypoint;
 
 /**
- * Simulation is the class that handles the interaction
- * between elements and each other, as well as the
- * environment
+ * 
+ *
  */
 class RenderObjectList extends ArrayList<RenderObject>	{
 	int timeTaken;
@@ -23,6 +24,11 @@ class RenderObjectList extends ArrayList<RenderObject>	{
 	}
 }
 
+/**
+ * Simulation is the class that handles the interaction
+ * between elements and each other, as well as the
+ * environment
+ */
 public class Simulation extends Thread {
 	public UnforgivingArrayList<Element> elements;
 	public HeightMap hm = null;

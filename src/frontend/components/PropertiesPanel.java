@@ -38,7 +38,7 @@ public class PropertiesPanel extends JPanel implements CellEditorListener  {
 	public PropertiesPanel(final UserInterface ui)	{
 		//heading = new JLabel("Properties");
 		//heading.setFont(new Font("Arial", 1, 14));
-		this.setLayout(new GridLayout(7,1));
+		this.setLayout(new GridLayout(11,1));
 		this.setPreferredSize(new Dimension(200,0));
 		
 		size = new JSlider();

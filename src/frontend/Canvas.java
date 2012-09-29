@@ -29,7 +29,7 @@ import frontend.components.ContextMenu;
 
 /**
  * Canvas class used to paint Simulation on screen
- */
+ */	
 
 class Canvas extends JLabel implements MouseListener, MouseMotionListener, MouseWheelListener, Runnable	{
 	UserInterface ui;
@@ -300,8 +300,7 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 					mPoint = current;
 				}
 			}
-			else if ((me.getModifiers() & InputEvent.BUTTON3_MASK) == InputEvent.BUTTON3_MASK)
-			{
+			else if ((me.getModifiers() & InputEvent.BUTTON3_MASK) == InputEvent.BUTTON3_MASK) {
 				//drag canvas around
 				origin = origin.minus(mPoint.minus(current).mult(1/zoom));
 				mPoint = current;
@@ -349,7 +348,7 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 							ui.placeElement(toWorldSpace(mPoint), Predator.class);
 							break;
 						case SELECT:
-							maybeShowPopup(me);
+							showPopup(me);
 							break;
 						case PAINT_WAYPOINT:
 							//ui.placeElement(toWorldSpace(mPoint), Waypoint.class);
@@ -380,7 +379,7 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 			System.out.println("wat");
 	}
 	
-	private void maybeShowPopup(MouseEvent e) {
+	private void showPopup(MouseEvent e) {
         cm.position = toWorldSpace(new Vec(e.getX(), e.getY()));
 		cm.show(e.getComponent(),
                        e.getX(), e.getY());
