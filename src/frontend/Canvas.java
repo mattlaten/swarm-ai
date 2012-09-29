@@ -144,72 +144,76 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 								  clampedTl.x-tl.x, clampedTl.y-tl.y, (int)hmc.width-(br.x-clampedBr.x), (int)hmc.height-(br.y-clampedBr.y), null);*/
 			}	
 			//draw elements
-			for(Element e: ui.sim.elements)	{
-				if(e instanceof Obstacle)
-					continue;
-				if (e instanceof Prey)	{
-					g2.setColor(Color.blue);
-					if (ui.selection.contains(e))
-						g2.setColor(new Color(0.2f,0.2f,1.0f));
-				}
-				//if (e.getClass() == Predator.class)	{
-				else if (e instanceof Predator)	{
-					g2.setColor(Color.red);
-					if (ui.selection.contains(e))
-						g2.setColor(new Color(1.0f,0.2f,0.2f));
-				}
-				else if(e instanceof Waypoint)	{
-					g2.setColor(Color.orange);
-					if (ui.selection.contains(e))
-						g2.setColor(new Color(1.0f,0.2f,0.2f));
-					if(!renderWaypoints)
+			synchronized(ui.sim.elements)	{
+				for(Element e: ui.sim.elements)	{
+					if(e instanceof Obstacle)
 						continue;
-					else if(e.getTarget() != null)	{	//if we're here then we know we're going to render this waypoint. so also render the path to the next waypoint
+					if (e instanceof Prey)	{
+						g2.setColor(Color.blue);
+						if (ui.selection.contains(e))
+							g2.setColor(new Color(0.2f,0.2f,1.0f));
+					}
+					//if (e.getClass() == Predator.class)	{
+					else if (e instanceof Predator)	{
+						g2.setColor(Color.red);
+						if (ui.selection.contains(e))
+							g2.setColor(new Color(1.0f,0.2f,0.2f));
+					}
+					else if(e instanceof Waypoint)	{
+						g2.setColor(Color.orange);
+						if (ui.selection.contains(e))
+							g2.setColor(new Color(1.0f,0.2f,0.2f));
+						if(!renderWaypoints)
+							continue;
+						else if(e.getTarget() != null)	{	//if we're here then we know we're going to render this waypoint. so also render the path to the next waypoint
+							Point epos = toLabelSpace(e.getPosition()).getPoint(),
+								  tpos = toLabelSpace(e.getTarget().getPosition()).getPoint();
+							g2.drawLine(epos.x, epos.y, tpos.x, tpos.y);
+						}
+					}
+					int size = (int)(e.getSize()*zoom);
+					Point pos = toLabelSpace(e.getPosition()).getPoint();
+					g2.fillArc(pos.x-size, pos.y-size, size*2, size*2, 0, 360);
+					
+					if(renderRadii)	{
+						size = (int)(e.getRadius()*zoom);
+						g2.setColor(Color.red);
+						g2.drawArc(pos.x-size, pos.y-size, size*2, size*2, 0, 360);
+					}
+					
+					if(!(e instanceof Waypoint) && ui.selection.contains(e) && e.getTarget() != null)	{
+						g2.setColor(Color.red);
 						Point epos = toLabelSpace(e.getPosition()).getPoint(),
-							  tpos = toLabelSpace(e.getTarget().getPosition()).getPoint();
+								  tpos = toLabelSpace(e.getTarget().getPosition()).getPoint();
 						g2.drawLine(epos.x, epos.y, tpos.x, tpos.y);
 					}
+					
+					if(renderDirections && !(e instanceof Waypoint))
+						drawVector(g2, Color.green, e.getPosition(), e.getVelocity().mult(Math.min(70*zoom, 70)));
 				}
-				int size = (int)(e.getSize()*zoom);
-				Point pos = toLabelSpace(e.getPosition()).getPoint();
-				g2.fillArc(pos.x-size, pos.y-size, size*2, size*2, 0, 360);
-				
-				if(renderRadii)	{
-					size = (int)(e.getRadius()*zoom);
-					g2.setColor(Color.red);
-					g2.drawArc(pos.x-size, pos.y-size, size*2, size*2, 0, 360);
-				}
-				
-				if(!(e instanceof Waypoint) && ui.selection.contains(e) && e.getTarget() != null)	{
-					g2.setColor(Color.red);
-					Point epos = toLabelSpace(e.getPosition()).getPoint(),
-							  tpos = toLabelSpace(e.getTarget().getPosition()).getPoint();
-					g2.drawLine(epos.x, epos.y, tpos.x, tpos.y);
-				}
-				
-				if(renderDirections && !(e instanceof Waypoint))
-					drawVector(g2, Color.green, e.getPosition(), e.getVelocity().mult(Math.min(70*zoom, 70)));
 			}
 			
 			//draw obstacles
 			g2.setColor(Color.red);
-			for(Element e : ui.sim.elements)	{
-				if(e instanceof Obstacle)	{
-					Waypoint s = ((Obstacle)e).start;
-					LinkedList<Vec> points = new LinkedList<Vec>();
-					points.add(s.getPosition());
-					Waypoint cur = s.getTarget();
-					while(cur != s)	{
-						points.add(cur.getPosition());
-						cur = cur.getTarget();
+			synchronized(ui.sim.elements)	{
+				for(Element e : ui.sim.elements)	{
+					if(e instanceof Obstacle)	{
+						Waypoint s = ((Obstacle)e).start;
+						LinkedList<Vec> points = new LinkedList<Vec>();
+						points.add(s.getPosition());
+						Waypoint cur = s.getTarget();
+						while(cur != s)	{
+							points.add(cur.getPosition());
+							cur = cur.getTarget();
+						}
+						int [] xs = new int[points.size()], ys = new int[points.size()];
+						for(int i = 0; i < xs.length; i++)	{
+							Point p = toLabelSpace(points.remove(0)).getPoint();
+							xs[i] = p.x;
+							ys[i] = p.y;
+						}
+						g2.fillPolygon(xs, ys, xs.length);
 					}
-					int [] xs = new int[points.size()], ys = new int[points.size()];
-					for(int i = 0; i < xs.length; i++)	{
-						Point p = toLabelSpace(points.remove(0)).getPoint();
-						xs[i] = p.x;
-						ys[i] = p.y;
-					}
-					g2.fillPolygon(xs, ys, xs.length);
 				}
 			}
 			
@@ -294,9 +298,10 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 					selectRect = new Rectangle(startx, starty, width, height);
 				}
 				else	{
-					//now we're draggin selection
+					//now we're dragging the selection
 					for(Element e : ui.selection)
 						e.setPosition(e.getPosition().minus(mPoint.minus(current).invertY().mult(1/zoom)));
+					ui.sim.elements.stuffChanged();
 					mPoint = current;
 				}
 			}
@@ -366,12 +371,14 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 			}
 			else {
 				Vec mPointWorld = toWorldSpace(mPoint);
-				for(Element e : ui.sim.elements)
-					if(e instanceof Waypoint && mPointWorld.minus(e.getPosition()).size() < e.getSize())	{
-						for(Element s : ui.selection)
-							s.setTarget((Waypoint)e);
-						break;
-					}
+				synchronized(ui.sim.elements)	{
+					for(Element e : ui.sim.elements)
+						if(e instanceof Waypoint && mPointWorld.minus(e.getPosition()).size() < e.getSize())	{
+							for(Element s : ui.selection)
+								s.setTarget((Waypoint)e);
+							break;
+						}
+				}
 			}
 			//else	
 			//	ui.setSelectionDirection(toWorldSpace(mPoint));

@@ -12,7 +12,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 
-import javax.swing.JButton;
+import javax.swing.ButtonGroup;
+import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -21,7 +22,9 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JSplitPane;
+import javax.swing.border.TitledBorder;
 
 import math.Vec;
 import util.Logger;
@@ -110,25 +113,27 @@ public class UserInterface extends JFrame implements KeyListener {
 		//Add prey to selection
 		//Colour it differently (green?)
 		boolean added = false;
-		for (Element e : sim.elements)
-		{
-			if (e.getPosition().withinRadius(point, e.getSize()))	
+		synchronized(sim.elements)	{
+			for (Element e : sim.elements)
 			{
-				if (!addToSelection)
-					selection.clear();
-				selection.add(e);
-				try {
-					properties.targetEntity(e);
-				} catch (Exception e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+				if (e.getPosition().withinRadius(point, e.getSize()))	
+				{
+					if (!addToSelection)
+						selection.clear();
+					selection.add(e);
+					try {
+						properties.targetEntity(e);
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					added = true;
+					//log.info("Added element " + e.getPosition() + " : " + point);
 				}
-				added = true;
-				//log.info("Added element " + e.getPosition() + " : " + point);
+				else
+					continue;
+					//log.info("Did not add element " + e.getPosition() + " : " + point);
 			}
-			else
-				continue;
-				//log.info("Did not add element " + e.getPosition() + " : " + point);
 		}
 		if (!added)
 			selection.clear();
@@ -145,10 +150,12 @@ public class UserInterface extends JFrame implements KeyListener {
 		if (!addToSelection)
 			selection.clear();
 		
-		for (Element e : sim.elements)	{
-			Vec pos = e.getPosition();
-			if (pos.x >= minx && pos.x <= maxx && pos.y >= miny && pos.y <= maxy)
-				selection.add(e);
+		synchronized(sim.elements)	{
+			for (Element e : sim.elements)	{
+				Vec pos = e.getPosition();
+				if (pos.x >= minx && pos.x <= maxx && pos.y >= miny && pos.y <= maxy)
+					selection.add(e);	
+			}
 		}
 		canv.repaint();
 	}
@@ -163,15 +170,19 @@ public class UserInterface extends JFrame implements KeyListener {
 		boolean validLocation = true;
 		
 		Waypoint firstWaypoint = null;
-		for(Element e : sim.elements)
-			if(e instanceof Waypoint)	{
-				firstWaypoint = (Waypoint)e;
-				break;
-			}
+		synchronized(sim.elements)	{
+			for(Element e : sim.elements)
+				if(e instanceof Waypoint)	{
+					firstWaypoint = (Waypoint)e;
+					break;
+				}
+		}
 		
-		for (Element e : sim.elements)
-			if ((e instanceof Prey || e instanceof Predator) && e.getPosition().equals(new Vec(xloc, yloc)))
-				validLocation = false;
+		synchronized(sim.elements)	{
+			for (Element e : sim.elements)
+				if ((e instanceof Prey || e instanceof Predator) && e.getPosition().equals(new Vec(xloc, yloc)))
+					validLocation = false;
+		}
 		
 		if (validLocation)
 			try {
@@ -203,10 +214,12 @@ public class UserInterface extends JFrame implements KeyListener {
 		
 		boolean validLocation = true;
 		
-		for (Element e : sim.elements)
-			if ((e instanceof Prey || e instanceof Predator)
-					&& e.getPosition().equals(new Vec(xloc, yloc)))
-				validLocation = false;
+		synchronized(sim.elements)	{
+			for (Element e : sim.elements)
+				if ((e instanceof Prey || e instanceof Predator)
+						&& e.getPosition().equals(new Vec(xloc, yloc)))
+					validLocation = false;
+		}
 		
 		if (validLocation)	{
 			sim.elements.add(toAdd);
@@ -505,21 +518,25 @@ public class UserInterface extends JFrame implements KeyListener {
 
 	private class Toolbar extends JPanel {
 
-		JButton modeSelect, modePrey, modePredator, modeModifier, 
-		modeObstacle, modeLoad, modeRandom, trackButton, modeWaypoint;
+		JRadioButton modeSelect, modePrey, modePredator, modeModifier, 
+		modeObstacle, modeLoad, modeRandom, modeWaypoint;
+		JCheckBox trackButton;
 		
 		public Toolbar()
 		{
 			//BUTTONS
-			modeSelect = new JButton("Select");
+			modeSelect = new JRadioButton("Select");
 			modeSelect.addActionListener(new ActionListener(){
 				public void actionPerformed(ActionEvent ae)	{
 					statusBar.setMode("Selecting");
 					setMode(Mode.SELECT);
 				}
 			});
+			modeSelect.setSelected(true);
+			statusBar.setMode("Selecting");
+			setMode(Mode.SELECT);
 			
-			modePrey = new JButton("Prey");
+			modePrey = new JRadioButton("Prey");
 			modePrey.addActionListener(new ActionListener(){
 				public void actionPerformed(ActionEvent ae)	{
 					statusBar.setMode("Placing prey");
@@ -527,7 +544,7 @@ public class UserInterface extends JFrame implements KeyListener {
 				}
 			});
 			
-			modePredator = new JButton("Predator");
+			modePredator = new JRadioButton("Predator");
 			modePredator.addActionListener(new ActionListener(){
 				public void actionPerformed(ActionEvent ae)	{
 					statusBar.setMode("Placing predator");
@@ -535,21 +552,21 @@ public class UserInterface extends JFrame implements KeyListener {
 				}
 			});
 			
-			modeModifier = new JButton("Modifier");
+			modeModifier = new JRadioButton("Modifier");
 			modeModifier.addActionListener(new ActionListener(){
 				public void actionPerformed(ActionEvent ae)	{
 					statusBar.setMode("Placing modifier");
 				}
 			});
 			
-			modeObstacle = new JButton("Obstacle");
+			modeObstacle = new JRadioButton("Obstacle");
 			modeObstacle.addActionListener(new ActionListener(){
 				public void actionPerformed(ActionEvent ae)	{
 					statusBar.setMode("Placing obstacle");
 				}
 			});
 			
-			modeWaypoint = new JButton("Waypoint");
+			modeWaypoint = new JRadioButton("Waypoint");
 			modeWaypoint.addActionListener(new ActionListener(){
 				public void actionPerformed(ActionEvent ae)	{
 					statusBar.setMode("Placing waypoints");
@@ -557,23 +574,41 @@ public class UserInterface extends JFrame implements KeyListener {
 				}
 			});
 			
-			trackButton = new JButton("Track");
+			trackButton = new JCheckBox("Track");
 			trackButton.addActionListener(new ActionListener(){
 				public void actionPerformed(ActionEvent ae)	{
-					canv.track = !canv.track;
+					canv.track = trackButton.isSelected();
 				}
 			});
+			
+			ButtonGroup modeGroup = new ButtonGroup();
+			modeGroup.add(modeSelect);
+			modeGroup.add(modePrey);
+			modeGroup.add(modePredator);
+			modeGroup.add(modeModifier);
+			modeGroup.add(modeObstacle);
+			modeGroup.add(modeWaypoint);
 
 			//TOOLBAR
 			setLayout(new FlowLayout());
 			getContentPane().setLayout(new BorderLayout());
-			add(modeSelect);
-			add(modePrey);
-			add(modePredator);
-			add(modeModifier);
-			add(modeObstacle);
-			add(modeWaypoint);
-			add(trackButton);
+			JPanel modesPanel = new JPanel();
+			modesPanel.setBorder(new TitledBorder("Mode"));
+			modesPanel.setLayout(new FlowLayout());
+			modesPanel.add(modeSelect);
+			modesPanel.add(modePrey);
+			modesPanel.add(modePredator);
+			modesPanel.add(modeModifier);
+			modesPanel.add(modeObstacle);
+			modesPanel.add(modeWaypoint);
+			
+			JPanel trackingPanel = new JPanel();
+			trackingPanel.setBorder(new TitledBorder("Tracking"));
+			trackingPanel.setLayout(new FlowLayout());
+			trackingPanel.add(trackButton);
+			
+			add(modesPanel);
+			add(trackingPanel);
 		}
 	}
 }

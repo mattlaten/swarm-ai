@@ -8,7 +8,7 @@ import math.Vec;
 public abstract class Animal extends Element implements Cloneable {
 	public @Property Vec velocity;	//this stores a vector that is at most a unit vector which is multiplied by the maxSpeed 
 	private Vec oldVelocity = null;
-	public @Property double size;
+	//public @Property double size;
 	public @Property double maxSpeed;
 	public @Property double sightRadius;
 	

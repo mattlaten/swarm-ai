@@ -26,34 +26,29 @@ import backend.environment.Element;
 import backend.environment.Prey;
 import backend.environment.Property;
 
-public class PropertiesPanel extends JPanel implements CellEditorListener  {
-	
-	JTable jt;
+public class PropertiesPanel extends JPanel  {
 	JTextField propKey, propVal, x, y;
-	JLabel heading;
 	JSlider size, maxSpeed;
-	PropertyTableModel model;
 	VelocityWheel velWheel;
 	
 	public PropertiesPanel(final UserInterface ui)	{
-		//heading = new JLabel("Properties");
-		//heading.setFont(new Font("Arial", 1, 14));
 		this.setLayout(new GridLayout(11,1));
 		this.setPreferredSize(new Dimension(200,0));
 		
-		size = new JSlider();
-		size.addChangeListener(new ChangeListener(){
+		size = new JSlider(2, 30);
+		size.setPaintTicks(true);
+		size.setPaintLabels(true);
+		size.setMajorTickSpacing(10);
+		size.setMinorTickSpacing(2);
+		size.setSnapToTicks(true);
+		size.addChangeListener(new ChangeListener()	{
 			public void stateChanged(ChangeEvent ce)
 			{
 				JSlider source = (JSlider)ce.getSource();
-				if (!source.getValueIsAdjusting())
-				{
+				//if (!source.getValueIsAdjusting())	{
 					for (Element e : ui.selection)
-					{
-						System.out.println(source.getValue());
 						e.setSize(source.getValue());
-					}
-				}
+				//}
 			}
 		});
 		maxSpeed = new JSlider();
@@ -112,37 +107,10 @@ public class PropertiesPanel extends JPanel implements CellEditorListener  {
 		
 		this.add(velPan);
 		
-		/*
-		model = new PropertyTableModel();
-		jt = new JTable(model);
-		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
-		
-		this.add(jt, BorderLayout.CENTER);
-		*/
 		setVisible(true);
 	}
 	
 	public void targetEntity(Element e) throws Exception	{
-		/*String [] cols = {"Property", "Value"};
-		ArrayList<Field> props = new ArrayList<Field>();
-		Field[] fields = e.getClass().getFields();
-		for(Field f : fields)
-			//System.out.println(f.getName() + ": " + f.isAnnotationPresent(Property.class) + " " + f.getAnnotations().length);
-			if(f.getAnnotation(Property.class) != null)
-				props.add(f);
-		model.setTarget(e, props);
-		jt.repaint();*/
-	}
-
-	//@Override
-	public void editingCanceled(ChangeEvent arg0) {
-		// TODO Auto-generated method stub
-		System.out.print("derp");
-	}
-
-	//@Override
-	public void editingStopped(ChangeEvent arg0) {
-		// TODO Auto-generated method stub
-		System.out.print("herp");
+		
 	}
 }
