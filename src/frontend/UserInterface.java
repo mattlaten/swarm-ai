@@ -179,9 +179,14 @@ public class UserInterface extends JFrame implements KeyListener {
 		
 		synchronized(sim.elements)	{
 			for (Element e : sim.elements)	{
-				Vec pos = e.getPosition();
-				if (pos.x >= minx && pos.x <= maxx && pos.y >= miny && pos.y <= maxy)
-					selection.add(e);	
+				if(mode == Mode.SELECT
+						|| (mode == Mode.PAINT_PREY && e instanceof Prey)
+						|| (mode == Mode.PAINT_PREDATOR && e instanceof Predator)
+						|| (mode == Mode.PAINT_WAYPOINT && e instanceof Waypoint))	{
+					Vec pos = e.getPosition();
+					if (pos.x >= minx && pos.x <= maxx && pos.y >= miny && pos.y <= maxy)
+						selection.add(e);
+				}
 			}
 		}
 		properties.update();

@@ -103,6 +103,7 @@ public class Simulation extends Thread implements Serializable {
 							l.remove(new RenderObject(e));
 						for(Element e: elements.added)
 							l.add(new RenderObject(e));
+						elements.clean();
 						setTotalTime(time);
 					}
 					apply(ind);

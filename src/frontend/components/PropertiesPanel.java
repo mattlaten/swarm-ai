@@ -180,7 +180,7 @@ public class PropertiesPanel extends JPanel implements ChangeListener  {
 			}
 		});
 		
-		velWheel = new VelocityWheel();
+		velWheel = new VelocityWheel(ui);
 		
 		JPanel radPan = new JPanel();
 		radPan.setLayout(new BoxLayout(radPan, BoxLayout.PAGE_AXIS));
@@ -258,7 +258,7 @@ public class PropertiesPanel extends JPanel implements ChangeListener  {
 	}
 	
 	public void updateQuick()	{
-		synchronized(this)	{
+		/*synchronized(this)	{
 			Vec pos = new Vec();
 			int count = 0;
 			for(Element e : ui.selection)	{
@@ -273,7 +273,8 @@ public class PropertiesPanel extends JPanel implements ChangeListener  {
 				posLabel.setText("(,)");
 			
 			velWheel.repaint();
-		}
+		}*/
+		update();
 	}
 	
 	public void update()	{
@@ -311,6 +312,7 @@ public class PropertiesPanel extends JPanel implements ChangeListener  {
 				avgSize /= count;
 				avgMaxSpeed /= count;
 				avgMaxSpeed *= 2;
+				avgRadius /= count;
 				
 				oldSize = (int)avgSize;
 				size.setValue((int)avgSize);
@@ -323,6 +325,7 @@ public class PropertiesPanel extends JPanel implements ChangeListener  {
 				posLabel.setText("(,)");
 				size.setValue(15);
 				maxSpeed.setValue(1);
+				radius.setValue(100);
 			}
 	//		x.setEnabled(count == 1);
 	//		y.setEnabled(count == 1);
@@ -358,6 +361,7 @@ public class PropertiesPanel extends JPanel implements ChangeListener  {
 	}
 
 	public void stateChanged(ChangeEvent arg0) {
-		ui.sim.elements.stuffChanged();
+		if(!settingValues)
+			ui.sim.elements.stuffChanged();
 	}
 }

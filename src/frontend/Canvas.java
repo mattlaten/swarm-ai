@@ -379,8 +379,21 @@ public class Canvas extends JLabel implements MouseListener, MouseMotionListener
 	public void mouseClicked(MouseEvent me) {
 		if ((me.getModifiers() & InputEvent.BUTTON1_MASK) == InputEvent.BUTTON1_MASK)
 			ui.selectPrey(toWorldSpace(mPoint), me.isControlDown());
-		else if ((me.getModifiers() & InputEvent.BUTTON3_MASK) == InputEvent.BUTTON3_MASK)
-			if (ui.selection.isEmpty())	{	
+		else if ((me.getModifiers() & InputEvent.BUTTON3_MASK) == InputEvent.BUTTON3_MASK)	{
+			boolean waypointClickedOn = false;
+			if(!ui.selection.isEmpty())	{
+				Vec mPointWorld = toWorldSpace(mPoint);
+				synchronized(ui.sim.elements)	{
+					for(Element e : ui.sim.elements)
+						if(e instanceof Waypoint && mPointWorld.minus(e.getPosition()).size() < e.getSize())	{
+							for(Element s : ui.selection)
+								s.setTarget((Waypoint)e);
+							waypointClickedOn = true;
+							break;
+						}
+				}
+			}
+			if (!waypointClickedOn)	{	
 				try {
 					switch(ui.mode)
 					{
@@ -407,21 +420,7 @@ public class Canvas extends JLabel implements MouseListener, MouseMotionListener
 					e.printStackTrace();
 				}
 			}
-			else {
-				Vec mPointWorld = toWorldSpace(mPoint);
-				synchronized(ui.sim.elements)	{
-					for(Element e : ui.sim.elements)
-						if(e instanceof Waypoint && mPointWorld.minus(e.getPosition()).size() < e.getSize())	{
-							for(Element s : ui.selection)
-								s.setTarget((Waypoint)e);
-							break;
-						}
-				}
-			}
-			//else	
-			//	ui.setSelectionDirection(toWorldSpace(mPoint));
-		else
-			System.out.println("wat");
+		}
 	}
 	
 	private void showPopup(MouseEvent e) {

@@ -80,10 +80,10 @@ public class Prey extends Animal {
 			if(dir.size() > 0 && dir.size() <= getRadius())	{
 				if(e instanceof Prey)	{
 					neighbourhoodCount ++;
-					collisionAvoidance = collisionAvoidance.plus(dir.unit().mult(Math.pow((getRadius()-dir.size())/getRadius(),1)).neg());
+					collisionAvoidance = collisionAvoidance.plus(dir.unit().mult(Math.pow((getRadius()-dir.size()+e.getSize())/getRadius(),1)).neg());
 					//this needs to be fixed, it's very haxxy that I must divide by e.getMaxSpeed() to get the truncated-to-unit vector, e.velocity
-					velocityMatching = velocityMatching.plus(e.getVelocity().mult(1.0/e.getMaxSpeed()));
-					flockCentering = flockCentering.plus(dir.unit().mult(Math.pow(dir.size()/getRadius(),1)));
+					velocityMatching = velocityMatching.plus(e.getVelocity().mult(1.0/getMaxSpeed()).truncate(1));
+					flockCentering = flockCentering.plus(dir.unit().mult(Math.pow((dir.size()-e.getSize())/getRadius(),1)));
 					
 					//take target suggestions from flock members who are in front
 					if(e.getPosition().minus(getPosition()).dot(velocity) > 0)	{
@@ -94,7 +94,7 @@ public class Prey extends Animal {
 				}
 				else if(e instanceof Predator)	{
 					predatorCount ++;
-					predatorAvoidance = predatorAvoidance.plus(dir.unit().mult(Math.pow((getRadius()-dir.size())/getRadius(), 1.0/3)).neg());
+					predatorAvoidance = predatorAvoidance.plus(dir.unit().mult(Math.pow((getRadius()-dir.size()+e.getSize())/getRadius(), 1.0/3)).neg());
 				}
 			}
 		}

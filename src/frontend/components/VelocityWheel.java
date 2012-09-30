@@ -14,6 +14,8 @@ import java.util.LinkedList;
 
 import javax.swing.JLabel;
 
+import frontend.UserInterface;
+
 import math.Vec;
 import backend.environment.Animal;
 import backend.environment.Element;
@@ -22,14 +24,16 @@ public class VelocityWheel extends JLabel {
 	LinkedList<Animal> animals;
 	double centerScale = 1.0/8,
 			pinScale = 1.0/16;
+	final UserInterface ui;
 	
 	public Dimension getDim()	{
 		int min = Math.min(getSize().width, getSize().height);
 		return new Dimension(min, min);
 	}
 	
-	public VelocityWheel ()	{
+	public VelocityWheel (final UserInterface ui)	{
 		super();
+		this.ui = ui;
 		setForeground(Color.black);
 		animals = new LinkedList<Animal>();
 		
@@ -58,6 +62,8 @@ public class VelocityWheel extends JLabel {
 			v.y /= getDim().height/2;
 			for(Animal a : animals)
 				a.setVelocity(v.mult(a.getMaxSpeed()));
+			
+			ui.sim.elements.stuffChanged();
 			
 			//now paint the changes
 			repaint();
