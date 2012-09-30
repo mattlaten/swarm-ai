@@ -67,9 +67,9 @@ public class UserInterface extends JFrame implements KeyListener {
 	File terrainFile;
 	
 	Mode mode;
-	StatusBar statusBar = null;
-	ControlBar controlBar;
-	PropertiesPanel properties;
+	public StatusBar statusBar = null;
+	public ControlBar controlBar;
+	public PropertiesPanel properties;
 	Toolbar toolbar;
 	JPanel viewPort;
 	MenuBar menuBar;
@@ -275,6 +275,8 @@ public class UserInterface extends JFrame implements KeyListener {
 	{
 		selection.clear();
 		sim.elements.clear();
+		sim.elements.clean();
+		sim.snapshots.clear();
 		sim.setTime(0);
 		sim.setTotalTime(0);
 	}

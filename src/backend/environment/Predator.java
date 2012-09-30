@@ -147,18 +147,21 @@ public class Predator extends Animal implements Cloneable {
 		}
 		
 		double nTerrainAvoidanceWeight = terrainAvoidanceWeight * velocity.size();
-		Vec ret = preyAttacking.mult(otherAnimalWeight)
+		double denom = otherAnimalWeight
+				+collisionAvoidanceWeight
+				+flockCenteringWeight
+				+velocityMatchingWeight
+				+waypointAttractionWeight
+				+nTerrainAvoidanceWeight;
+		Vec ret = new Vec();
+		if(denom != 0)
+			ret = preyAttacking.mult(otherAnimalWeight)
 						.plus(collisionAvoidance.mult(collisionAvoidanceWeight)
 						.plus(flockCentering.mult(flockCenteringWeight)
 						.plus(velocityMatching.mult(velocityMatchingWeight)
 						.plus(waypointAttraction.mult(waypointAttractionWeight)
 						.plus(terrainAvoidance.mult(nTerrainAvoidanceWeight))))))
-						.mult(1.0/(otherAnimalWeight
-								+collisionAvoidanceWeight
-								+flockCenteringWeight
-								+velocityMatchingWeight
-								+waypointAttractionWeight
-								+nTerrainAvoidanceWeight));
+						.mult(1.0/(denom));
 		velocity = velocity.plus(ret.truncate(1)).truncate(1);
 	}
 	

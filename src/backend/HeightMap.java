@@ -19,7 +19,7 @@ public class HeightMap {
 	int y = 513;
 	int x = 513;
 	
-	double max = 0;
+	double max = -Double.MAX_VALUE;
 	double min = Double.MAX_VALUE;
 	double range = 0;
 	
@@ -124,7 +124,7 @@ public class HeightMap {
 	 */
 	public void normalizeTerrain(double factor)
 	{
-		log.info("Normalizing Terrain");
+		log.info("Normalizing Terrain: Max: " + max + ", Min: " + min + ", Range: " + range);
 		range = max - min; //calc range
 		
 		//normalize range
@@ -169,6 +169,10 @@ public class HeightMap {
 		if(x < this.x && x >= 0 && y < this.y && y >= 0)
 			return terrain[this.y-y-1][this.x-x-1];
 		return 0;
+	}
+	
+	public double getUnnormalisedInterpolatedHeightAt(Vec pp)	{
+		return getInterpolatedHeightAt(pp)*range+min;
 	}
 	
 	//http://en.wikipedia.org/wiki/Bilinear_interpolation
@@ -216,28 +220,3 @@ public class HeightMap {
 		return new Rectangle2D.Double(topLeft.x - xStep, topLeft.y + yStep, width + xStep*2, height + yStep);
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

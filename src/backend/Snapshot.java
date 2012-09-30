@@ -52,15 +52,15 @@ public class Snapshot extends ArrayList<RenderObject> implements Comparable<Snap
 				Vec vel = new Vec(rob.velocity);
 				String name = elementNames.get(rob.element);
 				Vec velUnit = vel.unit();
-				double posZ = hm.getInterpolatedHeightAt(pos);
-				double velZ = hm.getInterpolatedHeightAt(pos.plus(velUnit)) - hm.getInterpolatedHeightAt(pos);
+				double posZ = hm.getUnnormalisedInterpolatedHeightAt(pos);
+				double velZ = hm.getUnnormalisedInterpolatedHeightAt(pos.plus(velUnit)) - hm.getUnnormalisedInterpolatedHeightAt(pos);
 				str += "\n" + name
 					+ " " + pos.x
-					+ " " + pos.y
 					+ " " + posZ
+					+ " " + pos.y
 					+ " " + vel.x
-					+ " " + vel.y
 					+ " " + velZ
+					+ " " + vel.y
 					+ " " + frame;
 			}
 		}
