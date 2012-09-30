@@ -118,7 +118,7 @@ public class RenderObject {
 			return null;
 		RenderObject r = new RenderObject(e);
 		//now deal with target
-		if(!elements.containsKey(ss[2]))
+		if(!ss[2].equals("e") && !elements.containsKey(ss[2]))
 			elements.put(ss[2], new Waypoint());
 		r.target = (Waypoint)elements.get(ss[2]);
 		r.position = new Vec(Double.parseDouble(ss[3]), Double.parseDouble(ss[4]));

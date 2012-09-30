@@ -39,6 +39,8 @@ public class Simulation extends Thread implements Serializable {
 	public boolean isRunning = false;
 	public boolean saved = false;
 	
+	public File saveFile = null;
+	
 	public Simulation()	{
 		elements = new UnforgivingArrayList<Element>(0);
 		
@@ -257,6 +259,15 @@ public class Simulation extends Thread implements Serializable {
 		for(Snapshot s : snapshots)
 			out.println(s.toString(names));
 		out.close();
+		saveFile = f;
+	}
+	
+	public boolean saveSimulation() throws IOException	{
+		if(saveFile != null)	{
+			saveSimulationToFile(saveFile);
+			return true;
+		}
+		return false;
 	}
 	
 	/**

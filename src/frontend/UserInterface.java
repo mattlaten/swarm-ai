@@ -380,14 +380,18 @@ public class UserInterface extends JFrame implements KeyListener {
 			fileSave = new JMenuItem("Save");
 			fileSave.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent ae)	{
-					if (!sim.saved)
-					{
-						fileChooser.setCurrentDirectory(new File("./saves/"));
-						statusBar.setMode("Choose location to save Simulation");
-						int returnVal = fileChooser.showSaveDialog(UserInterface.this);
-						if (returnVal == JFileChooser.APPROVE_OPTION){
-							
-						}
+					try	{
+						boolean b = sim.saveSimulation();
+						if(!b)	{
+							JFileChooser chooser = new JFileChooser();
+							chooser.setCurrentDirectory(new File("./saves/"));
+							int returnVal = chooser.showSaveDialog(uiFinal);
+							if(returnVal == JFileChooser.APPROVE_OPTION)
+								sim.saveSimulationToFile(chooser.getSelectedFile());
+						}	
+					}
+					catch(IOException ioe)	{
+						System.out.println("IO Error");
 					}
 				}
 			});

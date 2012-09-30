@@ -84,7 +84,7 @@ public abstract class Animal extends Element implements Cloneable {
 	protected abstract void initWeights();
 	
 	public void update()	{
-		position = position.plus(getVelocity());
+		position = position.plus(velocity.mult(getMaxSpeed()));
 		oldVelocity = new Vec(velocity);
 	}
 }
