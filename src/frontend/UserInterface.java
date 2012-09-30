@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
 import java.util.HashSet;
 
 import javax.swing.ButtonGroup;
@@ -32,13 +33,11 @@ import math.Vec;
 import util.Logger;
 import backend.HeightMap;
 import backend.Simulation;
+import backend.Snapshot;
 import backend.environment.Element;
 import backend.environment.Predator;
 import backend.environment.Prey;
 import backend.environment.Waypoint;
-
-import backend.Snapshot;
-
 import frontend.components.ControlBar;
 import frontend.components.PropertiesPanel;
 import frontend.components.StatusBar;
@@ -131,7 +130,7 @@ public class UserInterface extends JFrame implements KeyListener {
 						selection.clear();
 					selection.add(e);
 					try {
-						properties.targetEntity(e);
+						//properties.targetEntity(e);
 					} catch (Exception e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -323,7 +322,16 @@ public class UserInterface extends JFrame implements KeyListener {
 			fileOpen = new JMenuItem("Open...");
 			fileOpen.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent ae)	{
-					System.exit(0);
+					try	{
+						JFileChooser chooser = new JFileChooser();
+						chooser.setCurrentDirectory(new File("./saves/"));
+						int returnVal = chooser.showOpenDialog(uiFinal);
+						if(returnVal == JFileChooser.APPROVE_OPTION)
+							sim.loadSimulationFromFile(chooser.getSelectedFile());
+					}
+					catch(IOException ioe)	{
+						System.out.println("IO Error");
+					}
 				}
 			});
 			
@@ -346,7 +354,6 @@ public class UserInterface extends JFrame implements KeyListener {
 							
 						}
 					}
-					
 				}
 			});
 			
@@ -355,15 +362,10 @@ public class UserInterface extends JFrame implements KeyListener {
 				public void actionPerformed(ActionEvent ae)	{
 					try	{
 						JFileChooser chooser = new JFileChooser();
+						chooser.setCurrentDirectory(new File("./saves/"));
 						int returnVal = chooser.showSaveDialog(uiFinal);
-						if(returnVal == JFileChooser.APPROVE_OPTION)	{
-							File f = chooser.getSelectedFile();
-							PrintWriter out = new PrintWriter(new FileWriter(f));
-							for(Snapshot s : sim.snapshots)	{
-								out.println(s.toString());
-							}
-							out.close();
-						}
+						if(returnVal == JFileChooser.APPROVE_OPTION)
+							sim.saveSimulationToFile(chooser.getSelectedFile());
 					}
 					catch(IOException ioe)	{
 						System.out.println("IO Error");
@@ -384,7 +386,6 @@ public class UserInterface extends JFrame implements KeyListener {
 				            sim.loadHeightMap(terrainFile);
 				            canv.hmc.setHeightMap(sim.hm);
 				            log.info("Importing Terrain: " + terrainFile.getName());
-				            
 				        }
 						statusBar.setMode("");
 					}

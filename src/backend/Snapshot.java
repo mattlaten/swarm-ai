@@ -2,9 +2,9 @@ package backend;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import backend.environment.Element;
-import backend.environment.Waypoint;
 
 /**
  * Snapshot is a class used to store the state of 
@@ -31,22 +31,24 @@ public class Snapshot extends ArrayList<RenderObject> implements Comparable<Snap
 		return 0;
 	}
 	
-	public String toString(){
+	public String toString(HashMap<Element, String> elementNames){
 		String str = "{\n" + timeTaken + "\n";
 		synchronized(this)	{
-			//first go through all the render objects and find the waypoint indices
-			HashMap<Waypoint, Integer> waypointIndices = new HashMap<Waypoint, Integer>();
-			for(int i = 0; i < size(); i++)	{
-				RenderObject e = get(i);
-				if(e.element instanceof Waypoint)
-					waypointIndices.put((Waypoint)(e.element), i);
-			}
-			
 			for (int i = 0; i < size(); i++){
 				RenderObject rob = get(i);
-				str += rob.toString(waypointIndices) + '\n';
+				str += rob.toString(elementNames) + '\n';
 			}
 		}
 		return str + "}";
+	}
+	
+	public static HashMap<Element, String> getNamesForElements(List<Snapshot> s)	{
+		int elements = 0;
+		HashMap<Element, String> names = new HashMap<Element, String>();
+		for(Snapshot snap : s)
+			for(RenderObject r : snap)
+				if(!names.containsKey(r.element))
+					names.put(r.element, "e" + (elements++));
+		return names;
 	}
 }

@@ -1,16 +1,16 @@
 package backend;
 
-import java.awt.Point;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.HashMap;
 
-import math.Vec;
 import backend.environment.Element;
-import backend.environment.Obstacle;
-import backend.environment.Prey;
-import backend.environment.Waypoint;
 
 /**
  * Simulation is the class that handles the interaction
@@ -186,5 +186,44 @@ public class Simulation extends Thread implements Serializable {
 	
 	public void setHeightMap(HeightMap hm)	{
 		this.hm = hm;
+	}
+	
+	public void saveSimulationToFile(File f) throws IOException	{
+		PrintWriter out = new PrintWriter(new FileWriter(f));
+		HashMap<Element, String> names = Snapshot.getNamesForElements(snapshots);
+		out.println(hm.heightMapFile.getPath());
+		for(Snapshot s : snapshots)
+			out.println(s.toString(names));
+		out.close();
+	}
+	
+	public void loadSimulationFromFile(File f)	throws IOException	{
+		BufferedReader in = new BufferedReader(new FileReader(f));
+		HashMap<String, Element> elements = new HashMap<String, Element>();
+		snapshots.clear();
+		elements.clear();
+		time = 0;
+		Snapshot current = null;
+		String heightMapName = in.readLine();
+		if(heightMapName.equals("-1") || !new File(heightMapName).exists())
+			hm = new HeightMap();
+		else
+			hm = new HeightMap(new File(heightMapName));
+		while(in.ready())	{
+			String line = in.readLine();
+			if(line.equals("{"))
+				current = new Snapshot(0, Integer.parseInt(in.readLine()));
+			else if(line.equals("}") && current != null)
+				snapshots.add(current);
+			else if(current != null)
+				current.add(RenderObject.fromString(line, elements));
+		}
+		if(snapshots.size() > 0)	{
+			totalTime = snapshots.get(snapshots.size()-1).timeTaken;
+			apply(0);
+		}
+		else
+			totalTime = 0;
+		in.close();
 	}
 }
