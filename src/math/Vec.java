@@ -47,7 +47,7 @@ public class Vec implements Serializable	{
 	public Vec minus(Vec other)		{	return plus(other.neg());					}
 	public Vec mult(double scalar)	{	return new Vec(x * scalar, y * scalar);		}
 	public Vec neg()				{	return mult(-1);							}
-	public double size()			{	return Math.sqrt(dot(this));				}
+	public double size()			{	return Math.sqrt(Math.abs(dot(this)));				}
 	public Vec unit()				{	return (size() != 0 ? mult(1.0/size()) : new Vec());}
 	
 	public Vec invertY()			{	return new Vec(x, -y);						}

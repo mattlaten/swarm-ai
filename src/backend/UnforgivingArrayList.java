@@ -54,6 +54,6 @@ public class UnforgivingArrayList<T> extends ArrayList<T> implements Iterable<T>
 	}
 	
 	public boolean isDirty()	{
-		return removed.size() + added.size() > 0 || dirty;
+		return dirty || removed.size() + added.size() > 0;
 	}
 }
