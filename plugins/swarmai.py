@@ -1,5 +1,5 @@
-#import win32com.client
-#from win32com.client import constants
+import win32com.client
+from win32com.client import constants
 
 null = None
 false = 0
