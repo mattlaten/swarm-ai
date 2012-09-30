@@ -62,6 +62,7 @@ public class ControlBar extends JPanel implements Runnable, ActionListener {
 	
 	public void updateTime(double mousePosition)	{
 		sim.setTime((int)(sim.getTotalTime()*mousePosition/progress.getSize().width));
+		playPause.setText(sim.isRunning ? "Pause" : "Play");
 	}
 	
 	public void updateProgressString()	{
