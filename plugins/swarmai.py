@@ -1,5 +1,5 @@
-#import win32com.client
-#from win32com.client import constants
+import win32com.client
+from win32com.client import constants
 
 null = None
 false = 0
@@ -30,8 +30,9 @@ def XSIUnloadPlugin( in_reg ):
 
 	return true
 
-#def SwarmAI_Init(in_ctxt):
-
+def SwarmAI_Init(in_ctxt):
+	LoadSimulation('D:\\Dev\\swarm-ai\\plugins\\animation')
+	pass
 
 
 '''
@@ -56,19 +57,24 @@ def LoadSimulation(filename):
     #LoadTerrain(lines[0])
     for name in lines[1].split():
         animap[name] = {'x':[], 'y':[], 'z':[], 'i':[], 'j':[], 'k':[]}
-        animap['obj'] = Application.ActiveSceneRoot.addGeometry('Sphere','NurbsSurface')
-    for line in lines[2:]:
-        e = line.split()
-        animap[e[0]]['x'].extend([e[-1],e[1]])
-        animap[e[0]]['y'].extend([e[-1],e[2]])
-        animap[e[0]]['z'].extend([e[-1],e[3]])
-        animap[e[0]]['i'].extend([e[-1],e[4]])
-        animap[e[0]]['j'].extend([e[-1],e[5]])
-        animap[e[0]]['k'].extend([e[-1],e[6]])
-    for key in animap:
-        animap[key]['obj'].PosX.addFCurve2(animap[key]['x'])
-        animap[key]['obj'].PosY.addFCurve2(animap[key]['y'])
-        animap[key]['obj'].PosZ.addFCurve2(animap[key]['z'])
+        animap[name]['obj'] = Application.ActiveSceneRoot.addGeometry('Sphere','NurbsSurface')
+	#Application.LogMessage(animap[name]['x'])
+	for line in lines[2:]:
+		if line == '':
+			break
+		e = line.split()
+		#Application.LogMessage(animap[e[0]])
+		#animap[e[0]]['x'].extend([e[-1],e[1]])
+		#animap[e[0]]['x'].extend([e[-1],e[1]])
+		#animap[e[0]]['y'].extend([e[-1],e[2]])
+		#animap[e[0]]['z'].extend([e[-1],e[3]])
+		#animap[e[0]]['i'].extend([e[-1],e[4]])
+		#animap[e[0]]['j'].extend([e[-1],e[5]])
+		#animap[e[0]]['k'].extend([e[-1],e[6]])
+	for key in animap.keys():
+		animap[key]['obj'].PosX.addFCurve2(animap[key]['x'])
+		animap[key]['obj'].PosY.addFCurve2(animap[key]['y'])
+		animap[key]['obj'].PosZ.addFCurve2(animap[key]['z'])
     #read in first frame, 
     #read in metadata: prey, predator etc 
     #read in frame by frame and import into XSI
