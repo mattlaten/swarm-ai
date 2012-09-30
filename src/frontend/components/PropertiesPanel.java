@@ -113,12 +113,12 @@ public class PropertiesPanel extends JPanel  {
 		
 		props.add(velPan);
 		
-		props.setBorder(new TitledBorder("Properties"));
+		props.setBorder(new TitledBorder("Selection Properties"));
 		
-		JPanel influences = new JPanel();
-		influences.setBorder(new TitledBorder("Influences"));	
+		JPanel parameters = new JPanel();
+		parameters.setBorder(new TitledBorder("Simulation Parameters"));	
 		
-		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, props, influences);
+		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, props, parameters);
 		this.add(splitPane);
 		setVisible(true);
 	}

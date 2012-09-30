@@ -7,7 +7,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
@@ -34,6 +36,9 @@ import backend.environment.Element;
 import backend.environment.Predator;
 import backend.environment.Prey;
 import backend.environment.Waypoint;
+
+import backend.Snapshot;
+
 import frontend.components.ControlBar;
 import frontend.components.PropertiesPanel;
 import frontend.components.StatusBar;
@@ -78,7 +83,7 @@ public class UserInterface extends JFrame implements KeyListener {
 		controlBar = new ControlBar(sim);
 		statusBar = new StatusBar();
 		toolbar = new Toolbar();
-		menuBar = new MenuBar();
+		menuBar = new MenuBar(this);
 		
 		//set up things
 		setSize(1024, 600);
@@ -301,8 +306,9 @@ public class UserInterface extends JFrame implements KeyListener {
 		JFileChooser fileChooser; 
 		
 		
-		public MenuBar()
+		public MenuBar(UserInterface ui)
 		{
+			final UserInterface uiFinal = ui;
 			fileChooser = new JFileChooser("./maps/");
 			
 			//FILE
@@ -347,7 +353,21 @@ public class UserInterface extends JFrame implements KeyListener {
 			fileSaveAs = new JMenuItem("Save As...");
 			fileSaveAs.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent ae)	{
-					System.exit(0);
+					try	{
+						JFileChooser chooser = new JFileChooser();
+						int returnVal = chooser.showSaveDialog(uiFinal);
+						if(returnVal == JFileChooser.APPROVE_OPTION)	{
+							File f = chooser.getSelectedFile();
+							PrintWriter out = new PrintWriter(new FileWriter(f));
+							for(Snapshot s : sim.snapshots)	{
+								out.println(s.toString());
+							}
+							out.close();
+						}
+					}
+					catch(IOException ioe)	{
+						System.out.println("IO Error");
+					}
 				}
 			});
 			
