@@ -4,7 +4,10 @@ package backend.environment;
 import java.util.List;
 
 import math.Vec;
-
+/**
+ * Animal is a subclass of Element and superclass to Prey and Predator
+ *
+ */
 public abstract class Animal extends Element implements Cloneable {
 	public @Property Vec velocity;	//this stores a vector that is at most a unit vector which is multiplied by the maxSpeed 
 	private Vec oldVelocity = null;

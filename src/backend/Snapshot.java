@@ -8,12 +8,17 @@ import math.Vec;
 import backend.environment.Element;
 
 /**
- * 
- *
+ * Snapshot is a class used to store the state of 
+ * a simulation at a distinct point in time 
  */
 public class Snapshot extends ArrayList<RenderObject> implements Comparable<Snapshot>	{
 	int timeTaken;
 	
+	/**
+	 * Public constructor for Snapshot
+	 * @param size The size of the list of RenderObjects
+	 * @param timeTaken 
+	 */
 	public Snapshot(int size, int timeTaken)	{
 		super(size);
 		this.timeTaken = timeTaken;

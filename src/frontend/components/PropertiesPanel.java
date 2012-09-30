@@ -10,6 +10,7 @@ import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JSplitPane;
 import javax.swing.JTextField;
+import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -62,8 +63,7 @@ public class PropertiesPanel extends JPanel  {
 		maxSpeed.setMinorTickSpacing(10);
 		oldMaxSpeed = maxSpeed.getValue();
 		maxSpeed.addChangeListener(new ChangeListener(){
-			public void stateChanged(ChangeEvent ce)
-			{
+			public void stateChanged(ChangeEvent ce)	{
 				double diff = (maxSpeed.getValue() - oldMaxSpeed)/100.0;
 				oldMaxSpeed = maxSpeed.getValue();
 				if(!settingValues)
@@ -230,7 +230,6 @@ public class PropertiesPanel extends JPanel  {
 		splitPane.add(spec);
 		
 		this.add(splitPane);
-		
 		setVisible(true);
 	}
 	
