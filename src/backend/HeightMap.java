@@ -13,6 +13,9 @@ import util.Logger;
 
 import math.Vec;
 
+/**
+ * Class that stores the terrain in the form of a grid of heights
+ */
 public class HeightMap {
 
 	double terrain[][] = null;
@@ -31,6 +34,10 @@ public class HeightMap {
 	
 	public Vec topLeft, botRight;
 	
+	/**
+	 * Constructor
+	 * @param file The terrain file
+	 */
 	public HeightMap(File file)
 	{
 		log = new Logger(HeightMap.class, System.out, System.err);
@@ -38,16 +45,9 @@ public class HeightMap {
 		normalizeTerrain(1);
 	}
 	
-	/*
-	public HeightMap()
-	{
-		log = new Logger(HeightMap.class, System.out, System.err);
-		terrain = new double [y][x];
-		generateRandomHeights();
-		normalizeTerrain(1);
-	}
-	*/
-	
+	/**
+	 * Default constructor
+	 */
 	public HeightMap()
 	{
 		log = new Logger(HeightMap.class, System.out, System.err);
@@ -55,7 +55,10 @@ public class HeightMap {
 		normalizeTerrain(1);
 	}
 	
-	
+	/**
+	 * Method to read in terrain file
+	 * @param file The terrain file
+	 */
 	public void readInFile(File file)
 	{
 		try
@@ -165,12 +168,23 @@ public class HeightMap {
 			}
 	}
 	
+	/**
+	 * Method to get actual height from grid at position (x,y)
+	 * @param x x-value
+	 * @param y y-value
+	 * @return The height value at (x,y)
+	 */
 	public double getHeightAt(int x, int y)	{
 		if(x < this.x && x >= 0 && y < this.y && y >= 0)
 			return terrain[this.y-y-1][this.x-x-1];
 		return 0;
 	}
 	
+	/**
+	 * Method to get interpolated non-normalized height
+	 * @param pp The position Vec
+	 * @return 
+	 */
 	public double getUnnormalisedInterpolatedHeightAt(Vec pp)	{
 		return getInterpolatedHeightAt(pp)*range+min;
 	}
