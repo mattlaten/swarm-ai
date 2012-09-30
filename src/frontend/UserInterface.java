@@ -43,22 +43,29 @@ import frontend.components.PropertiesPanel;
 import frontend.components.StatusBar;
 
 /**
- * 
- *
+ * The UserInterface serves to combine all the frontend components together.
+ * It holds the Canvas, the PropertiesPanel, the StatusBar, the Toolbar, the Menubar
+ * as well as the Simulation. It also keeps track of the current editting mode the user.
  */
 public class UserInterface extends JFrame implements KeyListener {
-	
 	Logger log = new Logger(UserInterface.class, System.out, System.err);
+	
+	public enum Mode {SELECT, PAINT_PREY, PAINT_PREDATOR, PAINT_WAYPOINT};
 
+	/**
+	 * The currently running simulation.
+	 */
 	public Simulation sim;
 	Canvas canv;
 	
 	Element previousWaypoint;
 	
+	/**
+	 * The list of Elements that make up the current selection
+	 */
 	public HashSet<Element> selection;
 	File terrainFile;
 	
-	public enum Mode {SELECT, PAINT_PREY, PAINT_PREDATOR, PAINT_WAYPOINT};
 	Mode mode;
 	StatusBar statusBar = null;
 	ControlBar controlBar;
@@ -67,6 +74,10 @@ public class UserInterface extends JFrame implements KeyListener {
 	JPanel viewPort;
 	MenuBar menuBar;
 
+	/**
+	 * Initiates and shows the UserInterface
+	 * @param sim The Simulation object to use
+	 */
 	public UserInterface(final Simulation sim) throws Exception	{
 		super("Swarm AI");
 		this.sim = sim;
@@ -104,19 +115,26 @@ public class UserInterface extends JFrame implements KeyListener {
 		getContentPane().add(statusBar, BorderLayout.PAGE_END);
 		getContentPane().add(splitPane, BorderLayout.CENTER);
 		
-		/*PropertyDialog pd = new PropertyDialog(this);
-		pd.targetEntity(sim.elements.get(0));*/
-		
 		setVisible(true);
 		sim.start();
 	}
 	
+	/**
+	 * Sets the mode of the UserInterface. The mode affects what elements can be selected
+	 * by the selection box as well as what the mouse buttons will do when clicked.
+	 * @param m The new mode
+	 */
 	public void setMode(Mode m)	{
 		mode = m;
 		if(m == Mode.PAINT_WAYPOINT)
 			previousWaypoint = null;
 	}
 	
+	/**
+	 * Sets the selection to any prey that are found at the given position in space
+	 * @param point The position where the selection prey should be
+	 * @param addToSelection Whether we're adding to the current selection or defining a completely new selection
+	 */
 	public void selectPrey(Vec point, boolean addToSelection) {
 		//Add prey to selection
 		//Colour it differently (green?)
@@ -129,12 +147,7 @@ public class UserInterface extends JFrame implements KeyListener {
 					if (!addToSelection)
 						selection.clear();
 					selection.add(e);
-					try {
-						properties.update();
-					} catch (Exception e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
+					properties.update();
 					added = true;
 					//log.info("Added element " + e.getPosition() + " : " + point);
 				}
@@ -148,6 +161,12 @@ public class UserInterface extends JFrame implements KeyListener {
 		canv.repaint();
 	}
 	
+	/**
+	 * Given the bounds of a selection box, select the prey found inside it
+	 * @param start The starting point of the selection box
+	 * @param end The ending point of the selection box
+	 * @param addToSelection Whether we're adding to the current selection or defining a completely new selection 
+	 */
 	public void selectBox(Vec start, Vec end, boolean addToSelection)
 	{
 		double minx = Math.min(start.x, end.x);
@@ -169,6 +188,11 @@ public class UserInterface extends JFrame implements KeyListener {
 		canv.repaint();
 	}
 
+	/**
+	 * Creates a new Animal at the given point
+	 * @param mPoint The position in space to create the animal
+	 * @param cl The class of the Animal to create (Prey or Predator)
+	 */
 	public <T> void placeElement(Vec mPoint, Class<T> cl) throws SecurityException, NoSuchMethodException {
 		Constructor c = cl.getConstructor(double.class, double.class, double.class, double.class, double.class);
 		//convert mPoint to worldspace
@@ -177,15 +201,6 @@ public class UserInterface extends JFrame implements KeyListener {
 		double yloc = Math.round(mPoint.y/10)*10;
 		
 		boolean validLocation = true;
-		
-		Waypoint firstWaypoint = null;
-		synchronized(sim.elements)	{
-			for(Element e : sim.elements)
-				if(e instanceof Waypoint)	{
-					firstWaypoint = (Waypoint)e;
-					break;
-				}
-		}
 		
 		synchronized(sim.elements)	{
 			for (Element e : sim.elements)
@@ -196,7 +211,6 @@ public class UserInterface extends JFrame implements KeyListener {
 		if (validLocation)
 			try {
 				sim.elements.add((Element)c.newInstance(xloc,yloc,1,1,5));
-				sim.elements.get(sim.elements.size()-1).setTarget(firstWaypoint);
 			} catch (IllegalArgumentException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -213,6 +227,10 @@ public class UserInterface extends JFrame implements KeyListener {
 		canv.repaint();
 	}
 	
+	/**
+	 * Places the given Element into the world
+	 * @param toAdd The Element to add in the world
+	 */
 	public void placeElement(Element toAdd)	{
 		//convert mPoint to worldspace
 		//place prey on closest dot
@@ -241,11 +259,18 @@ public class UserInterface extends JFrame implements KeyListener {
 		canv.repaint();
 	}
 
+	/**
+	 * Sets the facing direction of the currently selected Elements
+	 * @param mPoint
+	 */
 	public void setSelectionDirection(Vec mPoint) {
 		for (Element e : selection)
 			e.setVelocity(mPoint.minus(e.getPosition()));
 	}
 	
+	/**
+	 * Clears everyhing: selection, world, time
+	 */
 	public void clear()
 	{
 		selection.clear();
@@ -303,7 +328,8 @@ public class UserInterface extends JFrame implements KeyListener {
 					viewAxes, 
 					viewMap, 
 					viewDirections, 
-					viewRadii;
+					viewRadii,
+					viewQuality;
 		JFileChooser fileChooser; 
 		
 		
@@ -495,6 +521,14 @@ public class UserInterface extends JFrame implements KeyListener {
 				}
 			});
 			
+			viewQuality = new JCheckBoxMenuItem("High Quality Rendering", canv.highQualityRender);
+			viewQuality.addActionListener(new ActionListener()	{
+				public void actionPerformed(ActionEvent ae)	{
+					canv.highQualityRender = viewQuality.isSelected();
+					canv.repaint();
+				}
+			});
+			
 			transSize = new JMenuItem("Set Selection Size");
 			transSize.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent ae)	{
@@ -559,13 +593,15 @@ public class UserInterface extends JFrame implements KeyListener {
 				view.addSeparator();
 				view.add(viewDirections);
 				view.add(viewRadii);
+				view.addSeparator();
+				view.add(viewQuality);
 			trans = new JMenu("Transform");
 				trans.add(transSize);
 				trans.add(transMaxVel);
 				trans.add(transPos);
 			add(file);
 			add(view);
-			add(trans);
+			//add(trans);
 		}
 	}
 
@@ -638,8 +674,8 @@ public class UserInterface extends JFrame implements KeyListener {
 			modeGroup.add(modeSelect);
 			modeGroup.add(modePrey);
 			modeGroup.add(modePredator);
-			modeGroup.add(modeModifier);
-			modeGroup.add(modeObstacle);
+			//modeGroup.add(modeModifier);
+			//modeGroup.add(modeObstacle);
 			modeGroup.add(modeWaypoint);
 
 			//TOOLBAR
@@ -651,8 +687,8 @@ public class UserInterface extends JFrame implements KeyListener {
 			modesPanel.add(modeSelect);
 			modesPanel.add(modePrey);
 			modesPanel.add(modePredator);
-			modesPanel.add(modeModifier);
-			modesPanel.add(modeObstacle);
+			//modesPanel.add(modeModifier);
+			//modesPanel.add(modeObstacle);
 			modesPanel.add(modeWaypoint);
 			
 			JPanel trackingPanel = new JPanel();

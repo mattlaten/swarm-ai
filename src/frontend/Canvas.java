@@ -28,23 +28,34 @@ import backend.environment.Obstacle;
 import frontend.components.ContextMenu;
 
 /**
- * Canvas class used to paint Simulation on screen
+ * The Canvas is used to paint Simulation on the screen. It runs an independent thread that
+ * constantly pings the Simulation for new data to paint. It also takes care of the zooming
+ * and panning effects. In order to paint the terrain height map, it stores a HeightMapCache
+ * instance.
  */	
 
-class Canvas extends JLabel implements MouseListener, MouseMotionListener, MouseWheelListener, Runnable	{
-	UserInterface ui;
-	Vec origin = new Vec();	//the origin relative to the center of the Canvas
-	Vec mPoint = new Vec();	//the position of the mouse in labelSpace
-	Vec startPoint = new Vec();
+public class Canvas extends JLabel implements MouseListener, MouseMotionListener, MouseWheelListener, Runnable	{
+	private UserInterface ui;
+	private Vec origin = new Vec();	//the origin relative to the center of the Canvas
+	private Vec mPoint = new Vec();	//the position of the mouse in labelSpace
+	private Vec startPoint = new Vec();
 	
-	ContextMenu cm;	
-	Rectangle selectRect = null;
+	private ContextMenu cm;	
+	private Rectangle selectRect = null;
 	
+	/**
+	 * The distance, in pixels, between to dots on the grid when no zoom is applied
+	 */
 	int dotDiff = 10;
+	
+	/**
+	 * The cached height map, used for painting the terrain efficiently
+	 */
 	HeightMapCache hmc = null;
-	double zoom = 1, defaultZoom = 1, minZoom = 0.01, maxZoom = 10,
+	
+	private double zoom = 1, defaultZoom = 1, minZoom = 0.01, maxZoom = 10,
 		   trackingZoom = 0.8;
-	boolean draggingSelection = false;
+	private boolean draggingSelection = false;
 	
 	public boolean renderGrid = false,
 			renderAxes = false,
@@ -52,7 +63,8 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 			renderDirections = true,
 			renderRadii = true,
 			renderWaypoints = true,
-			track = false;
+			track = false,
+			highQualityRender = true;
 	
 	public Canvas(UserInterface ui)	{
 		this.ui = ui;
@@ -68,10 +80,23 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 		new Thread(this, "Canvas").start();
 	}
 	
+	/**
+	 * Returns the position of the vector, relative to the top left corner of the
+	 * Canvas, with positive Y going down (ie. Label Space).
+	 * @param v The vector in world space
+	 * @return The vector in label space
+	 */
 	public Vec toLabelSpace(Vec v)	{	return v.mult(zoom).invertY().plus(origin.mult(zoom)).plus(new Vec(getSize().width/2, getSize().height/2));	}
+	
+	/**
+	 * Returns the position of the vector, relative to the origin of the world (ie. World Space).
+	 * @param v The vector in label space
+	 * @return The vector in world space
+	 */
 	public Vec toWorldSpace(Vec v)	{	return v.minus(originInLabelSpace()).mult(1/zoom).invertY();	}
-	public Vec originInLabelSpace()	{	return toLabelSpace(Vec.ZERO);	}
-	public Vec mouseInWorldSpace()	{	return toWorldSpace(mPoint);	}
+	
+	private Vec originInLabelSpace()	{	return toLabelSpace(Vec.ZERO);	}
+	private  Vec mouseInWorldSpace()	{	return toWorldSpace(mPoint);	}
 	
 	public void run()	{
 		try {
@@ -79,12 +104,18 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 				Thread.sleep(40);
 				if(ui.statusBar != null)
 					ui.statusBar.setZoom(zoom);
+				if(ui.properties != null)
+					ui.properties.updateQuick();
 				repaint();
 			}
 		}
 		catch(InterruptedException ie)	{}
 	}
 	
+	/**
+	 * This focuses the "camera" on the currently selected Elements, following them as they
+	 * move through the world.
+	 */
 	public void focusOnSelection()	{
 		if(ui.selection.size() == 0)	return;
 		//calculate bounding box of selection
@@ -111,9 +142,16 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 			zoom = Math.max(0.1, Math.min(1, getSize().width*trackingZoom/diff.x));*/
 	}
 	
+	/**
+	 * Paints the world onto the canvas, taking into account the zoom and position
+	 * of the origin as well as the different rendering options as set by the UserInterface.
+	 */
 	public void paint(Graphics g)	{
 		Graphics2D g2 = (Graphics2D)g;
-		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		if(highQualityRender)
+			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		else
+			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 		if (track)
 			focusOnSelection();
 		//System.out.println(hmc.completion);
@@ -189,7 +227,7 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 					}
 					
 					if(renderDirections && !(e instanceof Waypoint))
-						drawVector(g2, Color.green, e.getPosition(), e.getVelocity().mult(Math.min(70*zoom, 70)));
+						drawVector(g2, Color.green, e.getPosition(), e.getVelocity().mult(Math.min(10*zoom, 10)));
 				}
 			}
 			
@@ -253,7 +291,7 @@ class Canvas extends JLabel implements MouseListener, MouseMotionListener, Mouse
 		}
 	}
 	
-	public void drawVector(Graphics2D g2, Color c, Vec pos, Vec vec)	{
+	private void drawVector(Graphics2D g2, Color c, Vec pos, Vec vec)	{
 		Color old = g2.getColor();
 		g2.setColor(c);
 		Point posP = toLabelSpace(pos).getPoint();
