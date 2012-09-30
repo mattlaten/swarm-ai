@@ -3,14 +3,40 @@ package math;
 import java.awt.Point;
 import java.io.Serializable;
 
+/**
+ * Vec is a helper 2D vector class that enables easy application of vector
+ * math, without having to do it by hand.
+ */
 public class Vec implements Serializable	{
+	/**
+	 * A helper vector. This is the zero vector (0,0)
+	 */
 	public static final Vec ZERO = new Vec(0,0);
+	/**
+	 * The x and y co-ordinates for this vector
+	 */
 	public double x,y;
 	
+	/**
+	 * Constructs a zero vector (0,0)
+	 */
 	public Vec()		{	this(0,0);		}
+	/**
+	 * Constructs a vector from a point
+	 * @param p The point to use
+	 */
 	public Vec(Point p)	{	this(p.x, p.y);	}
+	/**
+	 * Constructs vector from another vector
+	 * @param v The vector to use
+	 */
 	public Vec(Vec v)	{	this(v.x, v.y);	}
 	
+	/**
+	 * Constructs a vector with the given x and y co-ordinates
+	 * @param x The x co-ordinate
+	 * @param y The y co-ordinate
+	 */
 	public Vec(double x, double y)	{
 		this.x = x;
 		this.y = y;
@@ -22,7 +48,7 @@ public class Vec implements Serializable	{
 	public Vec mult(double scalar)	{	return new Vec(x * scalar, y * scalar);		}
 	public Vec neg()				{	return mult(-1);							}
 	public double size()			{	return Math.sqrt(dot(this));				}
-	public Vec unit()				{	return mult(1.0/size());					}
+	public Vec unit()				{	return (size() != 0 ? mult(1.0/size()) : new Vec());}
 	
 	public Vec invertY()			{	return new Vec(x, -y);						}
 	

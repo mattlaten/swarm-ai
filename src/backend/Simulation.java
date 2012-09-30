@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import backend.environment.Element;
+import frontend.UserInterface;
 
 /**
  * The Simulation handles the interaction between elements and each
@@ -30,7 +31,7 @@ import backend.environment.Element;
 public class Simulation extends Thread implements Serializable {
 	public UnforgivingArrayList<Element> elements;
 	public HeightMap hm = null;
-	private ArrayList<Snapshot> snapshots;
+	public ArrayList<Snapshot> snapshots;
 	
 	private int timeStep = 20, stepsPerSave = 10;
 	public volatile int time = 0, totalTime = 0;
@@ -47,6 +48,9 @@ public class Simulation extends Thread implements Serializable {
 		setName("Simulation");
 	}
 	
+	/**
+	 * The main thread for the simulation
+	 */
 	public void run()	{
 		try {
 			while(true)	{
@@ -131,6 +135,8 @@ public class Simulation extends Thread implements Serializable {
 	 * @param i The index of the snapshot to use
 	 */
 	private void apply(int i)	{
+		if(i >= snapshots.size() || i < 0)
+			return;
 		synchronized(elements)	{
 			elements.clear();
 			for(RenderObject r : snapshots.get(i))	{
