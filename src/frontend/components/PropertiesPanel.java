@@ -1,41 +1,37 @@
 package frontend.components;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Font;
 import java.awt.GridLayout;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
+import java.util.HashMap;
 
-import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
-import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import frontend.UserInterface;
-
+import backend.RenderObject;
 import backend.environment.Animal;
 import backend.environment.Element;
 import backend.environment.Prey;
-import backend.environment.Property;
+import frontend.UserInterface;
 
 public class PropertiesPanel extends JPanel  {
 	JTextField propKey, propVal, x, y;
 	JSlider size, maxSpeed;
 	VelocityWheel velWheel;
+	HashMap<Element, RenderObject> selectionState = new HashMap<Element, RenderObject>();
+	final UserInterface ui;
 	
 	public PropertiesPanel(final UserInterface ui)	{
 		this.setLayout(new GridLayout(11,1));
+		this.ui = ui;
 		this.setPreferredSize(new Dimension(200,0));
 		
-		size = new JSlider(2, 30);
+		size = new JSlider(10, 200);
 		size.setPaintTicks(true);
 		size.setPaintLabels(true);
 		size.setMajorTickSpacing(10);
@@ -49,7 +45,6 @@ public class PropertiesPanel extends JPanel  {
 					for (Element e : ui.selection)
 					{	
 						double s = e.getSize();
-						System.out.println(source.getValue());
 						e.setSize(s*source.getValue()/50.0);
 					}
 			}
@@ -113,7 +108,10 @@ public class PropertiesPanel extends JPanel  {
 		setVisible(true);
 	}
 	
-	public void targetEntity(Element e) throws Exception	{
+	public void update()	{
+		selectionState.clear();
+		for(Element e : ui.selection)
+			selectionState.put(e, new RenderObject(e));
 		
 	}
 }

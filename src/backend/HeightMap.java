@@ -25,6 +25,8 @@ public class HeightMap {
 	
 	BufferedReader reader = null;
 	
+	File heightMapFile = null;
+	
 	Logger log = null;
 	
 	public Vec topLeft, botRight;
@@ -58,6 +60,7 @@ public class HeightMap {
 	{
 		try
 		{	
+			heightMapFile = file;
 			reader = new BufferedReader(new FileReader(file));
 			String line = reader.readLine();
 			String tokens [] = line.split(" ");			
