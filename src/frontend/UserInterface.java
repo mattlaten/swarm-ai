@@ -130,7 +130,7 @@ public class UserInterface extends JFrame implements KeyListener {
 						selection.clear();
 					selection.add(e);
 					try {
-						properties.targetEntity(e);
+						properties.update();
 					} catch (Exception e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -165,6 +165,7 @@ public class UserInterface extends JFrame implements KeyListener {
 					selection.add(e);	
 			}
 		}
+		properties.update();
 		canv.repaint();
 	}
 
@@ -289,6 +290,7 @@ public class UserInterface extends JFrame implements KeyListener {
 					fileClose,
 					fileSave,
 					fileSaveAs,
+					fileExportXSI,
 					fileImportTerrain,
 					fileExportTerrain,
 					fileGenerateRandomTerrain, 
@@ -366,6 +368,22 @@ public class UserInterface extends JFrame implements KeyListener {
 						int returnVal = chooser.showSaveDialog(uiFinal);
 						if(returnVal == JFileChooser.APPROVE_OPTION)
 							sim.saveSimulationToFile(chooser.getSelectedFile());
+					}
+					catch(IOException ioe)	{
+						System.out.println("IO Error");
+					}
+				}
+			});
+			
+			fileExportXSI = new JMenuItem("Export XSI");
+			fileExportXSI.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent ae)	{
+					try	{
+						JFileChooser chooser = new JFileChooser();
+						chooser.setCurrentDirectory(new File("./saves/"));
+						int returnVal = chooser.showSaveDialog(uiFinal);
+						if(returnVal == JFileChooser.APPROVE_OPTION)
+							sim.exportSimulationToFile(chooser.getSelectedFile());
 					}
 					catch(IOException ioe)	{
 						System.out.println("IO Error");
@@ -527,6 +545,7 @@ public class UserInterface extends JFrame implements KeyListener {
 				file.addSeparator();
 				file.add(fileSave);
 				file.add(fileSaveAs);
+				file.add(fileExportXSI);
 				file.addSeparator();
 				file.add(fileImportTerrain);
 				file.add(fileExportTerrain);

@@ -7,9 +7,13 @@ import math.Vec;
 public class Waypoint extends Element {
 	public Waypoint()	{
 		position = new Vec(0,0);
+		size = 20;
+		maxSpeed = 0;
+		radius = 50;
 	}
 	
 	public Waypoint(Vec position)	{
+		this();
 		this.position = new Vec(position);
 	}
 	
@@ -19,12 +23,10 @@ public class Waypoint extends Element {
 	}
 	
 	public Waypoint(Waypoint other)	{
+		this();
 		this.position = new Vec(other.position);
 	}
 	
-	public double getSize() 	{	return 20;		}
-	public double getMaxSpeed()	{	return 0;		}
-	public double getRadius()	{	return 50;		}
 	public Vec getVelocity() 	{	return new Vec();	}
 	public void setVelocity(Vec v)	{}
 	

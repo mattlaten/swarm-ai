@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import math.Vec;
 import backend.environment.Element;
 
 /**
@@ -35,6 +36,30 @@ public class Snapshot extends ArrayList<RenderObject> implements Comparable<Snap
 			}
 		}
 		return str + "}";
+	}
+	
+	public String toExportString(HashMap<Element, String> elementNames, int frame, HeightMap hm)	{
+		String str = "";
+		synchronized(this)	{
+			for (int i = 0; i < size(); i++){
+				RenderObject rob = get(i);
+				Vec pos = new Vec(rob.position);
+				Vec vel = new Vec(rob.velocity);
+				String name = elementNames.get(rob.element);
+				Vec velUnit = vel.unit();
+				double posZ = hm.getInterpolatedHeightAt(pos);
+				double velZ = hm.getInterpolatedHeightAt(pos.plus(velUnit)) - hm.getInterpolatedHeightAt(pos);
+				str += "\n" + name
+					+ " " + pos.x
+					+ " " + pos.y
+					+ " " + posZ
+					+ " " + vel.x
+					+ " " + vel.y
+					+ " " + velZ
+					+ " " + frame;
+			}
+		}
+		return str.substring(1);
 	}
 	
 	public static HashMap<Element, String> getNamesForElements(List<Snapshot> s)	{

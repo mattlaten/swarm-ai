@@ -12,9 +12,9 @@ import backend.HeightMap;
 public abstract class Element implements Serializable, Cloneable	{
 	protected Waypoint target = null;
 	protected Vec position;
-	protected volatile boolean alive = true;
 	double size;
 	double maxSpeed;
+	double radius = 1;
 	
 	public Waypoint getTarget()	{
 		return target;
@@ -39,17 +39,20 @@ public abstract class Element implements Serializable, Cloneable	{
 	public void setMaxSpeed(double s) {
 		maxSpeed = s;
 	}
-	public void setRadius(double r)	{}
-	public synchronized void setAlive(boolean a)	{
-		alive = a;
-	}
-	public boolean isAlive()	{
-		return alive;
+	public void setRadius(double r)	{
+		radius = r;
 	}
 	
-	abstract public double getSize();
-	abstract public double getMaxSpeed();
-	abstract public double getRadius();
+	public double getRadius()	{
+		return radius;
+	}
+	
+	public double getSize()	{
+		return size;
+	}
+	public double getMaxSpeed()	{
+		return maxSpeed;
+	}
 	abstract public Vec getVelocity();
 	abstract public void setVelocity(Vec v);
 	abstract public Object clone();		//force all Elements to have a clone method

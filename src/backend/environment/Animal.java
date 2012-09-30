@@ -8,8 +8,6 @@ import math.Vec;
 public abstract class Animal extends Element implements Cloneable {
 	public @Property Vec velocity;	//this stores a vector that is at most a unit vector which is multiplied by the maxSpeed 
 	private Vec oldVelocity = null;
-	public @Property double maxSpeed;
-	public @Property double sightRadius;
 	
 	public double collisionAvoidanceWeight = 0.15,
 			   velocityMatchingWeight = 0.1,
@@ -19,18 +17,18 @@ public abstract class Animal extends Element implements Cloneable {
 			   terrainAvoidanceWeight = 0.2;
 	
 	public Animal(Vec position, Vec velocity)	{
+		this();
 		this.position = new Vec(position);
 		this.velocity = new Vec(velocity);
-		initWeights();
 	}
 	
 	public Animal(Animal other)	{
+		this();
 		this.position = new Vec(other.position);
 		this.velocity = new Vec(other.velocity);
 		this.size = other.size;
 		this.maxSpeed = other.maxSpeed;
-		this.sightRadius = other.sightRadius;
-		initWeights();
+		this.radius = other.radius;
 	}
 	
 	public Animal()	{
@@ -38,7 +36,7 @@ public abstract class Animal extends Element implements Cloneable {
 		velocity = new Vec(0,0);
 		size = 5;
 		maxSpeed = 0.2;
-		sightRadius = 100;
+		radius = 100;
 		initWeights();
 	}
 	
@@ -50,9 +48,6 @@ public abstract class Animal extends Element implements Cloneable {
 		initWeights();
 	}
 	
-	public double getSize() 	{	return size;		}
-	public double getMaxSpeed()	{	return maxSpeed;	}
-	public double getRadius()	{	return sightRadius;	}
 	public Vec getVelocity() 	{	return (oldVelocity == null ? velocity : oldVelocity).mult(getMaxSpeed());	}
 	public void setVelocity(Vec v)	{
 		velocity = new Vec(v).mult(1.0/getMaxSpeed()).truncate(1);
@@ -64,9 +59,7 @@ public abstract class Animal extends Element implements Cloneable {
 	protected abstract void initWeights();
 	
 	public void update()	{
-		if(isAlive())	{
-			position = position.plus(velocity);
-			oldVelocity = new Vec(velocity);
-		}
+		position = position.plus(getVelocity());
+		oldVelocity = new Vec(velocity);
 	}
 }

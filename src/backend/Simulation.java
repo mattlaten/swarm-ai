@@ -197,6 +197,19 @@ public class Simulation extends Thread implements Serializable {
 		out.close();
 	}
 	
+	public void exportSimulationToFile(File f)	throws IOException	{
+		PrintWriter out = new PrintWriter(new FileWriter(f));
+		HashMap<Element, String> names = Snapshot.getNamesForElements(snapshots);
+		out.println(hm.heightMapFile.getPath());
+		String nameLine = "";
+		for(Element e: names.keySet())
+			nameLine += " " + names.get(e);
+		out.println(nameLine.substring(1));
+		for(Snapshot s : snapshots)
+			out.println(s.toExportString(names, s.timeTaken/timeStep, hm));
+		out.close();
+	}
+	
 	public void loadSimulationFromFile(File f)	throws IOException	{
 		BufferedReader in = new BufferedReader(new FileReader(f));
 		HashMap<String, Element> elements = new HashMap<String, Element>();
