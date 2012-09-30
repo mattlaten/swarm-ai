@@ -78,6 +78,7 @@ public class VelocityWheel extends JLabel {
 		synchronized(animals)	{
 			animals.clear();
 		}
+		repaint();
 	}
 	
 	public void paint(Graphics g)	{

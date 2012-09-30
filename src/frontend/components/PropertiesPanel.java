@@ -2,6 +2,7 @@ package frontend.components;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.text.DecimalFormat;
 
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
@@ -16,10 +17,10 @@ import javax.swing.event.ChangeListener;
 import math.Vec;
 import backend.environment.Animal;
 import backend.environment.Element;
-import backend.environment.Prey;
 import frontend.UserInterface;
 
-public class PropertiesPanel extends JPanel  {
+public class PropertiesPanel extends JPanel implements ChangeListener  {
+	DecimalFormat posFormat = new DecimalFormat("0.00");
 	JLabel posLabel;
 	JSlider size, maxSpeed, radius, collisionAvoidanceWeight,
 			   velocityMatchingWeight,
@@ -45,30 +46,33 @@ public class PropertiesPanel extends JPanel  {
 		size.setMajorTickSpacing(8);
 		size.setMinorTickSpacing(4);
 		oldSize = size.getValue();
+		size.addChangeListener(this);
 		size.addChangeListener(new ChangeListener()	{
 			public void stateChanged(ChangeEvent ce)	{
 				int diff = size.getValue() - oldSize;
 				oldSize = size.getValue();
 				if(!settingValues)
 					for (Element e : ui.selection)	{
-						e.setSize(Math.max(size.getMinimum(), Math.min(size.getMaximum(), e.getSize() + diff)));
+						//e.setSize(Math.max(size.getMinimum(), Math.min(size.getMaximum(), e.getSize() + diff)));
+						e.setSize(size.getValue());
 					}
 			}
 		});
-		maxSpeed = new JSlider(0, 100);
+		maxSpeed = new JSlider(1, 20);
 		maxSpeed.setPaintTicks(true);
 		maxSpeed.setPaintLabels(true);
-		maxSpeed.setMajorTickSpacing(50);
-		maxSpeed.setMinorTickSpacing(10);
+		maxSpeed.setMajorTickSpacing(9);
+		maxSpeed.setMinorTickSpacing(2);
 		oldMaxSpeed = maxSpeed.getValue();
+		maxSpeed.addChangeListener(this);
 		maxSpeed.addChangeListener(new ChangeListener(){
 			public void stateChanged(ChangeEvent ce)	{
-				double diff = (maxSpeed.getValue() - oldMaxSpeed)/100.0;
+				double diff = (maxSpeed.getValue() - oldMaxSpeed)/2.0;
 				oldMaxSpeed = maxSpeed.getValue();
 				if(!settingValues)
 					for (Element e : ui.selection)	{
-						e.setMaxSpeed(Math.max(0,
-								Math.min(1, e.getMaxSpeed() + diff)));
+						//e.setMaxSpeed(Math.max(0.5, Math.min(10, e.getMaxSpeed() + diff)));
+						e.setMaxSpeed(maxSpeed.getValue()/2.0);
 					}
 			}
 		});
@@ -78,6 +82,7 @@ public class PropertiesPanel extends JPanel  {
 		radius.setPaintLabels(true);
 		radius.setMajorTickSpacing(100);
 		radius.setMinorTickSpacing(40);
+		radius.addChangeListener(this);
 		radius.addChangeListener(new ChangeListener(){
 			public void stateChanged(ChangeEvent ce)	{
 				if(!settingValues)
@@ -91,6 +96,7 @@ public class PropertiesPanel extends JPanel  {
 		collisionAvoidanceWeight.setPaintLabels(true);
 		collisionAvoidanceWeight.setMajorTickSpacing(50);
 		collisionAvoidanceWeight.setMinorTickSpacing(10);
+		collisionAvoidanceWeight.addChangeListener(this);
 		collisionAvoidanceWeight.addChangeListener(new ChangeListener(){
 			public void stateChanged(ChangeEvent ce)	{
 				if(!settingValues)
@@ -105,6 +111,7 @@ public class PropertiesPanel extends JPanel  {
 		velocityMatchingWeight.setPaintLabels(true);
 		velocityMatchingWeight.setMajorTickSpacing(50);
 		velocityMatchingWeight.setMinorTickSpacing(10);
+		velocityMatchingWeight.addChangeListener(this);
 		velocityMatchingWeight.addChangeListener(new ChangeListener(){
 			public void stateChanged(ChangeEvent ce)	{
 				if(!settingValues)
@@ -119,6 +126,7 @@ public class PropertiesPanel extends JPanel  {
 		flockCenteringWeight.setPaintLabels(true);
 		flockCenteringWeight.setMajorTickSpacing(50);
 		flockCenteringWeight.setMinorTickSpacing(10);
+		flockCenteringWeight.addChangeListener(this);
 		flockCenteringWeight.addChangeListener(new ChangeListener(){
 			public void stateChanged(ChangeEvent ce)	{
 				if(!settingValues)
@@ -133,6 +141,7 @@ public class PropertiesPanel extends JPanel  {
 		otherAnimalWeight.setPaintLabels(true);
 		otherAnimalWeight.setMajorTickSpacing(50);
 		otherAnimalWeight.setMinorTickSpacing(10);
+		otherAnimalWeight.addChangeListener(this);
 		otherAnimalWeight.addChangeListener(new ChangeListener(){
 			public void stateChanged(ChangeEvent ce)	{
 				if(!settingValues)
@@ -147,6 +156,7 @@ public class PropertiesPanel extends JPanel  {
 		waypointAttractionWeight.setPaintLabels(true);
 		waypointAttractionWeight.setMajorTickSpacing(50);
 		waypointAttractionWeight.setMinorTickSpacing(10);
+		waypointAttractionWeight.addChangeListener(this);
 		waypointAttractionWeight.addChangeListener(new ChangeListener(){
 			public void stateChanged(ChangeEvent ce)	{
 				if(!settingValues)
@@ -160,6 +170,7 @@ public class PropertiesPanel extends JPanel  {
 		terrainAvoidanceWeight.setPaintLabels(true);
 		terrainAvoidanceWeight.setMajorTickSpacing(50);
 		terrainAvoidanceWeight.setMinorTickSpacing(10);
+		terrainAvoidanceWeight.addChangeListener(this);
 		terrainAvoidanceWeight.addChangeListener(new ChangeListener(){
 			public void stateChanged(ChangeEvent ce)	{
 				if(!settingValues)
@@ -204,7 +215,7 @@ public class PropertiesPanel extends JPanel  {
 		
 		JPanel stats = new JPanel();
 		stats.setLayout(new BoxLayout(stats, BoxLayout.PAGE_AXIS));
-		stats.setBorder(new TitledBorder("Stats"));
+		stats.setBorder(new TitledBorder("General"));
 		stats.add(sizePan);
 		stats.add(radPan);
 		stats.add(msPan);
@@ -220,6 +231,8 @@ public class PropertiesPanel extends JPanel  {
 		behave.add(flockCenteringWeight);
 		behave.add(newCenterJLabel("Velocity Matching"));
 		behave.add(velocityMatchingWeight);
+		behave.add(newCenterJLabel("Chase/Avoid Prey/Predator"));
+		behave.add(otherAnimalWeight);
 		behave.add(newCenterJLabel("Waypoint Attraction"));
 		behave.add(waypointAttractionWeight);
 		behave.add(newCenterJLabel("Terrain Slope Avoidance"));
@@ -234,6 +247,8 @@ public class PropertiesPanel extends JPanel  {
 		
 		this.add(genScroll);
 		setVisible(true);
+		
+		update();
 	}
 	
 	private JLabel newCenterJLabel(String text)	{
@@ -242,18 +257,37 @@ public class PropertiesPanel extends JPanel  {
 		return l;
 	}
 	
+	public void updateQuick()	{
+		synchronized(this)	{
+			Vec pos = new Vec();
+			int count = 0;
+			for(Element e : ui.selection)	{
+				pos = pos.plus(e.getPosition());
+				count ++;
+			}
+			if(count > 0)	{
+				pos = pos.mult(1.0/count);
+				posLabel.setText("("+posFormat.format(pos.x)+","+posFormat.format(pos.y)+")");
+			}
+			else
+				posLabel.setText("(,)");
+			
+			velWheel.repaint();
+		}
+	}
+	
 	public void update()	{
 		synchronized(this)	{
 			settingValues = true;
 			//find the average of EVERYTHING!!!
-			Vec pos = new Vec(), vel = new Vec();
-			double avgSize = 0, avgMaxSpeed = 0,
+			Vec pos = new Vec();
+			double avgSize = 0, avgMaxSpeed = 0, avgRadius = 0,
 					avgCA = 0, avgFC = 0, avgVM = 0, avgOA = 0, avgTA = 0, avgWA = 0;
 			int count = 0, specCount = 0;
 			for(Element e : ui.selection)	{
 				pos = pos.plus(e.getPosition());
-				vel = vel.plus(e.getVelocity().mult(1.0/e.getMaxSpeed()));
 				avgSize += e.getSize();
+				avgRadius += e.getRadius();
 				avgMaxSpeed += e.getMaxSpeed();
 				if(e instanceof Animal)	{
 					specCount ++;
@@ -274,21 +308,21 @@ public class PropertiesPanel extends JPanel  {
 			
 			if(count > 0)	{
 				pos = pos.mult(1.0/count);
-				vel = vel.mult(1.0/count);
 				avgSize /= count;
 				avgMaxSpeed /= count;
-				avgMaxSpeed *= 100;
+				avgMaxSpeed *= 2;
 				
 				oldSize = (int)avgSize;
 				size.setValue((int)avgSize);
 				oldMaxSpeed = (int)avgMaxSpeed;
 				maxSpeed.setValue((int)avgMaxSpeed);
-				posLabel.setText("("+pos.x+","+pos.y+")");
+				radius.setValue((int)avgRadius);
+				posLabel.setText("("+posFormat.format(pos.x)+","+posFormat.format(pos.y)+")");
 			}
 			else	{
 				posLabel.setText("(,)");
 				size.setValue(15);
-				maxSpeed.setValue(50);
+				maxSpeed.setValue(1);
 			}
 	//		x.setEnabled(count == 1);
 	//		y.setEnabled(count == 1);
@@ -321,5 +355,9 @@ public class PropertiesPanel extends JPanel  {
 			}
 			settingValues = false;
 		}
+	}
+
+	public void stateChanged(ChangeEvent arg0) {
+		ui.sim.elements.stuffChanged();
 	}
 }

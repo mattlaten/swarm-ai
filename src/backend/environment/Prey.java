@@ -6,12 +6,17 @@ import java.util.List;
 import math.Vec;
 import backend.HeightMap;
 
-/* TODO
- * 1. speed needs to increase/decrese depending on whether the prey is moving up- or downhill
- * 2. obstacles need to be fixed
+/**
+ * The Prey class is one of the two concrete Animals that can exist in the world.
+ * It seeks, as it's primary goal, to move towards it's target waypoint. The factors
+ * that affect it's behaviour, by default are:
+ * <ol>
+ * <li> desire not to be eaten by predators </li>
+ * <li> desire to get to target waypoint </li>
+ * <li> desire to stick with the flock </li>
+ * </ol>
  */
 public class Prey extends Animal {
-	Waypoint previousTarget = null;
 	double maxSpeedVar = 0.05,
 			maxTurningAngle = Math.PI/8;
 	
@@ -22,11 +27,6 @@ public class Prey extends Animal {
 	
 	public double weighted(double x)	{
 		return Math.pow(x, 3)*4+0.5;
-	}
-	
-	public void setTarget(Waypoint t)	{
-		previousTarget = getTarget();
-		super.setTarget(t);
 	}
 	
 	private int sign(double d)	{
@@ -46,24 +46,22 @@ public class Prey extends Animal {
 		terrainAvoidanceWeight = 0.2;
 	}
 	
-	/* Here we have two general approaches when dealing with multiple vectors:
-	 * 1. take a weighted average of the vectors
-	 * 2. use an accumulator: order the vectors by priority, start adding them up and when the 
-	 * 			total length exceeds some length limit, stop adding and truncate
+	/**
+	 * This is where the central logic for the prey's behaviour takes place.
+	 * For each of the six factors mentioned (in the Animal class) the prey constructs
+	 * a vector of influence. These vectors are as follows:
+	 * <ol>
+	 * <li> collision avoidance pushes the prey away from fellow prey </li>
+	 * <li> velocity matching makes the prey try and match it's fellow prey member's velocities (to go in the same direction) </li>
+	 * <li> flock centering pulls the prey towards all the other prey members </li>
+	 * <li> predator avoidance pushes the prey away from nearby predators </li>
+	 * <li> terrain avoidance pushes the prey towards smoother terrain </li>
+	 * </ol>
 	 * 
-	 * here we have a number of sources of vectors:
-	 * 		1. collision avoidance pushes the prey away from fellow prey
-	 * 		2. velocity matching makes the prey try and match it's fellow prey member's velocities (to go in the same direction)
-	 * 		3. flock centering pulls the prey towards all the other prey members
-	 * 
-	 * //A total source vector for each of these sources is calculated using weighted averaging. Then the three vectors are placed in
-	 * //an accumulator to find the final velocity.
-	 * We used to use an accumulator, now we take an "informed weighted sum" of the weighted averages. To understand what I mean by "informed"
-	 * consider the case where we weight collisionAvoidance 0.2, flockCentering 0.2, velocityMatching 0.1 and predatorAvoidance 0.5.
-	 * Now if there were no predator's to avoid, then the other factors should make a total weighting of 1 and not 0.5. This "accounting for
-	 * absent impulses" is what we understand as "informed".
-	 * 
-	 * Note: Collision avoidance and flock centering aren't linearly dependent on the distance of the other prey.
+	 * To deal with multiple competing vectors (pushing the prey in a number of different direction)
+	 * we take the "smart" weighted average of the different vectors. By "smart" we mean
+	 * that if there aren't any predators nearby then the predator avoidance weight doesn't
+	 * still bring the total resultant vector size down as it would in a simple weighted average.
 	 */
 	public void calculateUpdate(List<Element> influences, HeightMap hm) {
 		//calculate the sums
@@ -78,56 +76,25 @@ public class Prey extends Animal {
 		int neighbourhoodCount = 0, predatorCount = 0, obstacleCount = 0;
 		HashMap<Waypoint, Integer> flockTargets = new HashMap<Waypoint, Integer>();
 		for(Element e : influences)	{
-			if(e instanceof Obstacle)	{
-				Vec mostLeft = null,
-						mostRight = null;
-				double mostLeftAngle = Double.MAX_VALUE,
-						mostRightAngle = Double.MAX_VALUE;
-				Vec dir = velocity.unit();
-				for(Waypoint w : (Obstacle)e)	{
-					//get the cos of the angle between this waypoint and the dir vector
-					Vec wdir = w.getPosition().minus(getPosition());
-					double dot = dir.dot(wdir.unit());	//this will be in [-1,1]
-					dot = 1-(dot+1)/2;			//now it's in [0,1] with 0 being 0 degrees and 1 being 180
-					//figure out which side (left or right) this angle is on
-					dot *= dir.crossCompare(wdir);
-					System.out.println(dot);
-					if(mostLeft == null || mostLeftAngle > dot)	{
-						mostLeft = wdir;
-						mostLeftAngle = dot;
-					}
-					if(mostRight == null || mostRightAngle < dot)	{
-						mostRight = wdir;
-						mostRightAngle = dot;
+			Vec dir = e.getPosition().minus(getPosition());
+			if(dir.size() > 0 && dir.size() <= getRadius())	{
+				if(e instanceof Prey)	{
+					neighbourhoodCount ++;
+					collisionAvoidance = collisionAvoidance.plus(dir.unit().mult(Math.pow((getRadius()-dir.size())/getRadius(),1)).neg());
+					//this needs to be fixed, it's very haxxy that I must divide by e.getMaxSpeed() to get the truncated-to-unit vector, e.velocity
+					velocityMatching = velocityMatching.plus(e.getVelocity().mult(1.0/e.getMaxSpeed()));
+					flockCentering = flockCentering.plus(dir.unit().mult(Math.pow(dir.size()/getRadius(),1)));
+					
+					//take target suggestions from flock members who are in front
+					if(e.getPosition().minus(getPosition()).dot(velocity) > 0)	{
+						Integer count = flockTargets.get(e.getTarget());
+						count = (count == null ? 0 : count) + 1;
+						flockTargets.put(e.getTarget(), count);
 					}
 				}
-				System.out.println(mostLeft + " " + mostRight + "\n");
-				if(mostLeft != null || mostRight != null && Math.min(mostRightAngle, mostLeftAngle) < 0.25)	{
-					obstacleAvoidance = (Math.abs(mostLeftAngle) < Math.abs(mostRightAngle) ? mostLeft : mostRight).unit();
-					obstacleCount++;
-				}
-			}
-			else {
-				Vec dir = e.getPosition().minus(getPosition());
-				if(dir.size() > 0 && dir.size() <= getRadius())	{
-					if(e instanceof Prey)	{
-						neighbourhoodCount ++;
-						collisionAvoidance = collisionAvoidance.plus(dir.unit().mult(Math.pow((getRadius()-dir.size())/getRadius(),1)).neg());
-						//this needs to be fixed, it's very haxxy that I must divide by e.getMaxSpeed() to get the truncated-to-unit vector, e.velocity
-						velocityMatching = velocityMatching.plus(e.getVelocity().mult(1.0/e.getMaxSpeed()));
-						flockCentering = flockCentering.plus(dir.unit().mult(Math.pow(dir.size()/getRadius(),1)));
-						
-						//take target suggestions from flock members who are in front
-						if(e.getPosition().minus(getPosition()).dot(velocity) > 0)	{
-							Integer count = flockTargets.get(e.getTarget());
-							count = (count == null ? 0 : count) + 1;
-							flockTargets.put(e.getTarget(), count);
-						}
-					}
-					else if(e instanceof Predator)	{
-						predatorCount ++;
-						predatorAvoidance = predatorAvoidance.plus(dir.unit().mult(Math.pow((getRadius()-dir.size())/getRadius(), 1.0/3)).neg());
-					}
+				else if(e instanceof Predator)	{
+					predatorCount ++;
+					predatorAvoidance = predatorAvoidance.plus(dir.unit().mult(Math.pow((getRadius()-dir.size())/getRadius(), 1.0/3)).neg());
 				}
 			}
 		}
@@ -190,33 +157,6 @@ public class Prey extends Animal {
 				terrainAvoidance = terrainAvoidance.mult(1.0/maxSlope);
 			else
 				terrainAvoidance = new Vec();
-			/*double minSlope = Double.MAX_VALUE,
-					dir = Math.atan2(velocity.y, velocity.x);
-			
-			for(double rad = 0; rad < Math.PI/16; rad += Math.PI/64)
-				for(int i = -1; i < 2; i+=2)	{
-					Vec v = new Vec(Math.cos(rad*i+dir), Math.sin(rad*i+dir));
-					
-					int scale = 1;
-					double slope = 0;
-					while(scale*getSize() <= getRadius())	{
-						Vec modOption = v.mult(scale*getSize());
-						double heightDiff = hm.getInterpolatedHeightAt(getPosition().plus(modOption))
-								- height;
-						
-						if(sign(heightDiff) == sign(slope) || sign(slope) == 0)	{
-							slope += heightDiff;
-						}
-						scale++;
-					}
-					//dy/dx
-					//System.out.println("slope at " + (rad*i) + ": " + slope);
-					slope = slope/((scale-1)*getSize());
-					if(slope < minSlope)	{
-						minSlope = slope;
-						terrainAvoidance = v;
-					}
-				}*/
 		}
 		
 		//take the average weighting
@@ -257,8 +197,6 @@ public class Prey extends Animal {
 				+ "\nwaypoint attraction: " + waypointAttraction
 				+ "\nterrain avoidance: " + terrainAvoidance
 				+ "\n");*/
-		//velocity = velocity.plus(ret.truncate(1)).plus(obstacleAvoidance.mult(10)).truncate(1);
-		//velocity = velocity.plus(ret.truncate(1)).truncate(1);
 		/* ret is the vector we wish to be facing. we want to affect the
 		 * current velocity so that it's pointing in the direction of ret.
 		 * however, the prey has a maximum turning angle and a maximum speed
