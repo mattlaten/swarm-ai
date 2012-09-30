@@ -2,14 +2,13 @@ package frontend.components;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSlider;
-import javax.swing.JSplitPane;
-import javax.swing.JTextField;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -35,10 +34,10 @@ public class PropertiesPanel extends JPanel  {
 	
 	public PropertiesPanel(final UserInterface ui)	{
 		this.setLayout(new BorderLayout());
-		JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+		//JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 		
 		this.ui = ui;
-		this.setPreferredSize(new Dimension(200,0));
+		this.setPreferredSize(new Dimension(250,0));
 		
 		size = new JSlider(2, 30);
 		size.setPaintTicks(true);
@@ -170,67 +169,77 @@ public class PropertiesPanel extends JPanel  {
 			}
 		});
 		
-		
-		Animal a = new Prey();
-		velWheel = new VelocityWheel(a);
+		velWheel = new VelocityWheel();
 		
 		JPanel radPan = new JPanel();
-		radPan.setLayout(new BoxLayout(radPan, BoxLayout.Y_AXIS));
-		radPan.add(new JLabel("Radius"));
+		radPan.setLayout(new BoxLayout(radPan, BoxLayout.PAGE_AXIS));
+		radPan.add(newCenterJLabel("Radius"));
 		radPan.add(radius);
 		
 		//this.add(heading);
 		JPanel sizePan = new JPanel();
-		sizePan.setLayout(new BoxLayout(sizePan, BoxLayout.Y_AXIS));
-		sizePan.add(new JLabel("Size"));
+		sizePan.setLayout(new BoxLayout(sizePan, BoxLayout.PAGE_AXIS));
+		sizePan.add(newCenterJLabel("Size"));
 		sizePan.add(size);
 		
 		JPanel msPan = new JPanel();
-		msPan.setLayout(new BoxLayout(msPan, BoxLayout.Y_AXIS));
-		msPan.add(new JLabel("Max Speed"));
+		msPan.setLayout(new BoxLayout(msPan, BoxLayout.PAGE_AXIS));
+		msPan.add(newCenterJLabel("Max Speed"));
 		msPan.add(maxSpeed);
 		
 		JPanel posPan = new JPanel();
-		posPan.setLayout(new BoxLayout(posPan, BoxLayout.Y_AXIS));
-		posPan.add(new JLabel("Position"));
-		posLabel = new JLabel("(,)");
+		posPan.setLayout(new BoxLayout(posPan, BoxLayout.PAGE_AXIS));
+		posPan.add(newCenterJLabel("Position"));
+		posLabel = newCenterJLabel("(,)");
 		posPan.add(posLabel);
 		
-		JPanel velPan = new JPanel(new BorderLayout());
-		JLabel lblVel = new JLabel("Velocity");
-		lblVel.setHorizontalAlignment(JLabel.CENTER);
-		velPan.add(lblVel, BorderLayout.PAGE_START);
-		
-		JPanel velWheelPan = new JPanel(new BorderLayout());
-		velWheelPan.add(velWheel);
-		velPan.add(velWheelPan);
+		JPanel velPan = new JPanel();
+		velPan.setLayout(new BorderLayout());
+		velPan.add(newCenterJLabel("Velocity"), BorderLayout.PAGE_START);
+		velWheel.setPreferredSize(new Dimension(100, 100));
+		velPan.add(velWheel, BorderLayout.CENTER);
 		
 		JPanel gen = new JPanel();
-		gen.setLayout(new BoxLayout(gen, BoxLayout.Y_AXIS));
-		gen.add(sizePan);
-		gen.add(radPan);
-		gen.add(msPan);
-		gen.add(posPan);
-		gen.add(velPan);
+		gen.setLayout(new BoxLayout(gen, BoxLayout.PAGE_AXIS));
 		
-		JPanel spec = new JPanel();
-		spec.setLayout(new BoxLayout(spec, BoxLayout.Y_AXIS));
-		spec.add(new JLabel("Collision Avoidance"));
-		spec.add(collisionAvoidanceWeight);
-		spec.add(new JLabel("Flock Centering"));
-		spec.add(flockCenteringWeight);
-		spec.add(new JLabel("Velocity Matching"));
-		spec.add(velocityMatchingWeight);
-		spec.add(new JLabel("Waypoint Attraction"));
-		spec.add(waypointAttractionWeight);
-		spec.add(new JLabel("Terrain Slope Avoidance"));
-		spec.add(terrainAvoidanceWeight);
+		JPanel stats = new JPanel();
+		stats.setLayout(new BoxLayout(stats, BoxLayout.PAGE_AXIS));
+		stats.setBorder(new TitledBorder("Stats"));
+		stats.add(sizePan);
+		stats.add(radPan);
+		stats.add(msPan);
+		stats.add(posPan);
+		stats.add(velPan);
 		
-		splitPane.add(gen);
-		splitPane.add(spec);
+		JPanel behave = new JPanel();
+		behave.setLayout(new BoxLayout(behave, BoxLayout.PAGE_AXIS));
+		behave.setBorder(new TitledBorder("Behaviour"));
+		behave.add(newCenterJLabel("Collision Avoidance"));
+		behave.add(collisionAvoidanceWeight);
+		behave.add(newCenterJLabel("Flock Centering"));
+		behave.add(flockCenteringWeight);
+		behave.add(newCenterJLabel("Velocity Matching"));
+		behave.add(velocityMatchingWeight);
+		behave.add(newCenterJLabel("Waypoint Attraction"));
+		behave.add(waypointAttractionWeight);
+		behave.add(newCenterJLabel("Terrain Slope Avoidance"));
+		behave.add(terrainAvoidanceWeight);
 		
-		this.add(splitPane);
+		//gen.setPreferredSize(new Dimension(150, 0));
+		gen.add(stats);
+		gen.add(behave);
+		
+		JScrollPane genScroll = new JScrollPane(gen);
+		genScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		
+		this.add(genScroll);
 		setVisible(true);
+	}
+	
+	private JLabel newCenterJLabel(String text)	{
+		JLabel l = new JLabel(text, JLabel.CENTER);
+		l.setAlignmentX(JLabel.CENTER_ALIGNMENT);
+		return l;
 	}
 	
 	public void update()	{
@@ -261,6 +270,7 @@ public class PropertiesPanel extends JPanel  {
 			
 			size.setEnabled(count > 0);
 			maxSpeed.setEnabled(count > 0);
+			radius.setEnabled(count > 0);
 			
 			if(count > 0)	{
 				pos = pos.mult(1.0/count);
@@ -283,7 +293,7 @@ public class PropertiesPanel extends JPanel  {
 	//		x.setEnabled(count == 1);
 	//		y.setEnabled(count == 1);
 			
-			velWheel.setEnabled(count == 1);
+			//velWheel.setEnabled(count == 1);
 			
 			collisionAvoidanceWeight.setEnabled(specCount > 0);
 			flockCenteringWeight.setEnabled(specCount > 0);
@@ -298,6 +308,7 @@ public class PropertiesPanel extends JPanel  {
 				otherAnimalWeight.setValue((int)(avgOA*100/specCount));
 				terrainAvoidanceWeight.setValue((int)(avgTA*100/specCount));
 				waypointAttractionWeight.setValue((int)(avgWA*100/specCount));
+				velWheel.setAnimals(ui.selection);
 			}
 			else	{
 				collisionAvoidanceWeight.setValue(50);
@@ -306,6 +317,7 @@ public class PropertiesPanel extends JPanel  {
 				otherAnimalWeight.setValue(50);
 				terrainAvoidanceWeight.setValue(50);
 				waypointAttractionWeight.setValue(50);
+				velWheel.clearAnimals();
 			}
 			settingValues = false;
 		}
