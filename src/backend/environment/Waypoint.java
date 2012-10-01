@@ -4,6 +4,10 @@ import java.util.List;
 
 import math.Vec;
 
+/**
+ * Waypoints are entities that can be targeted by Prey, Predators and other Waypoints
+ *
+ */
 public class Waypoint extends Element {
 	public Waypoint()	{
 		position = new Vec(0,0);

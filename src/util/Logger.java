@@ -4,6 +4,10 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.Date;
 
+/**
+ * Logging util class
+ *
+ */
 public class Logger {
 	
 	String className = null;

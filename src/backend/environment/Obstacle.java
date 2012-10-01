@@ -5,7 +5,8 @@ import java.util.List;
 
 import math.Vec;
 
-/* An obstacle is a polygon defined by a list of waypoints
+/**
+ * An obstacle is a polygon defined by a list of waypoints
  */
 public class Obstacle extends Element implements Iterable<Waypoint> {
 	public Waypoint start;

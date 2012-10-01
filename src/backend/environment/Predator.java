@@ -7,6 +7,10 @@ import java.util.List;
 import math.Vec;
 import backend.HeightMap;
 
+/**
+ * The Predator class is one of the two concrete Animals that can exist in the world.
+ *
+ */
 public class Predator extends Animal implements Cloneable {
 	public Predator(Predator other)					{	super(other);	}
 	public Predator(Vec position, Vec velocity)		{	super(position, velocity);	}

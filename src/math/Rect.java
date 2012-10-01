@@ -1,7 +1,10 @@
 package math;
 
 import java.io.Serializable;
-
+/**
+ * Helper class that represents a Rectangle 
+ * in label space
+ */
 public class Rect implements Serializable {
 	public Vec topLeft, botRight;
 	

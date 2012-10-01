@@ -20,6 +20,10 @@ import math.Vec;
 import backend.environment.Animal;
 import backend.environment.Element;
 
+/**
+ * VelocityWheel is used to control velocity and direction
+ * in the PropertiesPanel
+ */
 public class VelocityWheel extends JLabel {
 	LinkedList<Animal> animals;
 	double centerScale = 1.0/8,

@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import backend.environment.Element;
+import backend.environment.Prey;
 import frontend.UserInterface;
 
 /**
@@ -43,10 +44,14 @@ public class Simulation extends Thread implements Serializable {
 	
 	public Simulation()	{
 		elements = new UnforgivingArrayList<Element>(0);
-		
+		/*
+		for (int i = 0; i < 10000; i++)
+			elements.add(new Prey(Math.random()*7000-3000,Math.random()*7000-3000,Math.random()*10,Math.random()*10,5));
+		*/
 		snapshots = new ArrayList<Snapshot>();
 		
-		hm = new HeightMap(new File("./maps/GC2.map"));
+		//hm = new HeightMap(new File("./maps/GC2.map"));
+		hm = new HeightMap();
 		setName("Simulation");
 	}
 	

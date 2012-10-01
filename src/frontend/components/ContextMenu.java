@@ -16,6 +16,10 @@ import math.Vec;
 
 import frontend.UserInterface;
 
+/**
+ * Right-click menu for Canvas
+ *
+ */
 public class ContextMenu extends JPopupMenu {
 	
 	JMenuItem placePrey, placePredator, placeWaypoint, setDirection;

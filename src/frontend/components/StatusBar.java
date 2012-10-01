@@ -8,6 +8,10 @@ import javax.swing.JPanel;
 
 import math.Vec;
 
+/**
+ * The status bar that updates at the bottom of the UI
+ *
+ */
 public class StatusBar extends JPanel	{
 	JLabel mousePoint = new JLabel(),
 		   mode = new JLabel(),
