@@ -25,6 +25,9 @@ public class Snapshot extends ArrayList<RenderObject> implements Comparable<Snap
 		this.timeTaken = timeTaken;
 	}
 	
+	/**
+	 * Compare two snapshots on their timestamps
+	 */
 	public int compareTo(Snapshot other)	{
 		if(other.timeTaken > timeTaken)
 			return -1;
@@ -33,6 +36,11 @@ public class Snapshot extends ArrayList<RenderObject> implements Comparable<Snap
 		return 0;
 	}
 	
+	/**
+	 * Return a string representation of this snapshot
+	 * @param elementNames A map of elements to names
+	 * @return A string representation of this snapshot
+	 */
 	public String toString(HashMap<Element, String> elementNames){
 		String str = "{\n" + timeTaken + "\n";
 		synchronized(this)	{
@@ -44,6 +52,13 @@ public class Snapshot extends ArrayList<RenderObject> implements Comparable<Snap
 		return str + "}";
 	}
 	
+	/**
+	 * Return a string representation of this snapshot, usable for XSI exports
+	 * @param elementNames A map from elements to names
+	 * @param frame The current frame number
+	 * @param hm The heightmap to use
+	 * @return A string representation of this snapshot, usable for XSI exports
+	 */
 	public String toExportString(HashMap<Element, String> elementNames, int frame, HeightMap hm)	{
 		String str = "";
 		synchronized(this)	{
@@ -70,6 +85,11 @@ public class Snapshot extends ArrayList<RenderObject> implements Comparable<Snap
 		return str.substring(1);
 	}
 	
+	/**
+	 * Returns a map from elements to names
+	 * @param s A List of snapshots
+	 * @return A map from elements to names
+	 */
 	public static HashMap<Element, String> getNamesForElements(List<Snapshot> s)	{
 		int elements = 0;
 		HashMap<Element, String> names = new HashMap<Element, String>();

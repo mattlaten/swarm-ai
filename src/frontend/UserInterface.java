@@ -7,15 +7,13 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
 import java.util.HashSet;
 
 import javax.swing.ButtonGroup;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
@@ -33,7 +31,6 @@ import math.Vec;
 import util.Logger;
 import backend.HeightMap;
 import backend.Simulation;
-import backend.Snapshot;
 import backend.environment.Element;
 import backend.environment.Predator;
 import backend.environment.Prey;
@@ -621,6 +618,7 @@ public class UserInterface extends JFrame implements KeyListener {
 		JRadioButton modeSelect, modePrey, modePredator, modeModifier, 
 		modeObstacle, modeLoad, modeRandom, modeWaypoint;
 		JCheckBox trackButton;
+		JButton delete;
 		
 		public Toolbar()
 		{
@@ -641,6 +639,24 @@ public class UserInterface extends JFrame implements KeyListener {
 				public void actionPerformed(ActionEvent ae)	{
 					statusBar.setMode("Placing prey");
 					setMode(Mode.PAINT_PREY);
+				}
+			});
+			
+			delete = new JButton("Delete");
+			delete.addActionListener(new ActionListener(){
+				public void actionPerformed(ActionEvent ae)	{
+					synchronized(selection)	{
+						synchronized(sim.elements)	{
+							for(Element e : selection)	{
+								if(e instanceof Waypoint)
+									for(Element s : sim.elements)
+										if(s.getTarget() == e)
+											s.setTarget(null);
+								sim.elements.remove(e);
+							}
+							selection.clear();
+						}
+					}
 				}
 			});
 			
@@ -703,9 +719,10 @@ public class UserInterface extends JFrame implements KeyListener {
 			modesPanel.add(modeWaypoint);
 			
 			JPanel trackingPanel = new JPanel();
-			trackingPanel.setBorder(new TitledBorder("Tracking"));
+			trackingPanel.setBorder(new TitledBorder("Selection"));
 			trackingPanel.setLayout(new FlowLayout());
 			trackingPanel.add(trackButton);
+			trackingPanel.add(delete);
 			
 			add(modesPanel);
 			add(trackingPanel);

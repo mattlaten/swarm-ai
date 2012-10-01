@@ -16,13 +16,20 @@ import javax.swing.event.ChangeListener;
 
 import backend.Simulation;
 
+/**
+ * The ControlBar, in a UserInterface is what enables time manipulation by the user
+ */
 public class ControlBar extends JPanel implements Runnable, ActionListener {
-	JProgressBar progress;
-	JButton playPause;
-	JLabel beginning, end;
+	private JProgressBar progress;
+	private JButton playPause;
+	private JLabel beginning, end;
 	
-	Simulation sim;
+	private Simulation sim;
 	
+	/**
+	 * Constructor
+	 * @param sim The simulation this control bar belongs to
+	 */
 	public ControlBar(Simulation sim)	{
 		super();
 		
@@ -60,11 +67,18 @@ public class ControlBar extends JPanel implements Runnable, ActionListener {
 		new Thread(this, "Control Bar").start();
 	}
 	
+	/**
+	 * Updates the time on the control bar
+	 * @param mousePosition Position of the mouse in the bar (x-axis)
+	 */
 	public void updateTime(double mousePosition)	{
 		sim.setTime((int)(sim.getTotalTime()*mousePosition/progress.getSize().width));
 		playPause.setText(sim.isRunning ? "Pause" : "Play");
 	}
 	
+	/**
+	 * Updates the string representing how much progress is completed
+	 */
 	public void updateProgressString()	{
 		int milli = sim.getTime();
 		int t = milli/1000;
@@ -76,12 +90,18 @@ public class ControlBar extends JPanel implements Runnable, ActionListener {
 		playPause.setText(sim.isRunning ? "Pause" : "Play");
 	}
 	
+	/**
+	 * Toggles play/pause mode
+	 */
 	public void flip()
 	{
 		sim.isRunning = !sim.isRunning;
 		playPause.setText(sim.isRunning ? "Pause" : "Play");
 	}
 	
+	/**
+	 * Thread that constantly checks the Simulation for the current time and updates accordingly
+	 */
 	public void run()	{
 		try {
 			while(true)	{

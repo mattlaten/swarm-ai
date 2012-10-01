@@ -7,6 +7,8 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -21,10 +23,10 @@ import javax.swing.JLabel;
 import math.Rect;
 import math.Vec;
 import backend.environment.Element;
+import backend.environment.Obstacle;
 import backend.environment.Predator;
 import backend.environment.Prey;
 import backend.environment.Waypoint;
-import backend.environment.Obstacle;
 import frontend.components.ContextMenu;
 
 /**
