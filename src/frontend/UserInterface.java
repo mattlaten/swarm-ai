@@ -358,8 +358,11 @@ public class UserInterface extends JFrame implements KeyListener {
 						JFileChooser chooser = new JFileChooser();
 						chooser.setCurrentDirectory(new File("./saves/"));
 						int returnVal = chooser.showOpenDialog(uiFinal);
-						if(returnVal == JFileChooser.APPROVE_OPTION)
+						if(returnVal == JFileChooser.APPROVE_OPTION) {
 							sim.loadSimulationFromFile(chooser.getSelectedFile());
+							canv.hmc.setHeightMap(sim.hm);
+						}
+							
 					}
 					catch(IOException ioe)	{
 						System.out.println("IO Error");
