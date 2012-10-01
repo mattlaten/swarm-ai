@@ -89,12 +89,11 @@ public class RenderObject {
 				+ " " + size
 				+ " " + maxSpeed;
 		if(element instanceof Animal)	{
-			Animal a = (Animal)element;
-			str += " " + a.collisionAvoidanceWeight
-				+ " " + a.flockCenteringWeight
-				+ " " + a.velocityMatchingWeight
-				+ " " + a.otherAnimalWeight
-				+ " " + a.terrainAvoidanceWeight;
+			str += " " + collisionAvoidanceWeight
+				+ " " + flockCenteringWeight
+				+ " " + velocityMatchingWeight
+				+ " " + otherAnimalWeight
+				+ " " + terrainAvoidanceWeight;
 		}
 		return str;
 	}
