@@ -19,20 +19,28 @@ import backend.environment.Animal;
 import backend.environment.Element;
 import frontend.UserInterface;
 
+/**
+ * The PropertiesPanel allows the user to manipulate settings about the
+ * currently selected elements in the world
+ */
 public class PropertiesPanel extends JPanel implements ChangeListener  {
-	DecimalFormat posFormat = new DecimalFormat("0.00");
-	JLabel posLabel;
-	JSlider size, maxSpeed, radius, collisionAvoidanceWeight,
+	private DecimalFormat posFormat = new DecimalFormat("0.00");
+	private JLabel posLabel;
+	private JSlider size, maxSpeed, radius, collisionAvoidanceWeight,
 			   velocityMatchingWeight,
 			   flockCenteringWeight,
 			   otherAnimalWeight,
 			   waypointAttractionWeight,
 			   terrainAvoidanceWeight;
-	VelocityWheel velWheel;
-	final UserInterface ui;
-	int oldSize = 0, oldMaxSpeed = 0;
-	boolean settingValues = false;
+	private VelocityWheel velWheel;
+	private final UserInterface ui;
+	private int oldSize = 0, oldMaxSpeed = 0;
+	private boolean settingValues = false;
 	
+	/**
+	 * The Contructor
+	 * @param ui The UserInterface this Panel is connected to
+	 */
 	public PropertiesPanel(final UserInterface ui)	{
 		this.setLayout(new BorderLayout());
 		//JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
@@ -257,6 +265,9 @@ public class PropertiesPanel extends JPanel implements ChangeListener  {
 		return l;
 	}
 	
+	/**
+	 * A quick version of the update() method
+	 */
 	public void updateQuick()	{
 		/*synchronized(this)	{
 			Vec pos = new Vec();
@@ -277,6 +288,9 @@ public class PropertiesPanel extends JPanel implements ChangeListener  {
 		update();
 	}
 	
+	/**
+	 * Updates the panel to represent the selection
+	 */
 	public void update()	{
 		synchronized(this)	{
 			settingValues = true;
@@ -360,6 +374,9 @@ public class PropertiesPanel extends JPanel implements ChangeListener  {
 		}
 	}
 
+	/**
+	 * Allows us to dirty the simulation's element list
+	 */
 	public void stateChanged(ChangeEvent arg0) {
 		if(!settingValues)
 			ui.sim.elements.stuffChanged();

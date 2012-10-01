@@ -9,10 +9,28 @@ import backend.environment.Predator;
 import backend.environment.Prey;
 import backend.environment.Waypoint;
 
+/**
+ * RenderObjects store metadata on Elements so that they can be "reset" later.
+ * The RenderObject stores this information, and the apply() method is what's
+ * used to reset the Element to how it was the moment the RenderObject was
+ * created
+ */
 public class RenderObject {
+	/**
+	 * The Element
+	 */
 	public Element element;
+	/**
+	 * The velocity and position of the Element
+	 */
 	public Vec velocity, position;
+	/**
+	 * The target of the element
+	 */
 	public Waypoint target;
+	/**
+	 * The general properties of the Element
+	 */
 	public double size, radius, maxSpeed,
 		collisionAvoidanceWeight,
 		flockCenteringWeight,
@@ -30,6 +48,10 @@ public class RenderObject {
 		maxSpeed = ms;
 	}*/
 	
+	/**
+	 * Simple contructor
+	 * @param e The Element to store
+	 */
 	public RenderObject(Element e)	{
 		element = e;
 		velocity = new Vec(e.getVelocity());
@@ -48,6 +70,9 @@ public class RenderObject {
 		}
 	}
 	
+	/**
+	 * Apply the properties that were saved at creation to the Element
+	 */
 	public void apply()	{
 		element.setVelocity(velocity);
 		element.setPosition(position);
@@ -65,6 +90,9 @@ public class RenderObject {
 		}
 	}
 	
+	/**
+	 * Two RenderObjects are equal if and only if their Elements are equal
+	 */
 	public boolean equals(Object o)	{
 		try	{
 			return element == ((RenderObject)o).element;
@@ -73,6 +101,11 @@ public class RenderObject {
 		return false;
 	}
 	
+	/**
+	 * Returns a string representation of this RenderObject
+	 * @param names A map from elements to names
+	 * @return A string representation of this RenderObject
+	 */
 	public String toString(HashMap<Element, String> names){
 		String targetName = "e";
 		if(target != null && names.containsKey(target))
@@ -98,6 +131,12 @@ public class RenderObject {
 		return str;
 	}
 	
+	/**
+	 * Creates and returns a RenderObject represented by the String
+	 * @param s The string to interpret
+	 * @param elements A map from names to elements (can be empty)
+	 * @return A RenderObject represented by the String
+	 */
 	public static RenderObject fromString(String s, HashMap<String, Element> elements)	{
 		Element e = null;
 		String [] ss = s.split("\\s+");
