@@ -29,8 +29,15 @@ def XSIUnloadPlugin( in_reg ):
 	return true
 
 def SwarmAI_Init(in_ctxt):
-	LoadSimulation('D:\\Dev\\swarm-ai\\plugins\\animation')
-	pass
+    menu = in_ctxt.Source
+    menuitem = menu.AddCallbackItem("Load Simulation", "Load")
+    return true
+
+def Load(in_ctxt):
+	f = XSIUIToolkit.FileBrowser
+	f.showOpen()
+	LoadSimulation(f.FilePathName)
+	#LoadSimulation('D:\\Dev\\swarm-ai\\plugins\\animation')
 
 
 '''
@@ -59,7 +66,7 @@ def LoadSimulation(filename):
         animap[name]['obj'] = Application.ActiveSceneRoot.addGeometry('Sphere','NurbsSurface')
     for line in lines[2:]:
         if line == '':
-            break 
+            break
         e = line.split()
         print animap
         animap[e[0]]['x'].extend([e[-1],e[1]])
